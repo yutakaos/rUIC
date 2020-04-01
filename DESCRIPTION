@@ -1,0 +1,18 @@
+Package: ruic
+Type: Package
+Title: Unified Information-theoretic Causality for R
+Version: 0.1
+Authors@R:
+    person("Yutaka", "Osada", role = c("aut", "cre"),
+           email  = "ytosada@egmail.com",
+           comment = c(ORCID = "0000-0001-5967-194X"))
+Description: R implementation of unified information-theoretic causality.
+License: file LICENSE
+Encoding: UTF-8
+URL: https://github.com/yutakaos/rUIC
+BugReports: https://github.com/yutakaos/rUIC/issues
+NeedsCompilation: yes
+Imports: Rcpp, methods
+LinkingTo: Rcpp
+RcppModules: rUIC
+RoxygenNote: 7.1.0
