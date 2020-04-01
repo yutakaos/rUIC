@@ -80,34 +80,59 @@ with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 追加の説明（⇒）がないものは rEDM と同じ使い方をします。
 
 block     a data.frame or matrix where each column is a time series
+
 lib       the time range to be used for attractor reconstruction
+
 pred      the time range to be used for prediction forecast
+
 x_column  the name or column index of library data
+
    ⇒ 埋め込みに使われる変数, rEDM における lib_column に対応
+
 y_column  the name or column index of target data
+
    ⇒ 予測に使われる変数, rEDM における target_column に対応
+
 z_column  the name or column index of condition data
+
    ⇒ 条件付きに使われる変数
+
    ⇒ 多変量予測や間接因果の推定に使う
+
 norm      the power of Lp norm (if p < 0, max norm is used)
+
 E         the embedding dimension
+
 tau       the time-lag for delay embedding
+
 tp        the time index to predict
+
 nn        the number of neighbors
+
 　　⇒ rEDM における num_neighbors に対応
+
 　　⇒ "e+1" を使用可, スカラーの場合は nn = rep(nn, length(E+1))
+
 　　⇒ ベクトルの場合は length(E) == length(nn) でないとエラーを返す
+
 n_boot    the number of bootstrap to be used for computing p-value
+
 　　⇒ p値を計算するために必要なブートストラップ回数
+
 scaling   the local scaling (neighbor, velocity, no_scale)
+
 　　⇒ 距離行列の局所スケーリング, ノイズ頑健になるといわれているため実装している
+
 　　⇒ 検証した結果次第で、default は変更するかもしれない？
+
 exclusion_radius the norm filtering (time difference < exclusion_radius)
+
 epsilon   the norm filtering (d < epsilon)
+
 is_naive  whether rEDM-style estimator is used
+
 　　⇒ 近傍数によるの補正を行わない RMSE（ナイーブな推定量）を返すかどうか
+
 　　⇒ TRUE にすると CCM の解析解に近いものになる
+
 　　⇒ 補正が必要なことが確かめられたら、将来的には引数から削除する予定？
-
-
-
