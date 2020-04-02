@@ -52,37 +52,37 @@ with(op0[op0$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 with(op1, plot(tp, uic, type = "l"))
 with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 ``` 
+
 ## reic で実装している関数
 
 xmap :  
-　モデルの予測結果と統計量を返します, 予測結果がほしいときに使用する  
-　E, tau, tp, nn はスカラーのみに対応  
-　z_column 引数を使うことで多変量にも対応
+　モデルの予測結果と統計量を返します。予測結果がほしいときに使用する。  
+　E, tau, tp, nn はスカラーのみに対応。  
+　z_column 引数を使うことで多変量にも対応。
 
 simplex :  
-　統計量のみを返します  
-　E (+ nn), tau, tp はベクターに対応,  
-　ベクターの場合 E, tau, tp の全組み合わせを計算量ロスがないように計算する  
-　y_column に原因となる変数（uic と同じ）を指定する  
-　simplex projection においては y_column と z_column は同じ役割を果たすので、z_column は省略  
+　統計量のみを返します。  
+　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する。  
+　y_column に原因となる変数（uic と同じ）を指定する。  
 　n_boot > 1 以上で p 値を返す  
 　p 値は次の不等式が成り立つ確率で,「埋め込み次元をひとつ減らした場合に比べて予測力が改善した確率」を表します。  
- 　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-1)*tau]) >  
-   　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-2)*tau])
+　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-1)*tau]) >  
+　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-2)*tau])
+　simplex projection において y_column と z_column は同じ役割を果たすため、現在 z_column は省略している  
 
 uic :  
-統計量のみを返します
+　統計量のみを返します  
 　E には simplex projection で得られた E に 1 を追加したものを指定  
-　E (+ nn), tau, tp はベクターに対応  
-　ベクターの場合 E, tau, tp の全組み合わせを計算量ロスがないように計算する  
+　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する  
 　n_boot > 1 以上で p 値を返す  
-　p 値は次の不等式が成り立つ確率で,「Transfer Entropy の意味で y->x の因果がある確率」を表します。  
+　p 値は次の不等式が成り立つ確率で,「Transfer Entropy の意味で y -> x の因果がある確率」を表します。  
 　　　p(y[t+tp] | x[t+1], x[t], x[t-tau], ... x[t-(E-2)*tau]) >  
 　　　p(y[t+tp] |         x[t], x[t-tau], ... x[t-(E-2)*tau])
 
 ## ruic で使われる引数
 
-rEDM と同じ使い方の引数は省略します。  
+rEDM と同じ名前・同じ使い方の引数は省略します。  
+
 x_column : the name or column index of library data  
 　　⇒ 埋め込みに使われる変数, rEDM における lib_column に対応
 
@@ -104,7 +104,7 @@ scaling : the local scaling (neighbor, velocity, no_scale)
 　　⇒ 距離行列の局所スケーリング, ノイズ頑健になるといわれているため実装している  
 　　⇒ 検証した結果次第で、default は変更するかもしれない？
 
-is_naive  whether rEDM-style estimator is used  
+is_naive : whether rEDM-style estimator is used  
 　　⇒ 近傍数によるの補正を行わない RMSE（ナイーブな推定量）を返すかどうか  
 　　⇒ TRUE にすると CCM の解析解に近いものになる  
 　　⇒ 補正が必要なことが確かめられたら、将来的には引数から削除する予定？
