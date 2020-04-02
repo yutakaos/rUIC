@@ -53,14 +53,14 @@ with(op1, plot(tp, uic, type = "l"))
 with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 ``` 
 
-## reic で実装している関数
+## ruic で実装している関数
 
-xmap :  
+__xmap__  
 　モデルの予測結果と統計量を返します。予測結果がほしいときに使用する。  
 　E, tau, tp, nn はスカラーのみに対応。  
 　z_column 引数を使うことで多変量にも対応。
 
-simplex :  
+__simplex__  
 　統計量のみを返します。  
 　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する。  
 　y_column に原因となる変数（uic と同じ）を指定する。  
@@ -70,7 +70,7 @@ simplex :
 　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-2)*tau])  
 　simplex projection において y_column と z_column は同じ役割を果たすため、現在 z_column は省略している  
 
-uic :  
+__uic__  
 　統計量のみを返します  
 　E には simplex projection で得られた E に 1 を追加したものを指定  
 　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する  
@@ -81,30 +81,30 @@ uic :
 
 ## ruic で使われる引数
 
-rEDM と同じ名前・同じ使い方の引数は省略します。  
+rEDM と同じ名前・同じ使い方の引数の説明は省略します。  
 
-x_column : the name or column index of library data  
+__x_column__ : the name or column index of library data  
 　　⇒ 埋め込みに使われる変数, rEDM における lib_column に対応
 
-y_column : the name or column index of target data  
+__y_column__ : the name or column index of target data  
 　　⇒ 予測に使われる変数, rEDM における target_column に対応
 
-z_column : the name or column index of condition data  
+__z_column__ : the name or column index of condition data  
 　　⇒ 条件付きに使われる変数, 多変量予測や間接因果の推定に使う
 
-nn : the number of neighbors  
+__nn__ : the number of neighbors  
 　　⇒ rEDM における num_neighbors に対応  
 　　⇒ "e+1" を使用可, スカラーの場合は nn = rep(nn, length(E+1))  
 　　⇒ ベクトルの場合は length(E) == length(nn) でないとエラーを返す
 
-n_boot :  the number of bootstrap to be used for computing p-value  
+__n_boot__ :  the number of bootstrap to be used for computing p-value  
 　　⇒ p値を計算するために必要なブートストラップ回数
 
-scaling : the local scaling (neighbor, velocity, no_scale)  
+__scaling__ : the local scaling (neighbor, velocity, no_scale)  
 　　⇒ 距離行列の局所スケーリング, ノイズ頑健になるといわれているため実装している  
 　　⇒ 検証した結果次第で、default は変更するかもしれない？
 
-is_naive : whether rEDM-style estimator is used  
+__is_naive__ : whether rEDM-style estimator is used  
 　　⇒ 近傍数によるの補正を行わない RMSE（ナイーブな推定量）を返すかどうか  
-　　⇒ TRUE にすると CCM の解析解に近いものになる  
+　　⇒ TRUE にすると CCM の結果に近いものになる  
 　　⇒ 補正が必要なことが確かめられたら、将来的には引数から削除する予定？
