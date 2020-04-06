@@ -8,9 +8,9 @@
 #define _uic_helper_hpp_
 
 //* Header(s) */
-#include <algorithm>  // std::sort
-#include <limits>     // std::numeric_limits
-#include <vector>     // std::vector
+#include <algorithm> // std::sort
+#include <limits>    // std::numeric_limits
+#include <vector>    // std::vector
 
 
 namespace UIC

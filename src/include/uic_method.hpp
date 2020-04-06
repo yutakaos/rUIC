@@ -7,10 +7,11 @@
 #ifndef _uic_method_hpp_
 #define _uic_method_hpp_
 
-//* Header(s) */
-#include <algorithm>
-#include <random>
-#include <vector>
+//* Header(s
+#include <functional> // std::function
+#include <limits>     // std::numeric_limits
+#include <random>     // std::mt19937_64, std::uniform_real_distribution
+#include <vector>     // std::vector
 #include <uic_base.hpp>
 #include <local_scaling.hpp>
 

@@ -8,6 +8,7 @@
 #define _uic_base_hpp_
 
 //* Header(s) */
+#include <limits> // std::numeric_limits
 #include <vector> // std::vector
 #include <helper.hpp>
 
