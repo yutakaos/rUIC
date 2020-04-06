@@ -19,5 +19,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Yutaka Osada \email{ytosada@egmail.com} (\href{https://orcid.org/0000-0001-5967-194X}{ORCID})
 
+Other contributors:
+\itemize{
+  \item Masayuki Ushio (\href{https://orcid.org/0000-0003-4831-7181}{ORCID}) [contributor]
+}
+
 }
 \keyword{internal}
