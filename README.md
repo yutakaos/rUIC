@@ -1,6 +1,6 @@
-# ruic : Unified Information-theoretic Causality for R
+# rUIC : Unified Information-theoretic Causality for R
 
-ひとまずパッケージとして試用するためのサイトをつくりました！
+Tentative manual of rUIC package.
 
 ## Installation
 
