@@ -64,7 +64,7 @@ namespace UIC
                 for (auto  x : *scale) if (x != 0 && x < min) min = x;
                 for (auto &x : *scale) if (x == 0) x = min;
             }
-        };
+        }
         
         template <typename num_t>
         void compute_scale_vels (
@@ -105,7 +105,7 @@ namespace UIC
                 for (auto  x : *scale) if (x != 0 && x < min) min = x;
                 for (auto &x : *scale) if (x == 0) x = min;
             }
-        };
+        }
     }
     
     template <typename num_t>

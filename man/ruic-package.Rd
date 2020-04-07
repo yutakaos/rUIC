@@ -11,8 +11,8 @@ R implementation of unified information-theoretic causality.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/yutakaos/rUIC}
-  \item Report bugs at \url{https://github.com/yutakaos/rUIC/issues}
+  \item \url{https://github.com/yutakaos/ruic}
+  \item Report bugs at \url{https://github.com/yutakaos/ruic/issues}
 }
 
 }

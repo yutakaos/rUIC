@@ -308,7 +308,7 @@ namespace nanoflann
             return indices_raw[index];
         }
         
-        inline bool check_invalid_query (size_t index, std::pair<int, int> time) const
+        inline bool check_invalid_query (size_t index, const std::pair<int, int> &time) const
         {
             size_t k = indices_raw[index];
             if (time_indices[k].second != time.second) return true;
@@ -456,10 +456,11 @@ namespace nanoflann
     template <class Derived, typename num_t>
     class KDTreeBase
     {
-    public:
-        
+    protected:
         typedef typename utils::Node<num_t> Node;
         typedef typename std::vector<utils::Interval<num_t>> BoundingBox;
+        
+    public:
         
         Node *root_node;
         std::vector<size_t> indices;
@@ -667,8 +668,6 @@ namespace nanoflann
     template <typename num_t>
     class KDTreeSingleIndexAdaptor : public KDTreeBase <KDTreeSingleIndexAdaptor<num_t>, num_t>
     {
-    public:
-        
         typedef typename nanoflann::KDTreeSingleIndexAdaptor<num_t> Derived;
         typedef typename nanoflann::KDTreeBase<Derived, num_t> Base;
         typedef typename Base::Node Node;
@@ -729,7 +728,7 @@ namespace nanoflann
          * The nearest neighbors is stored in 'op_indices' and 'op_dists'.
          */
         size_t knn_search (
-            const num_t *query, const std::pair<int, int> time,
+            const num_t *query, const std::pair<int, int> &time,
             std::vector<size_t> *op_indices, std::vector<num_t> *op_dists,
             const size_t num_closest, const bool tied = true) const
         {
@@ -767,7 +766,7 @@ namespace nanoflann
          */
         template <typename RESULTSET>
         bool find_neighbors (
-            RESULTSET &result, const num_t *query, const std::pair<int, int> time,
+            RESULTSET &result, const num_t *query, const std::pair<int, int> &time,
             const float eps = 0) const
         {
             assert(query);
@@ -790,8 +789,9 @@ namespace nanoflann
          */
         template <class RESULTSET>
         bool search_level (
-            RESULTSET &result_set, const num_t *query, const std::pair<int, int> time, const Node *node,
-            num_t mindistsq, std::vector<num_t> &dists, const float epsError) const
+            RESULTSET &result_set, const num_t *query,
+            const std::pair<int, int> &time, const Node *node, num_t mindistsq,
+            std::vector<num_t> &dists, const float epsError) const
         {
             if (node->child1 == NULL && node->child2 == NULL)  //* Leaf node */
             {
