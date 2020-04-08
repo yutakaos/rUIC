@@ -4,8 +4,8 @@
  */
 
 
-#ifndef _uic_local_scaling_hpp_
-#define _uic_local_scaling_hpp_
+#ifndef _ruic_local_scaling_hpp_
+#define _ruic_local_scaling_hpp_
 
 //* Header(s) */
 #include <limits> // std::numeric_limits
@@ -58,7 +58,7 @@ namespace UIC
                 if (d == 0) has_zero = true;
             }
             
-            if (has_zero)  //* replace 0 to the minimum value*/
+            if (has_zero)  //* then, 0 is replaced to the minimum value */
             {
                 num_t min = std::numeric_limits<num_t>::max();
                 for (auto  x : *scale) if (x != 0 && x < min) min = x;
@@ -99,7 +99,7 @@ namespace UIC
                 if (sum == 0) has_zero = true;
             }
             
-            if (has_zero)  //* replace 0 to the minimum value*/
+            if (has_zero)  //* then, 0 is replaced to the minimum value */
             {
                 num_t min = std::numeric_limits<num_t>::max();
                 for (auto  x : *scale) if (x != 0 && x < min) min = x;

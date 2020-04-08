@@ -4,12 +4,12 @@
  */
 
 
-#ifndef _uic_r_cpp_
-#define _uic_r_cpp_
+#ifndef _ruic_cpp_
+#define _ruic_cpp_
 
 /* Header(s) */
 #include <Rcpp.h>
-#include <vector>
+#include <vector> // std::vector
 #include <uic_method.hpp>
 #include <as_cpp.hpp>
 
@@ -19,9 +19,6 @@ typedef double num_t;
 
 class rUIC : protected UIC::UIC_METHOD <num_t>
 {
-    typedef std::vector<num_t> vec_t;
-    typedef std::pair<int, int> rng_t;
-    
 private:
     
     std::vector<UIC::ResultSet<num_t>> output;
@@ -123,7 +120,7 @@ public:
         
         size_t n_time = time_series_lib.size();
         std::vector<num_t> ts_lib = as_cpp<num_t>(time_series_lib);
-        std::vector<vec_t> ts_lib_m(n_time);
+        std::vector<std::vector<num_t>> ts_lib_m(n_time);
         for (size_t i = 0; i < n_time; ++i) ts_lib_m[i] = { ts_lib[i] };
         
         xmap_seq_internal(
@@ -145,11 +142,11 @@ private:
     
     void xmap_seq_internal (
         int n_boot,
-        std::vector<vec_t> time_series_lib,
+        std::vector<std::vector<num_t>> time_series_lib,
         std::vector<num_t> time_series_tar,
-        std::vector<vec_t> time_series_mvs,
-        std::vector<rng_t> range_lib,
-        std::vector<rng_t> range_prd,
+        std::vector<std::vector<num_t>> time_series_mvs,
+        std::vector<std::pair<int, int>> range_lib,
+        std::vector<std::pair<int, int>> range_prd,
         std::vector<int> E,
         std::vector<int> nn,
         std::vector<int> tau_ip,

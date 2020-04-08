@@ -2,7 +2,7 @@
  * Software License Agreement (BSD License)
  * 
  * Copyright 2020  Yutaka Osada. All rights reserved.
- *     - Add and Remove several functions for uic.
+ *     - Modification for ruic.
  * 
  * based on nanoflann (version:0x132)
  * 
@@ -44,8 +44,8 @@
  *  #include <nanoflann_Lp.hpp> in your code.
  */
 
-#ifndef _NANOFLANN_LP_HPP_
-#define _NANOFLANN_LP_HPP_
+#ifndef _ruic_NANOFLANN_LP_HPP_
+#define _ruic_NANOFLANN_LP_HPP_
 
 //* Header(s) */
 #include <algorithm>
@@ -64,23 +64,14 @@ namespace nanoflann
 {
     namespace utils
     {
-        struct leaf
-        {
-            size_t left, right; // Indices of points in leaf node
-        };
-        
-        template <typename num_t>
-        struct nonleaf
-        {
-            int divfeat; // Dimension used for subdivision
-            num_t divlow, divhigh; // The values used for subdivision
-        };
-        
         template <typename num_t>
         union node_union
         {
-            leaf lr;
-            nonleaf <num_t> sub;
+            // [leaf] left, right: indices of points in leaf node
+            // [nonleaf] divfeat: dimension used for subdivision
+            // [nonleaf] divlow, divhigh: the values used for subdivision
+            struct leaf { size_t left, right; } lr;
+            struct nonleaf { int divfeat; num_t divlow, divhigh; } sub;
         };
         
         template <typename num_t>
@@ -198,6 +189,10 @@ namespace nanoflann
     template <typename num_t>
     struct NormStruct
     {
+    private:
+        
+        num_t p;
+        
     public:
         
         std::function<num_t(num_t, num_t)> sum;
@@ -215,8 +210,6 @@ namespace nanoflann
         }
         
     private:
-        
-        num_t p;
         
         void set_L2 ()
         {
@@ -242,9 +235,9 @@ namespace nanoflann
             update_min_dist = [](num_t min_d, num_t cut_d, num_t) { return min_d < cut_d ? min_d : cut_d; };
         }
         
-        void set_Lp (num_t p_)
+        void set_Lp (num_t p_ip)
         {
-            this->p = p_;
+            p = p_ip;
             sum  = [    ](num_t a, num_t b) { return a + b; };
             pow  = [this](num_t a, num_t b) { return std::pow(std::abs(a - b), p); };
             root = [this](num_t a) { return std::pow(a, 1.0 / p); };
@@ -252,6 +245,7 @@ namespace nanoflann
         }
     };
     
+    //* Data adaptor */
     template <class num_t>
     struct DataAdaptor
     {
@@ -357,7 +351,7 @@ namespace nanoflann
         }
     };
     
-    //* Class: Result storage */
+    //* Result set */
     template <typename num_t>
     class ResultSet
     {
@@ -366,7 +360,7 @@ namespace nanoflann
     private:
         
         std::vector<pair_t> pairs;
-        size_t nn, nnp, count;  // for KNN search
+        size_t nn, nnp, count;
         bool tied;
         
     public:
@@ -395,7 +389,7 @@ namespace nanoflann
             for (auto p : pairs)
             {
                 (*op_indices).push_back(p.first);
-                (*op_dists)  .push_back(norm.root(p.second));
+                (*op_dists).push_back(norm.root(p.second));
             }
         }
         
@@ -452,13 +446,18 @@ namespace nanoflann
         }
     };
     
-    /** kd-tree base-class */
+    //* KD-tree base-class */
     template <class Derived, typename num_t>
     class KDTreeBase
     {
     protected:
+        
         typedef typename utils::Node<num_t> Node;
         typedef typename std::vector<utils::Interval<num_t>> BoundingBox;
+        
+    private:
+        
+        const num_t EPS = static_cast<num_t>(0.00001);
         
     public:
         
@@ -573,8 +572,6 @@ namespace nanoflann
         
     private:
         
-        const num_t EPS = static_cast<num_t>(0.00001);
-        
         void compute_minmax (
             const Derived &obj, size_t *ind, size_t count, int element,
             num_t &min_elem, num_t &max_elem)
@@ -664,7 +661,7 @@ namespace nanoflann
         }
     };
     
-    //* kd-tree static index */
+    //* KD-tree static index */
     template <typename num_t>
     class KDTreeSingleIndexAdaptor : public KDTreeBase <KDTreeSingleIndexAdaptor<num_t>, num_t>
     {

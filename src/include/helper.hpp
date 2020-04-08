@@ -1,11 +1,11 @@
 /*------------------------------------------------------------------------------------------#
- * Helper functions
+ * Helper functions for ruic
  *------------------------------------------------------------------------------------------#
  */
 
 
-#ifndef _uic_helper_hpp_
-#define _uic_helper_hpp_
+#ifndef _ruic_helper_hpp_
+#define _ruic_helper_hpp_
 
 //* Header(s) */
 #include <algorithm> // std::sort
@@ -209,9 +209,9 @@ namespace UIC
             [&dist](size_t i, size_t j) { return dist[i] < dist[j]; }
         );
         
+        std::vector<int>().swap(*neis);
         if (dist[idx.back()] == 0)  // all distance == 0
         {
-            std::vector<int>().swap(*neis);
             (*neis) = idx;
             return;
         }
@@ -234,7 +234,6 @@ namespace UIC
         }
         
         //* copy results */
-        std::vector<int>().swap(*neis);
         (*neis).resize(n_enn);
         for (int i = 0; i < n_enn; ++i) (*neis)[i] = idx[i];
     }

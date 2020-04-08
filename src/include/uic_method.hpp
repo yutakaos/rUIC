@@ -4,8 +4,8 @@
  */
 
 
-#ifndef _uic_method_hpp_
-#define _uic_method_hpp_
+#ifndef _ruic_method_hpp_
+#define _ruic_method_hpp_
 
 //* Header(s
 #include <functional> // std::function
