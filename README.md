@@ -1,3 +1,5 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
 # rUIC : Unified Information-theoretic Causality for R
 
 Tentative manual of rUIC package.
