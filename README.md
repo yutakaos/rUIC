@@ -53,7 +53,12 @@ with(op1, plot(tp, uic, type = "l"))
 with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 ``` 
 
-## ruic で実装している関数
+## Functions implemented in rUIC package
+
+- `xmap`  
+　Perform cross-mapping and return model predictions and statistics.
+　	-- `E`, `tau`, `tp`, `nn` accept scalar values only.  
+　	-- Specify `z_column` augument for the multivariate version of `xmap`.
 
 __xmap__  
 　モデルの予測結果と統計量を返します。予測結果がほしいときに使用する。  
