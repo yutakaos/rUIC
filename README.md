@@ -1,7 +1,7 @@
 # rUIC : Unified Information-theoretic Causality for R
 
 Tentative manual of rUIC package.
-\(x = at \theta\)
+\\(x = at \theta\\)
 
 ## Installation
 
