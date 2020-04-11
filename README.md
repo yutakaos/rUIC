@@ -2,6 +2,8 @@
 mathjax: true
 ---
 
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
+
 # rUIC : Unified Information-theoretic Causality for R
 
 Tentative manual of rUIC package.
