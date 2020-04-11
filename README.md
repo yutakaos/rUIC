@@ -66,8 +66,8 @@ __simplex__
 　y_column に原因となる変数（uic と同じ）を指定する。  
 　n_boot > 1 以上で p 値を返す  
 　p 値は次の不等式が成り立つ確率で,「埋め込み次元をひとつ減らした場合に比べて予測力が改善した確率」を表します。  
-    p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) >
-    p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)
+    **_p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) >
+    p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
 
 　simplex projection において y_column と z_column は同じ役割を果たすため、現在 z_column は省略している  
 
