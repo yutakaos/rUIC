@@ -66,10 +66,8 @@ __simplex__
 　y_column に原因となる変数（uic と同じ）を指定する。  
 　n_boot > 1 以上で p 値を返す  
 　p 値は次の不等式が成り立つ確率で,「埋め込み次元をひとつ減らした場合に比べて予測力が改善した確率」を表します。  
-　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-1)*tau]) >  
-　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-2)*tau])
-    p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&times;&tau;</sub>) >
-    p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&times;&tau;</sub>)
+    p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) >
+    p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)
 
 　simplex projection において y_column と z_column は同じ役割を果たすため、現在 z_column は省略している  
 
@@ -79,8 +77,8 @@ __uic__
 　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する  
 　n_boot > 1 以上で p 値を返す  
 　p 値は次の不等式が成り立つ確率で,「Transfer Entropy の意味で y -> x の因果がある確率」を表します。  
-　　　p(y[t+tp] | x[t+1], x[t], x[t-tau], ... x[t-(E-2)*tau]) >  
-　　　p(y[t+tp] |         x[t], x[t-tau], ... x[t-(E-2)*tau])
+    p(x<sub>t+tp</sub> | x<sub>t+1</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>) >
+    p(x<sub>t+tp</sub> |  x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)
 
 ## ruic で使われる引数
 
