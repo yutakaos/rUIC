@@ -1,3 +1,9 @@
+<head>
+    <script id="MathJax-script" async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+
 # rUIC : Unified Information-theoretic Causality for R
 
 Tentative manual of rUIC package.
@@ -77,10 +83,6 @@ $$
 
 h<sub>&theta;</sub>(x) = &theta;<sub>o</sub> x + &theta;<sub>1</sub>x
 
-<script id="MathJax-script" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-  $$p(x)$$
-</script>
 
 　simplex projection において y_column と z_column は同じ役割を果たすため、現在 z_column は省略している  
 
