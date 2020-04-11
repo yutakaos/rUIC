@@ -1,4 +1,4 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 
 # rUIC : Unified Information-theoretic Causality for R
 
@@ -113,3 +113,5 @@ __is_naive__ : whether rEDM-style estimator is used
 　　⇒ 近傍数によるの補正を行わない RMSE（ナイーブな推定量）を返すかどうか  
 　　⇒ TRUE にすると CCM の結果に近いものになる  
 　　⇒ 補正が必要なことが確かめられたら、将来的には引数から削除する予定？
+
+</script>
