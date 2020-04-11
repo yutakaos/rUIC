@@ -1,18 +1,6 @@
-<head>
-<script>
-MathJax = {
-  chtml: {
-    matchFontHeight: false
-  },
-  tex: {
-    inlineMath: [['$', '$']]
-  }
-};
-</script>
-<script id="MathJax-script" async
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-</script>
-</head>
+---
+mathjax: true
+---
 
 # rUIC : Unified Information-theoretic Causality for R
 
