@@ -1,3 +1,7 @@
+−−−
+mathjax: true
+−−−
+
 # ruic : Unified Information-theoretic Causality for R
 
 ひとまずパッケージとして試用するためのサイトをつくりました！
