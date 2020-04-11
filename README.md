@@ -69,9 +69,7 @@ __simplex__
 　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-1)*tau]) >  
 　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-2)*tau])
 
-$$
-p(x[t+tp] | y[t], x[t], x[t-\tau], ... x[t-(E-1) \times \tau] > p(x[t+tp] | y[t], x[t], x[t-\tau], ... x[t-(E-2) \times \tau])
-$$
+$p(x[t+tp] | y[t], x[t], x[t-\tau], ... x[t-(E-1) \times \tau] > p(x[t+tp] | y[t], x[t], x[t-\tau], ... x[t-(E-2) \times \tau])$
 
 
 　simplex projection において y_column と z_column は同じ役割を果たすため、現在 z_column は省略している  
