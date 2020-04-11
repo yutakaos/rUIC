@@ -1,5 +1,3 @@
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-
 # rUIC : Unified Information-theoretic Causality for R
 
 Tentative manual of rUIC package.
@@ -71,7 +69,9 @@ __simplex__
 　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-1)*tau]) >  
 　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-2)*tau])
 
-$$p(x[t+tp] | y[t], x[t], x[t-\tau], ... x[t-(E-1) \times \tau] > p(x[t+tp] | y[t], x[t], x[t-\tau], ... x[t-(E-2) \times \tau])$$
+$$
+p(x[t+tp] | y[t], x[t], x[t-\tau], ... x[t-(E-1) \times \tau] > p(x[t+tp] | y[t], x[t], x[t-\tau], ... x[t-(E-2) \times \tau])
+$$
 
 　simplex projection において y_column と z_column は同じ役割を果たすため、現在 z_column は省略している  
 
@@ -114,4 +114,3 @@ __is_naive__ : whether rEDM-style estimator is used
 　　⇒ TRUE にすると CCM の結果に近いものになる  
 　　⇒ 補正が必要なことが確かめられたら、将来的には引数から削除する予定？
 
-</script>
