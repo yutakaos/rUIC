@@ -55,10 +55,19 @@ with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 
 ## Functions implemented in rUIC package
 
-- `xmap`  
+- `xmap`
 　Perform cross-mapping and return model predictions and statistics.
-    - `E`, `tau`, `tp`, `nn` accept scalar values only.
+    - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
+    - Potential causal variable should be specified by `y_column` augument.
     - Specify `z_column` augument for the multivariate version of `xmap`.
+
+- `simplex`
+　Perform simplex projection and return statistics only.
+    - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
+    - Potential causal variable should be specified by `y_column` augument.
+    - Return _p_ value if `n_boot > 1`.
+    - _p_ value indicates "Probability of the improvements of prediction compared with when one less embedding dimension is used" as specified in the following inequality:
+    **_p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) > p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
 
 __xmap__  
 　モデルの予測結果と統計量を返します。予測結果がほしいときに使用する。  
