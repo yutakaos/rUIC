@@ -76,35 +76,34 @@ with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
     - Potential causal variable should be specified by `y_column` augument.
     - Return _p_ value if `n_boot > 1`.
     - _p_ value indicates "Probability that y causes x in the sense of transfer entropy" as specified in the following inequality:
-    
     **_p(x<sub>t+tp</sub> | x<sub>t+1</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>) > p(x<sub>t+tp</sub> |  x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
 
-## ruic で使われる引数
+## Arguments in rUIC package
 
-rEDM と同じ名前・同じ使い方の引数の説明は省略します。  
+Arguments identical with those used in rEDM package are currently not explained. For arguments used in rEDM package, please see the rEDM tutorial (https://ha0ye.github.io/rEDM/index.html).
 
-__x_column__ : the name or column index of library data  
-　　⇒ 埋め込みに使われる変数, rEDM における lib_column に対応
+`x_column` : the name or column index of library data  
+　　&rarr; A variable that is used for time-delay embedding (`lib_column` argument in rEDM)
 
-__y_column__ : the name or column index of target data  
+`y_column` : the name or column index of target data  
 　　⇒ 予測に使われる変数, rEDM における target_column に対応
 
-__z_column__ : the name or column index of condition data  
+`z_column` : the name or column index of condition data  
 　　⇒ 条件付きに使われる変数, 多変量予測や間接因果の推定に使う
 
-__nn__ : the number of neighbors  
+`nn` : the number of neighbors  
 　　⇒ rEDM における num_neighbors に対応  
 　　⇒ "e+1" を使用可, スカラーの場合は nn = rep(nn, length(E+1))  
 　　⇒ ベクトルの場合は length(E) == length(nn) でないとエラーを返す
 
-__n_boot__ :  the number of bootstrap to be used for computing p-value  
+`n_boot` :  the number of bootstrap to be used for computing p-value  
 　　⇒ p値を計算するために必要なブートストラップ回数
 
-__scaling__ : the local scaling (neighbor, velocity, no_scale)  
+`scaling` : the local scaling (neighbor, velocity, no_scale)  
 　　⇒ 距離行列の局所スケーリング, ノイズ頑健になるといわれているため実装している  
 　　⇒ 検証した結果次第で、default は変更するかもしれない？
 
-__is_naive__ : whether rEDM-style estimator is used  
+`is_naive` : whether rEDM-style estimator is used  
 　　⇒ 近傍数によるの補正を行わない RMSE（ナイーブな推定量）を返すかどうか  
 　　⇒ TRUE にすると CCM の結果に近いものになる  
 　　⇒ 補正が必要なことが確かめられたら、将来的には引数から削除する予定？
