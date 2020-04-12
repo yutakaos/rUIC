@@ -69,30 +69,14 @@ with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
     - _p_ value indicates "Probability of the improvements of prediction compared with when one less embedding dimension is used" as specified in the following inequality:
     **_p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) > p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
 
-__xmap__  
-　モデルの予測結果と統計量を返します。予測結果がほしいときに使用する。  
-　E, tau, tp, nn はスカラーのみに対応。  
-　z_column 引数を使うことで多変量にも対応。
-
-__simplex__  
-　統計量のみを返します。  
-　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する。  
-　y_column に原因となる変数（uic と同じ）を指定する。  
-　n_boot > 1 以上で p 値を返す  
-　p 値は次の不等式が成り立つ確率で,「埋め込み次元をひとつ減らした場合に比べて予測力が改善した確率」を表します。  
-    **_p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) >
-    p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
-
-　simplex projection において y_column と z_column は同じ役割を果たすため、現在 z_column は省略している  
-
-__uic__  
-　統計量のみを返します  
-　E には simplex projection で得られた E に 1 を追加したものを指定  
-　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する  
-　n_boot > 1 以上で p 値を返す  
-　p 値は次の不等式が成り立つ確率で,「Transfer Entropy の意味で y -> x の因果がある確率」を表します。  
-    p(x<sub>t+tp</sub> | x<sub>t+1</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>) >
-    p(x<sub>t+tp</sub> |  x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)
+- `uic`
+　Perform uic and return statistics only.
+    - `E` should be an optimal embedding dimension (estimated by `simplex`) + 1.
+    - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
+    - Potential causal variable should be specified by `y_column` augument.
+    - Return _p_ value if `n_boot > 1`.
+    - _p_ value indicates "Probability that there is a causal influence from y to x in the sense of transfer entropy" as specified in the following inequality:
+    **_p(x<sub>t+tp</sub> | x<sub>t+1</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>) > p(x<sub>t+tp</sub> |  x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
 
 ## ruic で使われる引数
 
