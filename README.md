@@ -27,50 +27,43 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
 }
 block = data.frame(t = 1:tl, x = x, y = y)
 ```
-<img src="demo/demo_figures/tie_series.png" width="70%">
+<img src="demo/demo_figures/time_series.png" width="70%">
 
+- 
+```r
+# No.1: Determine the optimal embedding dimension using simplex projection
+## Univariate UIC-version simplex projection
+simp_x <- ruic::simplex(block, x_column = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
+simp_y <- ruic::simplex(block, x_column = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 
+## Multivariate UIC-version simplex projection
+simp_xy <- ruic::simplex(block, x_column = "x", y_column = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
+simp_yx <- ruic::simplex(block, x_column = "y", y_column = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 
-``` r
-library(ruic); packageVersion("ruic") # v0.1
-
-## simulate logistic map
-tl <- 400  # time length
-x <- y <- rep(NA, tl)
-x[1] <- 0.4
-y[1] <- 0.2
-for (t in 1:(tl - 1)) {  # causality : x -> y
-    x[t+1] = x[t] * (3.8 - 3.8 * x[t] - 0.0 * y[t])
-    y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
-}
-block = data.frame(t = 1:tl, x = x, y = y)
-
-## xmap
-par(mfrow = c(2, 2))
-op0 = xmap(block, x_column = "x", y_column = "y", E = 2, tau = 1, tp = -1)
-op1 = xmap(block, x_column = "y", y_column = "x", E = 2, tau = 1, tp = -1)
-with(op0$model_output, plot(data, pred)); op0$stats
-with(op1$model_output, plot(data, pred)); op1$stats
-
-## simplex projection
-op0 = simplex(block, x_column = "x", y_column = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-op1 = simplex(block, x_column = "y", y_column = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-with(op0, plot(E, uic, type = "l"))
-with(op0[op0$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
-with(op1, plot(E, uic, type = "l"))
-with(op1[op1$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
-
-## UIC
-op0 = uic(block, x_column = "x", y_column = "y", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
-op1 = uic(block, x_column = "y", y_column = "x", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
-par(mfrow = c(2, 1))
-with(op0, plot(tp, uic, type = "l"))
-with(op0[op0$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
-with(op1, plot(tp, uic, type = "l"))
-with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
-``` 
-
+# Select the optimal embedding dimension (RMSE or UIC?)
+Exy <- simp_xy[which.min(simp_xy[simp_xy$pval < 0.05,]$rmse), "E"]
+Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
+```
 <img src="demo/demo_figures/simplex_uic.png" width="70%">
+
+
+```r
+# No.2: Cross-map
+xmap_xy <- ruic::xmap(block, x_column = "x", y_column = "y", E = Exy, tau = 1, tp = -1)
+xmap_yx <- ruic::xmap(block, x_column = "y", y_column = "x", E = Eyx, tau = 1, tp = -1)
+
+```
+<img src="demo/demo_figures/xmap.png" width="70%">
+
+
+```r
+# No.3: Compute UIC
+uic_xy <- ruic::uic(block, x_column = "x", y_column = "y", E = Exy + 1, tau = 1, tp = -4:5, n_boot = 2000)
+uic_yx <- ruic::uic(block, x_column = "y", y_column = "x", E = Eyx + 1, tau = 1, tp = -4:5, n_boot = 2000)
+
+```
+<img src="demo/demo_figures/uic.png" width="70%">
+
 
 ## Functions implemented in rUIC package
 
