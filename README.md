@@ -3,18 +3,14 @@
 Tentative manual of rUIC package.
 
 ## Installation
-
-プライベートレポジトリを使用しているので、次のようにインストールします。
-(インターネットを介する方式だと、personal access tokens を生成する必要があるため)
-
-1. 「clone or download」をクリックして、zipファイルをダウンロード
-2. 作業ディレクトリにzipファイルを解凍する（ruic-masterというフォルダができると思います）
-3. ライブラリのインストール
+1. Click "clone or download" and download the zip file.
+2. Decompress the zip file in a working directory. "ruic-master" folder will be created.
+3. Excute the following command.
 ``` r
 library(devtools)
 devtools::install(pkg = 'ruic-master', reload = TRUE, quick = FALSE)
 ``` 
-4. 具体例の実践
+4. A quick demo
 
 ``` r
 ## simulate logistic map
