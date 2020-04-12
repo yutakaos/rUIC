@@ -83,28 +83,28 @@ with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 Arguments identical with those used in rEDM package are currently not explained. For arguments used in rEDM package, please see the rEDM tutorial (https://ha0ye.github.io/rEDM/index.html).
 
 `x_column` : the name or column index of library data  
-　　&rarr; A variable that is used for time-delay embedding (`lib_column` argument in rEDM)
+　　&rarr; A variable to be used for time-delay embedding.
 
 `y_column` : the name or column index of target data  
-　　⇒ 予測に使われる変数, rEDM における target_column に対応
+　　&rarr; A variable to be predicted (`target_column` argument in rEDM).
 
 `z_column` : the name or column index of condition data  
-　　⇒ 条件付きに使われる変数, 多変量予測や間接因果の推定に使う
+　　&rarr; A third variable to be used for multivariate prediction, or detection of indirect interactions.
 
-`nn` : the number of neighbors  
-　　⇒ rEDM における num_neighbors に対応  
-　　⇒ "e+1" を使用可, スカラーの場合は nn = rep(nn, length(E+1))  
-　　⇒ ベクトルの場合は length(E) == length(nn) でないとエラーを返す
+`nn` : the number of neighbors used for prediction
+　　&rarr; `num_neighbors` argument in rEDM.
+　　&rarr; `\"e+1\"` may be used. If a scalar value is specified, nn = rep(nn, length(E+1)).
+　　&rarr; If vector is specified and if `length(E) != length(nn)`, error will be returned.
 
 `n_boot` :  the number of bootstrap to be used for computing p-value  
-　　⇒ p値を計算するために必要なブートストラップ回数
+　　&rarr; The number of bootstrap to calculate p value.
 
 `scaling` : the local scaling (neighbor, velocity, no_scale)  
-　　⇒ 距離行列の局所スケーリング, ノイズ頑健になるといわれているため実装している  
-　　⇒ 検証した結果次第で、default は変更するかもしれない？
+　　&rarr; Method for local scaling of distance matrix. Implemented to improve noise-robustness.
+　　&rarr; **This argument is experimental. May be changed in near future.**
 
 `is_naive` : whether rEDM-style estimator is used  
-　　⇒ 近傍数によるの補正を行わない RMSE（ナイーブな推定量）を返すかどうか  
-　　⇒ TRUE にすると CCM の結果に近いものになる  
-　　⇒ 補正が必要なことが確かめられたら、将来的には引数から削除する予定？
+　　&rarr; Whether to return not-corrected RMSE （naive estimator） (estimator that is not corrected using neighbors)  
+　　&rarr; If `TRUE`, the result will be similar to Convergent Cross Mapping (CCM)  
+　　&rarr; **This argument is experimental. May be changed in near future.**
 
