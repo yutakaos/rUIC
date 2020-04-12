@@ -75,7 +75,8 @@ with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - Potential causal variable should be specified by `y_column` augument.
     - Return _p_ value if `n_boot > 1`.
-    - _p_ value indicates "Probability that there is a causal influence from y to x in the sense of transfer entropy" as specified in the following inequality:
+    - _p_ value indicates "Probability that y causes x in the sense of transfer entropy" as specified in the following inequality:
+    
     **_p(x<sub>t+tp</sub> | x<sub>t+1</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>) > p(x<sub>t+tp</sub> |  x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
 
 ## ruic で使われる引数
