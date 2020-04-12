@@ -92,9 +92,9 @@ Arguments identical with those used in rEDM package are currently not explained.
     &rarr; A third variable to be used for multivariate prediction, or detection of indirect interactions.
 
 `nn` : the number of neighbors used for prediction
-    &rarr; `num_neighbors` argument in rEDM.
-    &rarr; `"e+1"` may be used. If a scalar value is specified, nn = rep(nn, length(E+1)).
-    &rarr; If vector is specified and if `length(E) != length(nn)`, error will be returned.
+    - `num_neighbors` argument in rEDM.
+    - `"e+1"` may be used. If a scalar value is specified, nn = rep(nn, length(E+1)).
+    - If vector is specified and if `length(E) != length(nn)`, error will be returned.
 
 `n_boot` :  the number of bootstrap to be used for computing p-value  
     &rarr; The number of bootstrap to calculate p value.
