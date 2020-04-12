@@ -82,29 +82,29 @@ with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 
 Arguments identical with those used in rEDM package are currently not explained. For arguments used in rEDM package, please see the rEDM tutorial (https://ha0ye.github.io/rEDM/index.html).
 
-`x_column` : the name or column index of library data  
-　　&rarr; A variable to be used for time-delay embedding.
+`x_column` : the name or column index of library data
+    &rarr; A variable to be used for time-delay embedding.
 
-`y_column` : the name or column index of target data  
-　　&rarr; A variable to be predicted (`target_column` argument in rEDM).
+`y_column` : the name or column index of target data
+    &rarr; A variable to be predicted (`target_column` argument in rEDM).
 
-`z_column` : the name or column index of condition data  
-　　&rarr; A third variable to be used for multivariate prediction, or detection of indirect interactions.
+`z_column` : the name or column index of condition data
+    &rarr; A third variable to be used for multivariate prediction, or detection of indirect interactions.
 
 `nn` : the number of neighbors used for prediction
-　　&rarr; `num_neighbors` argument in rEDM.
-　　&rarr; `\"e+1\"` may be used. If a scalar value is specified, nn = rep(nn, length(E+1)).
-　　&rarr; If vector is specified and if `length(E) != length(nn)`, error will be returned.
+    &rarr; `num_neighbors` argument in rEDM.
+    &rarr; `"e+1"` may be used. If a scalar value is specified, nn = rep(nn, length(E+1)).
+    &rarr; If vector is specified and if `length(E) != length(nn)`, error will be returned.
 
 `n_boot` :  the number of bootstrap to be used for computing p-value  
-　　&rarr; The number of bootstrap to calculate p value.
+    &rarr; The number of bootstrap to calculate p value.
 
-`scaling` : the local scaling (neighbor, velocity, no_scale)  
-　　&rarr; Method for local scaling of distance matrix. Implemented to improve noise-robustness.
-　　&rarr; **This argument is experimental. May be changed in near future.**
+`scaling` : the local scaling (neighbor, velocity, no_scale)
+    &rarr; Method for local scaling of distance matrix. Implemented to improve noise-robustness.
+    &rarr; **This argument is experimental. May be changed in near future.**
 
-`is_naive` : whether rEDM-style estimator is used  
-　　&rarr; Whether to return not-corrected RMSE （naive estimator） (estimator that is not corrected using neighbors)  
-　　&rarr; If `TRUE`, the result will be similar to Convergent Cross Mapping (CCM)  
-　　&rarr; **This argument is experimental. May be changed in near future.**
+`is_naive` : whether rEDM-style estimator is used
+    &rarr; Whether to return not-corrected RMSE （naive estimator） (estimator that is not corrected using neighbors)
+    &rarr; If `TRUE`, the result will be similar to Convergent Cross Mapping (CCM)
+    &rarr; **This argument is experimental. May be changed in near future.**
 
