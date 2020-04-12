@@ -29,7 +29,7 @@ block = data.frame(t = 1:tl, x = x, y = y)
 ```
 <img src="demo/demo_figures/time_series.png" width="70%">
 
-- 
+- Perform simplex projection and determine the optimal embedding dimension
 ```r
 # No.1: Determine the optimal embedding dimension using simplex projection
 ## Univariate UIC-version simplex projection
@@ -46,7 +46,7 @@ Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 ```
 <img src="demo/demo_figures/simplex_uic.png" width="70%">
 
-
+- Perform cross-mapping
 ```r
 # No.2: Cross-map
 xmap_xy <- ruic::xmap(block, x_column = "x", y_column = "y", E = Exy, tau = 1, tp = -1)
@@ -55,7 +55,7 @@ xmap_yx <- ruic::xmap(block, x_column = "y", y_column = "x", E = Eyx, tau = 1, t
 ```
 <img src="demo/demo_figures/xmap.png" width="70%">
 
-
+- Compute UIC
 ```r
 # No.3: Compute UIC
 uic_xy <- ruic::uic(block, x_column = "x", y_column = "y", E = Exy + 1, tau = 1, tp = -4:5, n_boot = 2000)
