@@ -48,7 +48,8 @@ with(op0[op0$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 with(op1, plot(tp, uic, type = "l"))
 with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 ``` 
-![](demo/demo_figures/simplex_uic.png){width=50%}
+
+<img src="demo/demo_figures/simplex_uic.png" width="50%">
 
 ## Functions implemented in rUIC package
 
