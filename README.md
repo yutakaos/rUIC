@@ -12,7 +12,28 @@ devtools::install(pkg = 'ruic-master', reload = TRUE, quick = FALSE)
 ``` 
 4. A quick demo
 
+- Load library and generate model time series
+```r
+library(ruic); packageVersion("ruic") # v0.1
+
+## simulate logistic map
+tl <- 400  # time length
+x <- y <- rep(NA, tl)
+x[1] <- 0.4
+y[1] <- 0.2
+for (t in 1:(tl - 1)) {  # causality : x -> y
+    x[t+1] = x[t] * (3.8 - 3.8 * x[t] - 0.0 * y[t])
+    y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
+}
+block = data.frame(t = 1:tl, x = x, y = y)
+```
+<img src="demo/demo_figures/tie_series.png" width="70%">
+
+
+
 ``` r
+library(ruic); packageVersion("ruic") # v0.1
+
 ## simulate logistic map
 tl <- 400  # time length
 x <- y <- rep(NA, tl)
@@ -49,7 +70,7 @@ with(op1, plot(tp, uic, type = "l"))
 with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 ``` 
 
-<img src="demo/demo_figures/simplex_uic.png" width="50%">
+<img src="demo/demo_figures/simplex_uic.png" width="70%">
 
 ## Functions implemented in rUIC package
 
