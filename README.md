@@ -82,16 +82,16 @@ with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
 
 Arguments identical with those used in rEDM package are currently not explained. For arguments used in rEDM package, please see the rEDM tutorial (https://ha0ye.github.io/rEDM/index.html).
 
-`x_column` : the name or column index of library data
+- `x_column` : the name or column index of library data
     &rarr; A variable to be used for time-delay embedding.
 
-`y_column` : the name or column index of target data
+- `y_column` : the name or column index of target data
     &rarr; A variable to be predicted (`target_column` argument in rEDM).
 
-`z_column` : the name or column index of condition data
+- `z_column` : the name or column index of condition data
     &rarr; A third variable to be used for multivariate prediction, or detection of indirect interactions.
 
-`nn` : the number of neighbors used for prediction
+- `nn` : the number of neighbors used for prediction
     - `num_neighbors` argument in rEDM.
     - `"e+1"` may be used. If a scalar value is specified, nn = rep(nn, length(E+1)).
     - If vector is specified and if `length(E) != length(nn)`, error will be returned.
