@@ -1,4 +1,4 @@
-# ruic : Unified Information-theoretic Causality for R
+# rUIC : Unified Information-theoretic Causality for R
 
 ひとまずパッケージとして試用するためのサイトをつくりました！
 
@@ -36,21 +36,21 @@ with(op0$model_output, plot(data, pred)); op0$stats
 with(op1$model_output, plot(data, pred)); op1$stats
 
 ## simplex projection
-op0 = simplex(block, x_column = "x", y_column = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-op1 = simplex(block, x_column = "y", y_column = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-with(op0, plot(E, uic, type = "l"))
-with(op0[op0$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
-with(op1, plot(E, uic, type = "l"))
-with(op1[op1$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
+op0 = simplex(block, x_column = "x", y_column = "y", E = 1:8, tau = 1, tp = 1, n_boot = 2000)
+op1 = simplex(block, x_column = "y", y_column = "x", E = 1:8, tau = 1, tp = 1, n_boot = 2000)
+with(op0, plot(E, te, type = "l"))
+with(op0[op0$pval < 0.05,], points(E, te, pch = 16, col = "red"))
+with(op1, plot(E, te, type = "l"))
+with(op1[op1$pval < 0.05,], points(E, te, pch = 16, col = "red"))
 
 ## UIC
 op0 = uic(block, x_column = "x", y_column = "y", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
 op1 = uic(block, x_column = "y", y_column = "x", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
 par(mfrow = c(2, 1))
-with(op0, plot(tp, uic, type = "l"))
-with(op0[op0$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
-with(op1, plot(tp, uic, type = "l"))
-with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
+with(op0, plot(tp, te, type = "l"))
+with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
+with(op1, plot(tp, te, type = "l"))
+with(op1[op1$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
 ``` 
 
 ## ruic で実装している関数
@@ -76,8 +76,8 @@ __uic__
 　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する  
 　n_boot > 1 以上で p 値を返す  
 　p 値は次の不等式が成り立つ確率で,「Transfer Entropy の意味で y -> x の因果がある確率」を表します。  
-　　　p(y[t+tp] | x[t+1], x[t], x[t-tau], ... x[t-(E-2)*tau]) >  
-　　　p(y[t+tp] |         x[t], x[t-tau], ... x[t-(E-2)*tau])
+　　　p(y[t-tp] | x[t+1], x[t], x[t-tau], ... x[t-(E-2)*tau]) >  
+　　　p(y[t-tp] |         x[t], x[t-tau], ... x[t-(E-2)*tau])
 
 ## ruic で使われる引数
 
