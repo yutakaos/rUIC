@@ -663,7 +663,8 @@ namespace nanoflann
     
     //* KD-tree static index */
     template <typename num_t>
-    class KDTreeSingleIndexAdaptor : public KDTreeBase <KDTreeSingleIndexAdaptor<num_t>, num_t>
+    class KDTreeSingleIndexAdaptor
+        : public KDTreeBase <KDTreeSingleIndexAdaptor<num_t>, num_t>
     {
         typedef typename nanoflann::KDTreeSingleIndexAdaptor<num_t> Derived;
         typedef typename nanoflann::KDTreeBase<Derived, num_t> Base;
@@ -684,19 +685,14 @@ namespace nanoflann
             const int n_dim,
             const std::vector<std::vector<num_t>>  &points,
             const std::vector<std::pair<int, int>> &time_indices,
-            const int exclusion_radius = 0,
-            const size_t leaf_max_size = 10)
+            const int exclusion_radius = 0)
         {
             dataset.set_dataset(points, time_indices, exclusion_radius);
-            
             Base::root_node = NULL;
-            Base::root_size = dataset.kdtree_get_point_count();
-            Base::root_size_at_index_build = Base::root_size;
             Base::root_dim = n_dim;
-            Base::root_leaf_max_size = leaf_max_size;
-            
-            Base::indices.resize(Base::root_size);
-            for (size_t i = 0; i < Base::root_size; i++) Base::indices[i] = i;
+            Base::root_leaf_max_size = 10;
+            set_norm();
+            build_index();
         }
         
         void set_norm (NORM norm_type = L2, bool do_root = true, num_t p = 0.5)
@@ -704,12 +700,27 @@ namespace nanoflann
             norm.set_norm(norm_type, do_root, p);
         }
         
+        size_t knn_search (
+            const num_t *query, const std::pair<int, int> &time,
+            std::vector<size_t> *op_indices, std::vector<num_t> *op_dists,
+            const size_t num_closest, const bool tied = true) const
+        {
+            size_t nn = Base::root_size < num_closest ? Base::root_size : num_closest;
+            nanoflann::ResultSet<num_t> result;
+            result.set_init(nn, tied);
+            this->find_neighbors(result, query, time);
+            result.output(norm, op_indices, op_dists);
+            for (auto &x : *op_indices) x = dataset.get_raw_index(x);
+            return result.size();
+        }
+        
+    private:
+        
         void build_index ()
         {
             this->free_index(*this);
             Base::root_size = dataset.kdtree_get_point_count();
             Base::root_size_at_index_build = Base::root_size;
-            Base::root_size = dataset.kdtree_get_point_count();
             
             Base::indices.resize(Base::root_size);
             for (size_t i = 0; i < Base::root_size; i++) Base::indices[i] = i;
@@ -717,29 +728,7 @@ namespace nanoflann
             
             compute_BoundingBox(Base::root_bbox);
             Base::root_node = this->divide_tree(*this, 0, Base::root_size, Base::root_bbox);
-            set_norm();
         }
-        
-        /**
-         * Find the 'num_closest' nearest neighbors to the 'query[0:dim-1]'.
-         * The nearest neighbors is stored in 'op_indices' and 'op_dists'.
-         */
-        size_t knn_search (
-            const num_t *query, const std::pair<int, int> &time,
-            std::vector<size_t> *op_indices, std::vector<num_t> *op_dists,
-            const size_t num_closest, const bool tied = true) const
-        {
-            size_t nn = Base::root_size < num_closest ? Base::root_size : num_closest;
-            
-            nanoflann::ResultSet<num_t> resultSet;
-            resultSet.set_init(nn, tied);
-            this->find_neighbors(resultSet, query, time);
-            resultSet.output(norm, op_indices, op_dists);
-            for (auto &x : *op_indices) x = dataset.get_raw_index(x);
-            return resultSet.size();
-        }
-        
-    private:
         
         void compute_BoundingBox (BoundingBox &bbox)
         {
