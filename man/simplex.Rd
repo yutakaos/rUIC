@@ -75,9 +75,9 @@ block = data.frame(t = 1:tl, x = x, y = y)
 op0 <- simplex(block, x_column = "x", y_column = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 op1 <- simplex(block, x_column = "y", y_column = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 par(mfrow = c(2, 1))
-with(op0, plot(E, uic, type = "l"))
-with(op0[op0$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
-with(op1, plot(E, uic, type = "l"))
-with(op1[op1$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
+with(op0, plot(E, te, type = "l"))
+with(op0[op0$pval < 0.05,], points(E, te, pch = 16, col = "red"))
+with(op1, plot(E, te, type = "l"))
+with(op1[op1$pval < 0.05,], points(E, te, pch = 16, col = "red"))
 
 }

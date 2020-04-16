@@ -1,4 +1,4 @@
-#' Batch processing to compute UIC
+#' Batch processing to compute unified information-theoritic causality
 #' 
 #' @param block    a data.frame or matrix where each column is a time series
 #' @param lib      the time range to be used for attractor reconstruction
@@ -17,7 +17,7 @@
 #' @param epsilon  the norm filtering (d < epsilon)
 #' @param is_naive whether rEDM-style estimator is used
 #' 
-#' @return A data.frame with model parameters, root mean squared errors, uic and p-value
+#' @return A data.frame with model parameters, RMSE, TE and p-value
 #' 
 #' @examples
 #' ## simulate logistic map
@@ -35,10 +35,10 @@
 #' op0 = uic(block, x_column = "x", y_column = "y", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
 #' op1 = uic(block, x_column = "y", y_column = "x", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
 #' par(mfrow = c(2, 1))
-#' with(op0, plot(tp, uic, type = "l"))
-#' with(op0[op0$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
-#' with(op1, plot(tp, uic, type = "l"))
-#' with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
+#' with(op0, plot(tp, te, type = "l"))
+#' with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
+#' with(op1, plot(tp, te, type = "l"))
+#' with(op1[op1$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
 #' 
 uic = function (
     block, lib = c(1, NROW(block)), pred = lib, x_column = 1, y_column = 2, z_column = NULL,

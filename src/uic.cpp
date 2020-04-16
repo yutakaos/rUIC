@@ -204,7 +204,7 @@ private:
     DataFrame model_statistics ()
     {
         IntegerVector E, nn, tau, tp;
-        NumericVector n_lib, n_pred, rmse, rmse_r, uic, pval;
+        NumericVector n_lib, n_pred, rmse, uic, pval;
         for (auto op : output)
         {
             size_t nn_ = op.nn < op.n_lib ? op.nn : op.n_lib;
@@ -215,7 +215,6 @@ private:
             n_lib .push_back(op.n_lib);
             n_pred.push_back(op.n_pred);
             rmse  .push_back(op.rmseF);
-            rmse_r.push_back(op.rmseR);
             uic   .push_back(op.uic);
             pval  .push_back(op.pval);
         }
@@ -226,9 +225,8 @@ private:
             Named("nn" ) = nn,
             Named("n_lib" ) = n_lib,
             Named("n_pred") = n_pred,
-            Named("rmse"  ) = rmse,
-            Named("rmse_r") = rmse_r,
-            Named("uic" ) = uic,
+            Named("rmse") = rmse,
+            Named("te"  ) = uic,
             Named("pval") = pval
         );
     }

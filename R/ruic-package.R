@@ -4,7 +4,7 @@
 # The following block is used by usethis to automatically manage
 # roxygen namespace tags. Modify with care!
 ## usethis namespace: start
-#' @useDynLib ruic, .registration = TRUE
+#' @useDynLib rUIC, .registration = TRUE
 #' @importFrom methods new
 #' @export xmap
 #' @export simplex

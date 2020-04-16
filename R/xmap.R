@@ -16,7 +16,7 @@
 #' @param epsilon  the norm filtering (d < epsilon)
 #' @param is_naive whether rEDM-style estimator is used
 #' 
-#' @return A data.frame with model parameters, root mean squared errors, uic and p-value
+#' @return A data.frame with model parameters, RMSE, TE and p-value
 #' 
 #' @examples
 #' ## simulate logistic map

@@ -16,7 +16,7 @@
 #' @param epsilon  the norm filtering (d < epsilon)
 #' @param is_naive whether rEDM-style estimator is used
 #' 
-#' @return A data.frame with model parameters, root mean squared errors and p-value
+#' @return A data.frame with model parameters, RMSE and p-value
 #' 
 #' @examples
 #' ## simulate logistic map
@@ -31,13 +31,13 @@
 #' block = data.frame(t = 1:tl, x = x, y = y)
 #' 
 #' ## simplex projecton
-#' op0 <- simplex(block, x_column = "x", y_column = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-#' op1 <- simplex(block, x_column = "y", y_column = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
+#' op0 <- simplex(block, x_column = "x", y_column = "y", E = 1:8, tau = 1, tp = 1, n_boot = 2000)
+#' op1 <- simplex(block, x_column = "y", y_column = "x", E = 1:8, tau = 1, tp = 1, n_boot = 2000)
 #' par(mfrow = c(2, 1))
-#' with(op0, plot(E, uic, type = "l"))
-#' with(op0[op0$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
-#' with(op1, plot(E, uic, type = "l"))
-#' with(op1[op1$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
+#' with(op0, plot(E, te, type = "l"))
+#' with(op0[op0$pval < 0.05,], points(E, te, pch = 16, col = "red"))
+#' with(op1, plot(E, te, type = "l"))
+#' with(op1[op1$pval < 0.05,], points(E, te, pch = 16, col = "red"))
 #' 
 simplex = function (
     block, lib = c(1, NROW(block)), pred = lib, x_column = 1, y_column = 2,
