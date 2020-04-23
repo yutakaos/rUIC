@@ -2,62 +2,103 @@
 % Please edit documentation in R/xmap.R
 \name{xmap}
 \alias{xmap}
-\title{Perform cross mapping (return model output and statistics)}
+\title{Perform cross mapping}
 \usage{
 xmap(
-  block,
-  lib = c(1, NROW(block)),
-  pred = lib,
-  x_column = 1,
-  y_column = 2,
-  z_column = NULL,
-  norm = 2,
-  E = 1,
-  tau = 1,
-  tp = 0,
-  nn = "e+1",
+  block, lib = c(1, NROW(block)), pred = lib,
+  lib_var = 1, tar_var = 2, cond_var = NULL,
+  norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1",
   scaling = c("neighbor", "velocity", "no_scale"),
-  exclusion_radius = NULL,
-  epsilon = NULL,
-  is_naive = FALSE
-)
+  exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
 }
 \arguments{
-\item{block}{a data.frame or matrix where each column is a time series}
+\item{block}{a data.frame or matrix where each column is a time series.}
 
-\item{lib}{the time range to be used for attractor reconstruction}
+\item{lib}{a two-column matrix (or two-element vector) where each row specifies
+the first and last indices of time series to use for attractor reconstruction.}
 
-\item{pred}{the time range to be used for prediction forecast}
+\item{pred}{a two-column matrix (or two-element vector) where each row specifies
+the first and last indices of time series to use for model predictions.}
 
-\item{x_column}{the name or column index of library data}
+\item{lib_var}{the names or column indices of library variables.
+The specifed variables are used as explanatory variables with time-delay embedding.}
 
-\item{y_column}{the name or column index of target data}
+\item{tar_var}{the name or column index of a target variable.
+The specifed variable is used as response variables.}
 
-\item{z_column}{the name or column index of condition data}
+\item{cond_var}{the names or column indeices of condition data.
+The specifed variables are used as explanatory variables (without time-delay embedding).}
 
-\item{norm}{the power of Lp norm (if p < 0, max norm is used)}
+\item{norm}{the power of Lp distance to use. See Details.}
 
-\item{E}{the embedding dimension}
+\item{E}{the embedding dimension to use for time-delay embedding.}
 
-\item{tau}{the time-lag for delay embedding}
+\item{tau}{the time-lag to use for time-delay embedding.}
 
-\item{tp}{the time index to predict}
+\item{tp}{the time index to predict.}
 
-\item{nn}{the number of neighbors}
+\item{nn}{the number of nearest neighbors to use.
+If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.}
 
-\item{scaling}{the local scaling (neighbor, velocity, no_scale)}
+\item{scaling}{the method for local scaling of distance matrix. See Details.}
 
-\item{exclusion_radius}{the norm filtering (time difference < exclusion_radius)}
+\item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within exclusion radius.}
 
-\item{epsilon}{the norm filtering (d < epsilon)}
+\item{epsilon}{the filtering to exclude nearest neighbors if epsilon is farther than their distances.}
 
-\item{is_naive}{whether rEDM-style estimator is used}
+\item{is_naive}{specifies whether the rEDM-style estimator is used.}
 }
 \value{
-A data.frame with model parameters, root mean squared errors, uic and p-value
+A list with model predictions and its statistics.
+
+\code{model_output} is a data.frame where each column is:
+\tabular{ll}{
+\code{time} \tab \code{:} time indices \cr
+\code{data} \tab \code{:} data values used for model prediction \cr
+\code{pred} \tab \code{:} predicted values \cr
+\code{enn}  \tab \code{:} effective number of nearest neighbors \cr
+}
+
+\code{stats} is a data.frame where each row represents model statistics computed from a parameter set:
+\tabular{ll}{
+\code{E}      \tab \code{:} embedding dimension \cr
+\code{tau}    \tab \code{:} time-lag \cr
+\code{tp}     \tab \code{:} time prediction horizon \cr
+\code{nn}     \tab \code{:} number of nearest neighbors \cr
+\code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
+\code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
+\code{rmse}   \tab \code{:} unbiased root mean squared error \cr
+\code{te}     \tab \code{:} transfer entropy \cr
+}
+
+\code{nn} can be different between argument specification and output results
+when some nearest neighbors have tied distances.
+
+\code{rmse} is the unbiased root mean squared error computed from model predictions.
+If \code{is_naive = TRUE}, the raw root mean sqaured error is returned.
+
+\code{te} is transfer entropy based on the unified information-theoretic causality test:
+\deqn{
+\sum_{t} log p(y_{t+tp} | x_{t}     , x_{t- \tau}, \ldots, x_{t-(E-1)\tau}, z_{t}) -
+         log p(y_{t+tp} | x_{t-\tau}, x_{t-2\tau}, \ldots, x_{t-(E-1)\tau}, z_{t})
+}
+where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
 }
 \description{
-Perform cross mapping (return model output and statistics)
+\code{xmap} returns model predictions and its statistics computed from
+given multipe time series based on cross mapping.
+}
+\details{
+\code{norm} specifies the power of Lp distance to use.
+In particular, Euclidean distance (\code{norm} = 2), Manhattan distance
+(\code{norm} = 1) and Maximum distance (\code{norm} \eqn{\le} 0) can be
+used as the special cases of Lp distance.
+
+\code{scaling} specifies the methods for local scaling of distance matrix. This argument is
+experimental. The following distances can be used as local scaling factors:
+the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
+the mean distances to nearest time indices (\code{scaling = velocity}) and
+the constant distance (\code{scaling = no_scale}).
 }
 \examples{
 ## simulate logistic map
@@ -69,13 +110,16 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
     x[t+1] = x[t] * (3.8 - 3.8 * x[t] - 0.0 * y[t])
     y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
 }
-block = data.frame(t = 1:tl, x = x, y = y)
+block <- data.frame(t = 1:tl, x = x, y = y)
 
 ## cross mapping
-op0 <- xmap(block, x_column = "x", y_column = "y", E = 2, tau = 1, tp = -1)
-op1 <- xmap(block, x_column = "y", y_column = "x", E = 2, tau = 1, tp = -1)
+op0 <- xmap(block, lib_var = "x", tar_var = "y", E = 2, tau = 1, tp = -1)
+op1 <- xmap(block, lib_var = "y", tar_var = "x", E = 2, tau = 1, tp = -1)
 par(mfrow = c(2, 1))
 with(op0$model_output, plot(data, pred)); op0$stats
 with(op1$model_output, plot(data, pred)); op1$stats
 
+}
+\seealso{
+\link{simplex}, \link{uic}
 }

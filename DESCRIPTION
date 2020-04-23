@@ -1,8 +1,7 @@
-
 Package: rUIC
 Type: Package
 Title: Unified Information-theoretic Causality for R
-Version: 0.01.01
+Version: 0.01.02
 Authors@R:
     c(
         person("Yutaka", "Osada", role = c("aut", "cre"),
