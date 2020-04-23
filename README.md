@@ -1,4 +1,4 @@
-# ruic : Unified Information-theoretic Causality for R
+# rUIC : Unified Information-theoretic Causality for R
 
 ひとまずパッケージとして試用するためのサイトをつくりました！
 
@@ -26,85 +26,78 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
     x[t+1] = x[t] * (3.8 - 3.8 * x[t] - 0.0 * y[t])
     y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
 }
-block = data.frame(t = 1:tl, x = x, y = y)
+block <- data.frame(t = 1:tl, x = x, y = y)
 
 ## xmap
 par(mfrow = c(2, 2))
-op0 = xmap(block, x_column = "x", y_column = "y", E = 2, tau = 1, tp = -1)
-op1 = xmap(block, x_column = "y", y_column = "x", E = 2, tau = 1, tp = -1)
+op0 <- xmap(block, lib_var = "x", tar_var = "y", E = 2, tau = 1, tp = -1)
+op1 <- xmap(block, lib_var = "y", tar_var = "x", E = 2, tau = 1, tp = -1)
 with(op0$model_output, plot(data, pred)); op0$stats
 with(op1$model_output, plot(data, pred)); op1$stats
 
 ## simplex projection
-op0 = simplex(block, x_column = "x", y_column = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-op1 = simplex(block, x_column = "y", y_column = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-with(op0, plot(E, uic, type = "l"))
-with(op0[op0$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
-with(op1, plot(E, uic, type = "l"))
-with(op1[op1$pval < 0.05,], points(E, uic, pch = 16, col = "red"))
+op0 <- simplex(block, lib_var = "x", cond_var = "y", E = 1:8, tau = 1, tp = 1, n_boot = 2000)
+op1 <- simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1, tp = 1, n_boot = 2000)
+with(op0, plot(E, te, type = "l"))
+with(op0[op0$pval < 0.05,], points(E, te, pch = 16, col = "red"))
+with(op1, plot(E, te, type = "l"))
+with(op1[op1$pval < 0.05,], points(E, te, pch = 16, col = "red"))
 
 ## UIC
-op0 = uic(block, x_column = "x", y_column = "y", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
-op1 = uic(block, x_column = "y", y_column = "x", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
+op0 <- uic(block, lib_var = "x", tar_var = "y", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
+op1 <- uic(block, lib_var = "y", tar_var = "x", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
 par(mfrow = c(2, 1))
-with(op0, plot(tp, uic, type = "l"))
-with(op0[op0$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
-with(op1, plot(tp, uic, type = "l"))
-with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
+with(op0, plot(tp, te, type = "l"))
+with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
+with(op1, plot(tp, te, type = "l"))
+with(op1[op1$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
 ``` 
 
 ## ruic で実装している関数
 
-__xmap__  
-　モデルの予測結果と統計量を返します。予測結果がほしいときに使用する。  
-　E, tau, tp, nn はスカラーのみに対応。  
-　z_column 引数を使うことで多変量にも対応。
+- `xmap`
+  - モデルの予測結果と統計量を返します。予測結果がほしいときに使用.
+  - `E`, `tau`, `tp`, `nn` はスカラーのみに対応.
+  - `cond_var` を使うことで多変量にも対応.
 
-__simplex__  
-　統計量のみを返します。  
-　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する。  
-　y_column に原因となる変数（uic と同じ）を指定する。  
-　n_boot > 1 以上で p 値を返す  
-　p 値は次の不等式が成り立つ確率で,「埋め込み次元をひとつ減らした場合に比べて予測力が改善した確率」を表します。  
-　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-1)*tau]) >  
-　　　p(x[t+tp] | y[t], x[t], x[t-tau], ... x[t-(E-2)*tau])  
-　simplex projection において y_column と z_column は同じ役割を果たすため、現在 z_column は省略している  
+- `simplex`
+  - 統計量のみを返します.
+  - `E`, `tau`, `tp` はベクターに対応し、ベクターの場合 `E`, `tau`, `tp` の全組み合わせを効率的に計算する.
+  - UIC における `E` を推定するときは `cond_var` に原因となる変数を指定する.
+  - `n_boot` > 1 以上で $p$ 値を返す.
+  - `te` は次の数式で表される. _x_ は `lib_var`, _z_ は `cond_var`.
+  ```math
+  \sum_{t} log p(x_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t}) -
+           log p(x_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-2)*&tau}, z_{t})
+  ```
+  - _p_ 値の帰無仮説は te <= 0.
 
-__uic__  
-　統計量のみを返します  
-　E には simplex projection で得られた E に 1 を追加したものを指定  
-　E (+ nn), tau, tp はベクターに対応し、ベクターの場合 E, tau, tp の全組み合わせを計算ロスがないよう計算する  
-　n_boot > 1 以上で p 値を返す  
-　p 値は次の不等式が成り立つ確率で,「Transfer Entropy の意味で y -> x の因果がある確率」を表します。  
-　　　p(y[t+tp] | x[t+1], x[t], x[t-tau], ... x[t-(E-2)*tau]) >  
-　　　p(y[t+tp] |         x[t], x[t-tau], ... x[t-(E-2)*tau])
+- `uic`
+  - 統計量のみを返します.
+  - `E`, `tau`, `tp` はベクターに対応し、ベクターの場合 `E`, `tau`, `tp` の全組み合わせを効率的に計算する.
+  - `E` には simplex projection で得られた E に 1 を追加したものを指定.
+  - `n_boot` > 1 以上で _p_ 値を返す.
+  - `te` は次の数式で表される. _x_ は `lib_var`, _y_ は `tar_var`, _z_ は `cond_var`.
+  ```math
+  \sum_{t} log p(y_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t}) -
+           log p(y_{t+tp} |        x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t})
+  ```
+  - _p_ 値の帰無仮説は te <= 0.
 
 ## ruic で使われる引数
 
-rEDM と同じ名前・同じ使い方の引数の説明は省略します。  
+rEDM と同じ名前・同じ使い方の引数の説明は省略します.
 
-__x_column__ : the name or column index of library data  
-　　⇒ 埋め込みに使われる変数, rEDM における lib_column に対応
-
-__y_column__ : the name or column index of target data  
-　　⇒ 予測に使われる変数, rEDM における target_column に対応
-
-__z_column__ : the name or column index of condition data  
-　　⇒ 条件付きに使われる変数, 多変量予測や間接因果の推定に使う
-
-__nn__ : the number of neighbors  
-　　⇒ rEDM における num_neighbors に対応  
-　　⇒ "e+1" を使用可, スカラーの場合は nn = rep(nn, length(E+1))  
-　　⇒ ベクトルの場合は length(E) == length(nn) でないとエラーを返す
-
-__n_boot__ :  the number of bootstrap to be used for computing p-value  
-　　⇒ p値を計算するために必要なブートストラップ回数
-
-__scaling__ : the local scaling (neighbor, velocity, no_scale)  
-　　⇒ 距離行列の局所スケーリング, ノイズ頑健になるといわれているため実装している  
-　　⇒ 検証した結果次第で、default は変更するかもしれない？
-
-__is_naive__ : whether rEDM-style estimator is used  
-　　⇒ 近傍数によるの補正を行わない RMSE（ナイーブな推定量）を返すかどうか  
-　　⇒ TRUE にすると CCM の結果に近いものになる  
-　　⇒ 補正が必要なことが確かめられたら、将来的には引数から削除する予定？
+- `lib_var` : 埋め込みに使われる変数, rEDM における lib_column に対応.
+- `tar_var` : 予測に使われる変数, rEDM における target_column に対応.
+- `cond_var` :  条件付きに使われる変数, 多変量予測や間接因果の推定に使う.
+- `nn` : 埋め込みに使われる近傍数, rEDM における num_neighbors に対応.
+  - "e+1" を使用可, スカラーの場合は nn = rep(nn, length(E)).
+  - ベクトルの場合は length(E) == length(nn) でないとエラーを返す.
+- `n_boot` : $p$値を計算するために必要なブートストラップ回数
+- `scaling` : 距離行列の局所スケーリング手法.
+  - ノイズ頑健になるといわれているため実装.
+  - 検証した結果次第で、default は変更するかもしれない？
+- `is_naive` : 近傍数によるの補正を行わない RMSE（ナイーブな推定量）を返すかどうか.
+  - TRUE にすると CCM の結果に近いものになる.
+  - 補正が必要なことが確かめられたら、将来的には引数から削除する予定？

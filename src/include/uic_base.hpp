@@ -4,10 +4,11 @@
  */
 
 
-#ifndef _uic_base_hpp_
-#define _uic_base_hpp_
+#ifndef _ruic_base_hpp_
+#define _ruic_base_hpp_
 
 //* Header(s) */
+#include <limits> // std::numeric_limits
 #include <vector> // std::vector
 #include <helper.hpp>
 
@@ -38,13 +39,14 @@ namespace UIC
         std::vector<num_t> y_prd;
         std::vector<std::vector<num_t>> x_lib; 
         std::vector<std::vector<num_t>> x_prd;
-        std::vector<std::pair<int, int>> time_lib; // [time, series]
-        std::vector<std::pair<int, int>> time_prd; // [time, series]
+        std::vector<std::pair<int, int>> time_lib; // [time, id]
+        std::vector<std::pair<int, int>> time_prd; // [time, id]
         
     private:
         
-        int n_time; // input data length
         const int nnmax = std::numeric_limits<int>::max();
+        
+        int n_time; // input data length
         time_range_t range_lib;
         time_range_t range_prd;
         

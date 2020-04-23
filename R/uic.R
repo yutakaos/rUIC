@@ -1,23 +1,42 @@
-#' Batch processing to compute UIC
+#' Perform unified information-theoretic causality computation
 #' 
-#' @param block    a data.frame or matrix where each column is a time series
-#' @param lib      the time range to be used for attractor reconstruction
-#' @param pred     the time range to be used for prediction forecast
-#' @param x_column the name or column index of library data
-#' @param y_column the name or column index of target data
-#' @param z_column the name or column index of condition data
-#' @param norm     the power of Lp norm (if p < 0, max norm is used)
-#' @param E        the embedding dimension
-#' @param tau      the time-lag for delay embedding
-#' @param tp       the time index to predict
-#' @param nn       the number of neighbors
-#' @param n_boot   the number of bootstrap to be used for computing p-value
-#' @param scaling  the local scaling (neighbor, velocity, no_scale)
-#' @param exclusion_radius the norm filtering (time difference < exclusion_radius)
-#' @param epsilon  the norm filtering (d < epsilon)
-#' @param is_naive whether rEDM-style estimator is used
+#' \code{uic} returns model statistics computed from given multipe time series
+#' based on cross mapping. This function simultaneously performs unified
+#' information-theoretic causality computations for all possible combinations of
+#' \code{E}, \code{tau} and \code{tp}.
 #' 
-#' @return A data.frame with model parameters, root mean squared errors, uic and p-value
+#' @inheritParams xmap
+#' @param n_boot
+#' the number of bootstraps to use for computing p-value.
+#' 
+#' @return
+#' A data.frame where each row represents model statistics computed from a parameter set.
+#' \tabular{ll}{
+#' \code{E}      \tab \code{:} embedding dimension \cr
+#' \code{tau}    \tab \code{:} time-lag \cr
+#' \code{tp}     \tab \code{:} time prediction horizon \cr
+#' \code{nn}     \tab \code{:} number of nearest neighbors \cr
+#' \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
+#' \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
+#' \code{rmse}   \tab \code{:} unbiased root mean squared error \cr
+#' \code{te}     \tab \code{:} transfer entropy \cr
+#' \code{pval}   \tab \code{:} bootstrap p-value for te > 0 \cr
+#' }
+#' 
+#' \code{nn} can be different between argument specification and output results
+#' when some nearest neighbors have tied distances.
+#' 
+#' \code{rmse} is the unbiased root mean squared error computed from model predictions.
+#' If \code{is_naive = TRUE}, the raw root mean sqaured error is returned.
+#' 
+#' \code{te} is transfer entropy based on the unified information-theoretic causality test:
+#' \deqn{
+#' \sum_{t} log p(y_{t+tp} | x_{t}     , x_{t- \tau}, \ldots, x_{t-(E-1)\tau}, z_{t}) -
+#'          log p(y_{t+tp} | x_{t-\tau}, x_{t-2\tau}, \ldots, x_{t-(E-1)\tau}, z_{t})
+#' }
+#' where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
+#' 
+#' @seealso \link{xmap}, \link{simplex}
 #' 
 #' @examples
 #' ## simulate logistic map
@@ -29,25 +48,27 @@
 #'     x[t+1] = x[t] * (3.8 - 3.8 * x[t] - 0.0 * y[t])
 #'     y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
 #' }
-#' block = data.frame(t = 1:tl, x = x, y = y)
+#' block <- data.frame(t = 1:tl, x = x, y = y)
 #' 
 #' ## UIC
-#' op0 = uic(block, x_column = "x", y_column = "y", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
-#' op1 = uic(block, x_column = "y", y_column = "x", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
+#' op0 <- uic(block, lib_var = "x", tar_var = "y", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
+#' op1 <- uic(block, lib_var = "y", tar_var = "x", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
 #' par(mfrow = c(2, 1))
-#' with(op0, plot(tp, uic, type = "l"))
-#' with(op0[op0$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
-#' with(op1, plot(tp, uic, type = "l"))
-#' with(op1[op1$pval < 0.05,], points(tp, uic, pch = 16, col = "red"))
+#' with(op0, plot(tp, te, type = "l"))
+#' with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
+#' with(op1, plot(tp, te, type = "l"))
+#' with(op1[op1$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
 #' 
 uic = function (
-    block, lib = c(1, NROW(block)), pred = lib, x_column = 1, y_column = 2, z_column = NULL,
-    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000, scaling = c("neighbor", "velocity", "no_scale"),
+    block, lib = c(1, NROW(block)), pred = lib,
+    lib_var = 1, tar_var = 2, cond_var = NULL,
+    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
+    scaling = c("neighbor", "velocity", "no_scale"),
     exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
 {
-    if (length(y_column) != 1)
+    if (length(tar_var) != 1)
     {
-        stop("Target column (y_column) must be a scalar.")
+        stop("Only a target variable (tar_var) must be specifed.")
     }
     lib  = rbind(lib)
     pred = rbind(pred)
@@ -65,10 +86,10 @@ uic = function (
     LS = match.arg(scaling)
     LS = switch(LS, "no_scale" = 0, "neighbor" = 1, "velocity" = 2)
     
-    x = cbind(block[,x_column])
-    y = cbind(block[,y_column])
+    x = cbind(block[,lib_var])
+    y = cbind(block[,tar_var])
     z = matrix()
-    if (!is.null(z_column)) z = cbind(block[,z_column])
+    if (!is.null(cond_var)) z = cbind(block[,cond_var])
     
     uic = new(rUIC)
     uic$set_norm (NORM, LS, p, exclusion_radius, epsilon)

@@ -4,12 +4,12 @@
  */
 
 
-#ifndef _uic_r_cpp_
-#define _uic_r_cpp_
+#ifndef _ruic_cpp_
+#define _ruic_cpp_
 
 /* Header(s) */
 #include <Rcpp.h>
-#include <vector>
+#include <vector> // std::vector
 #include <uic_method.hpp>
 #include <as_cpp.hpp>
 
@@ -19,9 +19,6 @@ typedef double num_t;
 
 class rUIC : protected UIC::UIC_METHOD <num_t>
 {
-    typedef std::vector<num_t> vec_t;
-    typedef std::pair<int, int> rng_t;
-    
 private:
     
     std::vector<UIC::ResultSet<num_t>> output;
@@ -57,8 +54,9 @@ public:
         IntegerMatrix range_prd,
         int E, int nn, int tau, int tp)
     {
-        if (range_lib.ncol() != 2) Rcpp::stop("ncol(range_lib) != 2.");
-        if (range_prd.ncol() != 2) Rcpp::stop("ncol(range_prd) != 2.");
+        if (range_lib.ncol() != 2) Rcpp::stop("ncol(lib) != 2.");
+        if (range_prd.ncol() != 2) Rcpp::stop("ncol(pred) != 2.");
+        
         xmap_seq_internal(
             0,
             as_cpp<num_t>(time_series_lib),
@@ -75,7 +73,7 @@ public:
     }
     
     DataFrame xmap_seq (
-        int n_rand,
+        int n_boot,
         NumericMatrix time_series_lib,
         NumericVector time_series_tar,
         NumericMatrix time_series_mvs,
@@ -86,11 +84,12 @@ public:
         NumericVector vector_tau,
         NumericVector vector_tp)
     {
-        if (range_lib.ncol() != 2) Rcpp::stop("ncol(range_lib) != 2.");
-        if (range_prd.ncol() != 2) Rcpp::stop("ncol(range_prd) != 2.");
+        if (range_lib.ncol() != 2) Rcpp::stop("ncol(lib) != 2.");
+        if (range_prd.ncol() != 2) Rcpp::stop("ncol(pred) != 2.");
         if (vector_E.size() != vector_nn.size()) Rcpp::stop("length(E) != length(nn)");
+        
         xmap_seq_internal(
-            n_rand,
+            n_boot,
             as_cpp<num_t>(time_series_lib),
             as_cpp<num_t>(time_series_tar),
             as_cpp<num_t>(time_series_mvs),
@@ -105,7 +104,7 @@ public:
     }
     
     DataFrame simplex_seq (
-        int n_rand,
+        int n_boot,
         NumericVector time_series_lib,
         NumericMatrix time_series_mvs,
         IntegerMatrix range_lib,
@@ -115,16 +114,17 @@ public:
         NumericVector vector_tau,
         NumericVector vector_tp )
     {
-        if (range_lib.ncol() != 2) Rcpp::stop("ncol(range_lib) != 2.");
-        if (range_prd.ncol() != 2) Rcpp::stop("ncol(range_prd) != 2.");
+        if (range_lib.ncol() != 2) Rcpp::stop("ncol(lib) != 2.");
+        if (range_prd.ncol() != 2) Rcpp::stop("ncol(pred) != 2.");
         if (vector_E.size() != vector_nn.size()) Rcpp::stop("length(E) != length(nn)");
         
         size_t n_time = time_series_lib.size();
         std::vector<num_t> ts_lib = as_cpp<num_t>(time_series_lib);
-        std::vector<vec_t> ts_lib_m(n_time);
+        std::vector<std::vector<num_t>> ts_lib_m(n_time);
         for (size_t i = 0; i < n_time; ++i) ts_lib_m[i] = { ts_lib[i] };
+        
         xmap_seq_internal(
-            n_rand,
+            n_boot,
             ts_lib_m, ts_lib,
             as_cpp<num_t>(time_series_mvs),
             as_cpp_range(range_lib),
@@ -141,12 +141,12 @@ public:
 private:
     
     void xmap_seq_internal (
-        int n_rand,
-        std::vector<vec_t> time_series_lib,
+        int n_boot,
+        std::vector<std::vector<num_t>> time_series_lib,
         std::vector<num_t> time_series_tar,
-        std::vector<vec_t> time_series_mvs,
-        std::vector<rng_t> range_lib,
-        std::vector<rng_t> range_prd,
+        std::vector<std::vector<num_t>> time_series_mvs,
+        std::vector<std::pair<int, int>> range_lib,
+        std::vector<std::pair<int, int>> range_prd,
         std::vector<int> E,
         std::vector<int> nn,
         std::vector<int> tau_ip,
@@ -154,8 +154,10 @@ private:
         bool is_uic = true)
     {
         std::vector<UIC::ResultSet<num_t>>().swap(output); 
-        std::vector<int> seed(n_rand);
-        for (int r = 0; r < n_rand; ++r) seed[r] = std::rand();
+        
+        if (n_boot < 0) n_boot = 0;
+        std::vector<int> seed(n_boot);
+        for (int r = 0; r < n_boot; ++r) seed[r] = std::rand();
         
         set_time_indices(range_lib, range_prd);
         for (size_t i = 0; i < E.size(); ++i)
@@ -202,7 +204,7 @@ private:
     DataFrame model_statistics ()
     {
         IntegerVector E, nn, tau, tp;
-        NumericVector n_lib, n_pred, rmse, rmse_r, uic, pval;
+        NumericVector n_lib, n_pred, rmse, uic, pval;
         for (auto op : output)
         {
             size_t nn_ = op.nn < op.n_lib ? op.nn : op.n_lib;
@@ -213,7 +215,6 @@ private:
             n_lib .push_back(op.n_lib);
             n_pred.push_back(op.n_pred);
             rmse  .push_back(op.rmseF);
-            rmse_r.push_back(op.rmseR);
             uic   .push_back(op.uic);
             pval  .push_back(op.pval);
         }
@@ -224,9 +225,8 @@ private:
             Named("nn" ) = nn,
             Named("n_lib" ) = n_lib,
             Named("n_pred") = n_pred,
-            Named("rmse"  ) = rmse,
-            Named("rmse_r") = rmse_r,
-            Named("uic" ) = uic,
+            Named("rmse") = rmse,
+            Named("te"  ) = uic,
             Named("pval") = pval
         );
     }

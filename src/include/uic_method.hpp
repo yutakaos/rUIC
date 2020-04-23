@@ -4,13 +4,14 @@
  */
 
 
-#ifndef _uic_method_hpp_
-#define _uic_method_hpp_
+#ifndef _ruic_method_hpp_
+#define _ruic_method_hpp_
 
-//* Header(s) */
-#include <algorithm>
-#include <random>
-#include <vector>
+//* Header(s
+#include <functional> // std::function
+#include <limits>     // std::numeric_limits
+#include <random>     // std::mt19937_64, std::uniform_real_distribution
+#include <vector>     // std::vector
 #include <uic_base.hpp>
 #include <local_scaling.hpp>
 
@@ -218,12 +219,12 @@ namespace UIC
         void bootstrap_pval (const std::vector<int> &seed)
         {
             if (!RMSE_F || !RMSE_R) return;
-            int n_rand = seed.size();
-            if (n_rand == 0) return;
+            int n_boot = seed.size();
+            if (n_boot == 0) return;
             
             num_t n_prd = sqerr_full.size();
             num_t counter = 0;
-            for (int r = 0; r < n_rand; ++r)
+            for (int r = 0; r < n_boot; ++r)
             {
                 mt.seed(seed[r]);
                 num_t sseF = 0, sseR = 0;
@@ -233,9 +234,9 @@ namespace UIC
                     sseF += sqerr_full[k];
                     sseR += sqerr_reduced[k];
                 }
-                if (1 <= sseF / sseR) ++counter;
+                if (sseR <= sseF) ++counter;
             }
-            this->result.pval = counter / num_t(n_rand);
+            this->result.pval = counter / num_t(n_boot);
         }
     };
 }

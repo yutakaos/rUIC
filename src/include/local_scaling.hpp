@@ -4,12 +4,12 @@
  */
 
 
-#ifndef _uic_local_scaling_hpp_
-#define _uic_local_scaling_hpp_
+#ifndef _ruic_local_scaling_hpp_
+#define _ruic_local_scaling_hpp_
 
 //* Header(s) */
-#include <vector>
-#include <functional>
+#include <limits> // std::numeric_limits
+#include <vector> // std::vector
 #include <nanoflann_uic.hpp>
 
 
@@ -33,6 +33,70 @@ namespace UIC
             }
             return norm.root(d);
         }
+        
+        template <typename num_t>
+        void scaling_neighbor (
+            std::vector<num_t> *scale,
+            const int n_dim,
+            const nanoflann::KDTreeSingleIndexAdaptor<num_t> &kd_tree,
+            const std::vector<int> &vidx,
+            const std::vector<std::vector<num_t>> &x,
+            const std::vector<std::pair<int, int>> &idx_time)
+        {
+            (*scale).resize(vidx.size());
+            std::vector<size_t> index;
+            std::vector<num_t>  dist;
+            bool has_zero = false;
+            for (size_t i = 0; i < vidx.size(); ++i)
+            {
+                size_t vi = vidx[i];
+                size_t kn = kd_tree.knn_search(&x[vi][0], idx_time[vi], &index, &dist, n_dim + 1);
+                num_t d = 0;
+                for (auto x : dist) d += x;
+                (*scale)[i] = d / num_t(kn);
+                if (d == 0) has_zero = true;
+            }
+            if (has_zero) // then, 0 is replaced to the minimum value
+            {
+                num_t min = std::numeric_limits<num_t>::max();
+                for (auto  x : *scale) if (x != 0 && x < min) min = x;
+                for (auto &x : *scale) if (x == 0) x = min;
+            }
+        }
+        
+        template <typename num_t>
+        void scaling_velocity (
+            std::vector<num_t> *scale,
+            const int n_dim,
+            const nanoflann::NormStruct<num_t> &norm,
+            const std::vector<int> &vidx,
+            const std::vector<std::vector<num_t>> &x,
+            const std::vector<std::pair<int, int>> &idx_time)
+        {
+            (*scale).resize(vidx.size(), 0);
+            num_t n = 0;
+            bool has_zero = false;
+            for (size_t i = 0; i < vidx.size() - 1; ++i)
+            {
+                int vi = vidx[i];
+                int vj = vidx[i + 1];
+                if (idx_time[vi].second == idx_time[vj].second)
+                {
+                    num_t d = dist::compute(x[vi], x[vj], n_dim, norm);
+                    (*scale)[i] = ((*scale)[i] + d) / (++n);
+                    (*scale)[i + 1] = d;
+                    n = 1;
+                }
+                else n = 0;
+                if ((*scale)[i] == 0) has_zero = true; 
+            }
+            if (has_zero) // then, 0 is replaced to the minimum value
+            {
+                num_t min = std::numeric_limits<num_t>::max();
+                for (auto  x : *scale) if (x != 0 && x < min) min = x;
+                for (auto &x : *scale) if (x == 0) x = min;
+            }
+        }
     }
     
     template <typename num_t>
@@ -51,83 +115,28 @@ namespace UIC
         const nanoflann::NORM norm_type,
         const num_t p = 0.5)
     {
-        size_t n_vlib = vidx_lib.size();
-        size_t n_vprd = vidx_prd.size();
         std::vector<num_t>().swap(*scale_lib);
         std::vector<num_t>().swap(*scale_prd);
-        (*scale_lib).resize(n_vlib, 1);
-        (*scale_prd).resize(n_vprd, 1);
-        if (n_dim == 0) return;
-        
-        if (scale_type == neighbor)
+        if (scale_type == no_scale || n_dim == 0)
+        {
+            (*scale_lib).resize(vidx_lib.size(), 1);
+            (*scale_prd).resize(vidx_prd.size(), 1);
+            return;
+        }
+        else if (scale_type == neighbor)
         {
             nanoflann::KDTreeSingleIndexAdaptor<num_t> kd_tree;
             kd_tree.initialize(n_dim, x_lib, idx_time_lib, exclusion_radius);
             kd_tree.set_norm(norm_type, true, p);
-            kd_tree.build_index();
-            
-            std::vector<size_t> index;
-            std::vector<num_t>  dist;
-            for (size_t i = 0; i < n_vlib; ++i)
-            {
-                size_t vi = vidx_lib[i];
-                size_t kn = kd_tree.knn_search(&x_lib[vi][0], idx_time_lib[vi], &index, &dist, n_dim + 1);
-                num_t d = 0;
-                for (auto x : dist) d += x;
-                (*scale_lib)[i] = d / num_t(kn);
-            }
-            for (size_t i = 0; i < n_vprd; ++i)
-            {
-                size_t vi = vidx_prd[i];
-                size_t kn = kd_tree.knn_search(&x_prd[vi][0], idx_time_prd[vi], &index, &dist, n_dim + 1);
-                num_t d = 0;
-                for (auto x : dist) d += x;
-                (*scale_prd)[i] = d / num_t(kn);
-            }            
+            dist::scaling_neighbor(scale_lib, n_dim, kd_tree, vidx_lib, x_lib, idx_time_lib);
+            dist::scaling_neighbor(scale_prd, n_dim, kd_tree, vidx_prd, x_prd, idx_time_prd);
         }
         else if (scale_type == velocity)
         {
             nanoflann::NormStruct<num_t> norm;
             norm.set_norm(norm_type, true, p);
-            
-            for (size_t i = 0; i < n_vlib; ++i)
-            {
-                num_t sum = 0, n = 0;
-                int vi = vidx_lib[i];
-                int si = idx_time_lib[vi].second;
-                if (i != 0 && idx_time_lib[vidx_lib[i - 1]].second == si)
-                {
-                    int vj = vidx_lib[i - 1];
-                    sum += dist::compute(x_lib[vi], x_lib[vj], n_dim, norm);
-                    ++n;
-                }
-                if (i != n_vlib - 1 && idx_time_lib[vidx_lib[i + 1]].second == si)
-                {
-                    int vj = vidx_lib[i + 1];
-                    sum += dist::compute(x_lib[vi], x_lib[vj], n_dim, norm);
-                    ++n;
-                }
-                (*scale_lib)[i] = sum / n;
-            }
-            for (size_t i = 0; i < n_vprd; ++i)
-            {
-                num_t sum = 0, n = 0;
-                int vi = vidx_prd[i];
-                int si = idx_time_prd[vi].second;
-                if (i != 0 && idx_time_prd[vidx_prd[i - 1]].second == si)
-                {
-                    int vj = vidx_lib[i - 1];
-                    sum += dist::compute(x_prd[vi], x_prd[vj], n_dim, norm);
-                    ++n;
-                }
-                if (i != n_vprd - 1 && idx_time_prd[vidx_prd[i + 1]].second == si)
-                {
-                    int vj = vidx_lib[i + 1];
-                    sum += dist::compute(x_prd[vi], x_prd[vj], n_dim, norm);
-                    ++n;
-                }
-                (*scale_prd)[i] = sum / n;
-            }
+            dist::scaling_velocity(scale_lib, n_dim, norm, vidx_lib, x_lib, idx_time_lib);
+            dist::scaling_velocity(scale_prd, n_dim, norm, vidx_prd, x_prd, idx_time_prd);
         }
     }
 }

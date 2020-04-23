@@ -1,11 +1,19 @@
-Package: ruic
+Package: rUIC
 Type: Package
 Title: Unified Information-theoretic Causality for R
+<<<<<<< HEAD
 Version: 0.01.00
+=======
+Version: 0.01.02
+>>>>>>> dev
 Authors@R:
-    person("Yutaka", "Osada", role = c("aut", "cre"),
-           email  = "ytosada@egmail.com",
-           comment = c(ORCID = "0000-0001-5967-194X"))
+    c(
+        person("Yutaka", "Osada", role = c("aut", "cre"),
+                email   = "ytosada@egmail.com",
+                comment = c(ORCID = "0000-0001-5967-194X")),
+        person("Masayuki", "Ushio", role = c("ctb"), 
+                comment = c(ORCID = "0000-0003-4831-7181"))
+    )
 Description: R implementation of unified information-theoretic causality.
 License: file LICENSE
 Encoding: UTF-8
