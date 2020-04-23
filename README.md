@@ -65,24 +65,24 @@ with(op1[op1$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
   - `E`, `tau`, `tp` はベクターに対応し、ベクターの場合 `E`, `tau`, `tp` の全組み合わせを効率的に計算する.
   - UIC における `E` を推定するときは `cond_var` に原因となる変数を指定する.
   - `n_boot` > 1 以上で $p$ 値を返す.
-  - `te` は次の数式で表される. $x$ は `lib_var`, $z$ は `cond_var`.
-  $$latex
+  - `te` は次の数式で表される. _x_ は `lib_var`, _z_ は `cond_var`.
+  ```math
   \sum_{t} log p(x_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t}) -
            log p(x_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-2)*&tau}, z_{t})
-  $$
-  - $p$ 値の帰無仮説は te <= 0.
+  ```
+  - _p_ 値の帰無仮説は te <= 0.
 
 - `uic`
   - 統計量のみを返します.
   - `E`, `tau`, `tp` はベクターに対応し、ベクターの場合 `E`, `tau`, `tp` の全組み合わせを効率的に計算する.
   - `E` には simplex projection で得られた E に 1 を追加したものを指定.
-  - `n_boot` > 1 以上で $p$ 値を返す.
-  - `te` は次の数式で表される. $x$ は `lib_var`, $z$ は `cond_var`.
-  $$latex
+  - `n_boot` > 1 以上で _p_ 値を返す.
+  - `te` は次の数式で表される. _x_ は `lib_var`, _y_ は `tar_var`, _z_ は `cond_var`.
+  ```math
   \sum_{t} log p(y_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t}) -
            log p(y_{t+tp} |        x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t})
-  $$
-  - $p$ 値の帰無仮説は te <= 0.
+  ```
+  - _p_ 値の帰無仮説は te <= 0.
 
 ## ruic で使われる引数
 
