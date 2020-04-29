@@ -8,13 +8,13 @@ Tentative manual of rUIC package.
 3. Excute the following command.
 ``` r
 library(devtools)
-devtools::install(pkg = 'ruic-master', reload = TRUE, quick = FALSE)
+devtools::install(pkg = 'rUIC-master', reload = TRUE, quick = FALSE)
 ``` 
 4. A quick demo
 
 - Load library and generate model time series
 ```r
-library(ruic); packageVersion("ruic") # v0.1
+library(rUIC); packageVersion("rUIC") # v0.1.2
 
 ## simulate logistic map
 tl <- 400  # time length
@@ -33,14 +33,14 @@ block = data.frame(t = 1:tl, x = x, y = y)
 ```r
 # No.1: Determine the optimal embedding dimension using simplex projection
 ## Univariate UIC-version simplex projection
-simp_x <- ruic::simplex(block, x_column = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-simp_y <- ruic::simplex(block, x_column = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
+simp_x <- rUIC::simplex(block, lib_var = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
+simp_y <- rUIC::simplex(block, lib_var = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 
 ## Multivariate UIC-version simplex projection
-simp_xy <- ruic::simplex(block, x_column = "x", y_column = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-simp_yx <- ruic::simplex(block, x_column = "y", y_column = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
+simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
+simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 
-# Select the optimal embedding dimension (RMSE or UIC?)
+# Select the optimal embedding dimension (used RMSE as a criteria; UIC may be used as a criteria)
 Exy <- simp_xy[which.min(simp_xy[simp_xy$pval < 0.05,]$rmse), "E"]
 Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 ```
@@ -49,8 +49,8 @@ Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 - Perform cross-mapping
 ```r
 # No.2: Cross-map
-xmap_xy <- ruic::xmap(block, x_column = "x", y_column = "y", E = Exy, tau = 1, tp = -1)
-xmap_yx <- ruic::xmap(block, x_column = "y", y_column = "x", E = Eyx, tau = 1, tp = -1)
+xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -1)
+xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp = -1)
 
 ```
 <img src="demo/demo_figures/xmap.png" width="70%">
@@ -58,8 +58,8 @@ xmap_yx <- ruic::xmap(block, x_column = "y", y_column = "x", E = Eyx, tau = 1, t
 - Compute UIC
 ```r
 # No.3: Compute UIC
-uic_xy <- ruic::uic(block, x_column = "x", y_column = "y", E = Exy + 1, tau = 1, tp = -4:5, n_boot = 2000)
-uic_yx <- ruic::uic(block, x_column = "y", y_column = "x", E = Eyx + 1, tau = 1, tp = -4:5, n_boot = 2000)
+uic_xy <- rUIC::uic(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, tp = -4:5, n_boot = 2000)
+uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -4:5, n_boot = 2000)
 
 ```
 <img src="demo/demo_figures/uic.png" width="70%">
@@ -71,12 +71,12 @@ uic_yx <- ruic::uic(block, x_column = "y", y_column = "x", E = Eyx + 1, tau = 1,
 　Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
     - Potential causal variable should be specified by `y_column` augument.
-    - Specify `z_column` augument for the multivariate version of `xmap`.
+    - Specify `cond_var` augument for the multivariate version of `xmap`.
 
 - `simplex`
 　Perform simplex projection and return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
-    - Potential causal variable should be specified by `y_column` augument.
+    - Potential causal variable should be specified by `tar_var` augument.
     - Return _p_ value if `n_boot > 1`.
     - _p_ value indicates "Probability of the improvements of prediction compared with when one less embedding dimension is used" as specified in the following inequality:
     **_p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) > p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
@@ -85,7 +85,7 @@ uic_yx <- ruic::uic(block, x_column = "y", y_column = "x", E = Eyx + 1, tau = 1,
 　Perform uic and return statistics only.
     - `E` should be an optimal embedding dimension (estimated by `simplex`) + 1.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
-    - Potential causal variable should be specified by `y_column` augument.
+    - Potential causal variable should be specified by `tar_var` augument.
     - Return _p_ value if `n_boot > 1`.
     - _p_ value indicates "Probability that y causes x in the sense of transfer entropy" as specified in the following inequality:
     **_p(x<sub>t+tp</sub> | x<sub>t+1</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>) > p(x<sub>t+tp</sub> |  x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
@@ -94,13 +94,13 @@ uic_yx <- ruic::uic(block, x_column = "y", y_column = "x", E = Eyx + 1, tau = 1,
 
 Arguments identical with those used in rEDM package are currently not explained. For arguments used in rEDM package, please see the rEDM tutorial (https://ha0ye.github.io/rEDM/index.html).
 
-- `x_column` : the name or column index of library data
+- `lib_var` : the name or column index of library data
     - A variable to be used for time-delay embedding.
 
-- `y_column` : the name or column index of target data
+- `tar_var` : the name or column index of target data
     - A variable to be predicted (`target_column` argument in rEDM).
 
-- `z_column` : the name or column index of condition data
+- `cond_var` : the name or column index of condition data
     - A third variable to be used for multivariate prediction, or detection of indirect interactions.
 
 - `nn` : the number of neighbors used for prediction
@@ -120,3 +120,4 @@ Arguments identical with those used in rEDM package are currently not explained.
     - Whether to return not-corrected RMSE （naive estimator） (estimator that is not corrected using neighbors)
     - If `TRUE`, the result will be similar to Convergent Cross Mapping (CCM)
 
+## Outputs in rUIC package
