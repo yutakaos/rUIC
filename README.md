@@ -40,7 +40,7 @@ simp_y <- rUIC::simplex(block, lib_var = "y", E = 1:8, tau = 1, tp = -1, n_boot 
 simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 
-# Select the optimal embedding dimension (used RMSE as a criteria; UIC may be used as a criteria)
+# Select the optimal embedding dimension (Here RMSE is as a criteria; UIC may be used as a criteria)
 Exy <- simp_xy[which.min(simp_xy[simp_xy$pval < 0.05,]$rmse), "E"]
 Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 ```
