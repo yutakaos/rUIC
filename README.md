@@ -44,7 +44,7 @@ simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1,
 Exy <- simp_xy[which.min(simp_xy[simp_xy$pval < 0.05,]$rmse), "E"]
 Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 ```
-<img src="demo/demo_figures/simplex_uic.png" width="70%">
+<img src="demo/demo_figures/simplex_rmse.png" width="70%">
 
 - Perform cross-mapping
 ```r
@@ -70,7 +70,7 @@ uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, t
 - `xmap`
 　Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
-    - Potential causal variable should be specified by `y_column` augument.
+    - Potential causal variable should be specified by `tar_var` augument.
     - Specify `cond_var` augument for the multivariate version of `xmap`.
 
 - `simplex`
