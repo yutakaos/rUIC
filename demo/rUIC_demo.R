@@ -58,7 +58,7 @@ g1 <- ggplot(simp_x, aes(x = E, y = rmse)) + geom_line() +
   geom_point(aes(color = pval < 0.05), size = 2) +
   scale_color_manual(values = c("black", "red3")) +
   ylab("RMSE") + theme(legend.position = "none") +
-  ggtitle(expression("{"~x[t]~","~y[t-1]~", ... }"))
+  ggtitle(expression("{"~x[t]~","~x[t-1]~", ... }"))
 g2 <- ggplot(simp_y, aes(x = E, y = rmse)) + geom_line() +
   geom_point(aes(color = pval < 0.05), size = 2) +
   scale_color_manual(values = c("black", "red3")) +
