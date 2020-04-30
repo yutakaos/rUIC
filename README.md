@@ -35,7 +35,6 @@ block = data.frame(t = 1:tl, x = x, y = y)
 </figure>
  
 
-
 ### Perform simplex projection and determine the optimal embedding dimension
 ```r
 # No.1: Determine the optimal embedding dimension using simplex projection
@@ -51,14 +50,12 @@ simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1,
 Exy <- simp_xy[which.min(simp_xy[simp_xy$pval < 0.05,]$rmse), "E"]
 Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 ```
+- The optimal embedding dimensions are determined based on multivariate simplex projection.<br>
 
 <figure>
 <img src="demo/demo_figures/simplex_rmse.png" width="70%">
 <figcaption><i>Figure 2 | RMSE of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ...} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ...} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill compared with one less embedding dimensions. For example, a red point in the top-left panel means that RMSE at E = 2 significantly improved than that at E = 1 while RMSE at E = 3 is not significantly better than RMSE at E = 2, suggesting that the optimal embedding dimension for x is 2.</i></figcaption>
 </figure>
-
-
-The optimal embedding dimensions are determined based on multivariate simplex projection.<br>
 
 
 ### Perform cross-mapping
@@ -67,13 +64,12 @@ The optimal embedding dimensions are determined based on multivariate simplex pr
 xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -1)
 xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp = -1)
 ```
+- Cross mapping show that `x` can be accurately predicted from `y` (left panel), suggesting that `x` causally influences `y`. On the other hand, `y` cannot be predicted from `x`, suggesting that  `y` does not have causal influences on `x`.
+
 <figure>
 <img src="demo/demo_figures/xmap.png" width="70%">
 <figcaption><i>Figure 3 | Predicted and observed values based on cross-mapping. Red dashed lines indicate 1:1 line.</i></figcaption>
 </figure>
-
-
-Cross mapping show that `x` can be accurately predicted from `y` (left panel), suggesting that `x` causally influences `y`. On the other hand, `y` cannot be predicted from `x`, suggesting that  `y` does not have causal influences on `x`.
 
 
 ### Compute UIC for different time-lag (`tp`)
@@ -87,7 +83,6 @@ uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, t
 <img src="demo/demo_figures/uic.png" width="70%" align="middle">
 <figcaption><i>Figure 4 | UIC at different time-lags (tp). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags, which suggests that causal influences from x to y occur at time lag -1.</i></figcaption>
 </figure>
-
 
 
 ## Functions implemented in rUIC package
