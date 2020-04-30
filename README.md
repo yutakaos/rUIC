@@ -12,9 +12,9 @@ Quick manual of rUIC package
 library(devtools)
 devtools::install(pkg = 'rUIC-master', reload = TRUE, quick = FALSE)
 ```
-4. A quick demo
+## A quick demo
 
-- Load library and generate model time series
+### Load library and generate model time series
 ```r
 library(rUIC); packageVersion("rUIC") # v0.1.2
 
@@ -36,7 +36,7 @@ block = data.frame(t = 1:tl, x = x, y = y)
  
 
 
-- Perform simplex projection and determine the optimal embedding dimension
+### Perform simplex projection and determine the optimal embedding dimension
 ```r
 # No.1: Determine the optimal embedding dimension using simplex projection
 ## Univariate UIC-version simplex projection
@@ -61,7 +61,7 @@ Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 The optimal embedding dimensions are determined based on multivariate simplex projection.<br>
 
 
-- Perform cross-mapping
+### Perform cross-mapping
 ```r
 # No.2: Cross-map
 xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -1)
@@ -76,7 +76,7 @@ xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp 
 Cross mapping show that `x` can be accurately predicted from `y` (left panel), suggesting that `x` causally influences `y`. On the other hand, `y` cannot be predicted from `x`, suggesting that  `y` does not have causal influences on `x`.
 
 
-- Compute UIC for different time-lag (`tp`)
+### Compute UIC for different time-lag (`tp`)
 ```r
 # No.3: Compute UIC
 uic_xy <- rUIC::uic(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, tp = -4:5, n_boot = 2000)
