@@ -50,7 +50,7 @@ simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1,
 Exy <- simp_xy[which.min(simp_xy[simp_xy$pval < 0.05,]$rmse), "E"]
 Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 ```
-- The optimal embedding dimensions are determined based on multivariate simplex projection.<br>
+- The optimal embedding dimensions used for `rUIC::uic()` function should be determined based on multivariate simplex projection.<br>
 
 <figure>
 <img src="demo/demo_figures/simplex_rmse.png" width="70%">
@@ -79,6 +79,8 @@ uic_xy <- rUIC::uic(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, t
 uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -4:5, n_boot = 2000)
 
 ```
+- The result suggests that `x` causally drives `y` and the effect time-lag is 1, being consistent with the model equations.
+
 <figure>
 <img src="demo/demo_figures/uic.png" width="70%" align="middle">
 <figcaption><i>Figure 4 | UIC at different time-lags (tp). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags, which suggests that causal influences from x to y occur at time lag -1.</i></figcaption>
