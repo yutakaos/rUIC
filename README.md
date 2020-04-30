@@ -1,8 +1,6 @@
 # rUIC : Unified Information-theoretic Causality for R
 
-Quick manual of rUIC package
-
-(for deails, see the package manual)
+A quick tutorial of rUIC package (for deails, see the package manual)
 
 ## Installation
 1. Click "clone or download" and download the zip file.
@@ -12,7 +10,7 @@ Quick manual of rUIC package
 library(devtools)
 devtools::install(pkg = 'rUIC-master', reload = TRUE, quick = FALSE)
 ```
-## A quick demo
+## A quick tutorial
 
 ### Load library and generate model time series
 ```r
