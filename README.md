@@ -31,8 +31,9 @@ block = data.frame(t = 1:tl, x = x, y = y)
 ```
 <figure>
 <img src="demo/demo_figures/time_series.png" width="70%">
-<figcaption><font size=1.5><i>Figure 1 | Model time series. Red and blue lines indicate time series of x and y, respectively.</i></font></figcaption>
+<figcaption><font size=1><i>Figure 1 | Model time series. Red and blue lines indicate time series of x and y, respectively.</i></font></figcaption>
 </figure>
+
 
 - Perform simplex projection and determine the optimal embedding dimension
 ```r
@@ -52,7 +53,7 @@ Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 
 <figure>
 <img src="demo/demo_figures/simplex_rmse.png" width="70%">
-<figcaption><i>Figure 2 | RMSE of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ...} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ...} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill compared with one less embedding dimensions. For example, a red point in the top-left panel means that RMSE at E = 2 significantly improved than that at E = 1 while RMSE at E = 3 is not significantly better than RMSE at E = 2, suggesting that the optimal embedding dimension for x is 2.</i></figcaption>
+<figcaption><font size=1><i>Figure 2 | RMSE of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ...} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ...} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill compared with one less embedding dimensions. For example, a red point in the top-left panel means that RMSE at E = 2 significantly improved than that at E = 1 while RMSE at E = 3 is not significantly better than RMSE at E = 2, suggesting that the optimal embedding dimension for x is 2.</i></font></figcaption>
 </figure>
 
 
@@ -67,7 +68,7 @@ xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp 
 ```
 <figure>
 <img src="demo/demo_figures/xmap.png" width="70%">
-<figcaption><i>Figure 3 | Predicted and observed values based on cross-mapping. Red dashed lines indicate 1:1 line.</i></figcaption>
+<figcaption><font size=1><i>Figure 3 | Predicted and observed values based on cross-mapping. Red dashed lines indicate 1:1 line.</i></font></figcaption>
 </figure>
 
 
@@ -83,7 +84,7 @@ uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, t
 ```
 <figure>
 <img src="demo/demo_figures/uic.png" width="70%" align="middle">
-<figcaption><i>Figure 4 | UIC at different time-lags (tp). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags, which suggests that causal influences from x to y occur at time lag -1.</i></figcaption>
+<figcaption><font size=1><i>Figure 4 | UIC at different time-lags (tp). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags, which suggests that causal influences from x to y occur at time lag -1.</i></font></figcaption>
 </figure>
 
 
