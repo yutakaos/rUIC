@@ -32,9 +32,8 @@ block = data.frame(t = 1:tl, x = x, y = y)
 <figure>
 <img src="demo/demo_figures/time_series.png" width="70%">
 <figcaption><font size=1><i>Figure 1 | Model time series. Red and blue lines indicate time series of x and y, respectively.</i></font></figcaption>
-</figure>
-<br>
-<br>
+</figure><br>
+
 - Perform simplex projection and determine the optimal embedding dimension
 ```r
 # No.1: Determine the optimal embedding dimension using simplex projection
@@ -54,11 +53,9 @@ Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 <figure>
 <img src="demo/demo_figures/simplex_rmse.png" width="70%">
 <figcaption><font size=1><i>Figure 2 | RMSE of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ...} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ...} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill compared with one less embedding dimensions. For example, a red point in the top-left panel means that RMSE at E = 2 significantly improved than that at E = 1 while RMSE at E = 3 is not significantly better than RMSE at E = 2, suggesting that the optimal embedding dimension for x is 2.</i></font></figcaption>
-</figure>
+</figure><br>
 
-<br>
-The optimal embedding dimensions are determined based on multivariate simplex projection.
-<br>
+The optimal embedding dimensions are determined based on multivariate simplex projection.<br>
 
 - Perform cross-mapping
 ```r
