@@ -36,15 +36,16 @@ block = data.frame(t = 1:tl, x = x, y = y)
 simp_x <- rUIC::simplex(block, lib_var = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 simp_y <- rUIC::simplex(block, lib_var = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 
-## Multivariate UIC-version simplex projection
+## Multivariate rUIC-version simplex projection
 simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
 
-# Select the optimal embedding dimension (Here RMSE is as a criteria; UIC may be used as a criteria)
+# Select the optimal embedding dimension (Here RMSE is used as a criteria; UIC may be used as a criteria)
 Exy <- simp_xy[which.min(simp_xy[simp_xy$pval < 0.05,]$rmse), "E"]
 Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 ```
 <img src="demo/demo_figures/simplex_rmse.png" width="70%">
+The optimal embedding dimensions are determined based on multivariate simplex projection.
 
 - Perform cross-mapping
 ```r
@@ -54,6 +55,7 @@ xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp 
 
 ```
 <img src="demo/demo_figures/xmap.png" width="70%">
+Cross mapping show that `x` can be accurately predicted from `y`, suggesting that `x` causally influences `y`.
 
 - Compute UIC
 ```r
