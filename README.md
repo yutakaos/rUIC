@@ -4,7 +4,7 @@ A quick tutorial of rUIC package (for deails, see the package manual)
 
 ## Installation
 1. Click "clone or download" and download the zip file.
-2. Decompress the zip file in a working directory. "ruic-master" folder will be created.
+2. Decompress the zip file in a working directory. "rUIC-master" folder will be created.
 3. Excute the following command.
 ``` r
 library(devtools)
