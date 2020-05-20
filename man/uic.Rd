@@ -5,11 +5,23 @@
 \title{Perform unified information-theoretic causality computation}
 \usage{
 uic(
-  block, lib = c(1, NROW(block)), pred = lib,
-  lib_var = 1, tar_var = 2, cond_var = NULL,
-  norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
+  block,
+  lib = c(1, NROW(block)),
+  pred = lib,
+  lib_var = 1,
+  tar_var = 2,
+  cond_var = NULL,
+  norm = 2,
+  E = 1,
+  tau = 1,
+  tp = 0,
+  nn = "e+1",
+  n_boot = 2000,
   scaling = c("neighbor", "velocity", "no_scale"),
-  exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
+  exclusion_radius = NULL,
+  epsilon = NULL,
+  is_naive = FALSE
+)
 }
 \arguments{
 \item{block}{a data.frame or matrix where each column is a time series.}
