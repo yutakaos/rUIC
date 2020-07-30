@@ -4,10 +4,8 @@ A quick tutorial of rUIC package (for deails, see the package manual)
 
 ## Installation
 
-<span style="color: red; ">
-プライベートレポジトリを使用しているので、次のようにインストールします。
-(インターネットを介する方式だと、personal access tokens を生成する必要があるため)
-</span>
+__These installation steps are temporal because this package is currently private.__
+__(This message will be deleted in the future)__
 
 1. Click "clone or download" and download the zip file.
 2. Decompress the zip file in a working directory. "rUIC-master" folder will be created.
