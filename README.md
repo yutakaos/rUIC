@@ -4,8 +4,10 @@ A quick tutorial of rUIC package (for deails, see the package manual)
 
 ## Installation
 
+<span style="color: red; ">
 プライベートレポジトリを使用しているので、次のようにインストールします。
 (インターネットを介する方式だと、personal access tokens を生成する必要があるため)
+</span>
 
 1. Click "clone or download" and download the zip file.
 2. Decompress the zip file in a working directory. "rUIC-master" folder will be created.
@@ -79,13 +81,25 @@ xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp 
 # No.3: Compute UIC
 uic_xy <- rUIC::uic(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, tp = -4:5, n_boot = 2000)
 uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -4:5, n_boot = 2000)
-
 ```
 - The result suggests that `x` causally drives `y` and the effect time-lag is 1, being consistent with the model equations.
 
 <figure>
 <img src="demo/demo_figures/uic.png" width="70%" align="middle">
 <figcaption><i>Figure 4 | UIC at different time-lags (tp). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags, which suggests that causal influences from x to y occur at time lag -1.</i></figcaption>
+</figure>
+
+### Compute marginal UIC for different time-lag (`tp`)
+```r
+# No.4: Compute marginal UIC
+muic_xy <- rUIC::marginal_uic(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1:3, tp = -4:5, n_boot = 2000)
+muic_yx <- rUIC::marginal_uic(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1:3, tp = -4:5, n_boot = 2000)
+```
+- `rUIC::marginal_uic()` computes UIC using model averaging technique (and marginalizing `E` and `tau`). Thus, the users do not have to determine the optimal `E` and `tau` by themselves.
+
+<figure>
+<img src="demo/demo_figures/muic.png" width="70%" align="middle">
+<figcaption><i>Figure 5 | marginal UIC at different time-lags (tp). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags, which suggests that causal influences from x to y occur at time lag -1.</i></figcaption>
 </figure>
 
 
@@ -98,6 +112,7 @@ uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, t
     
     **_p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) > p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
 
+<span style="color: red; ">
   - UIC における `E` を推定するときは `cond_var` に原因となる変数を指定する.
   - `te` は次の数式で表される. _x_ は `lib_var`, _z_ は `cond_var`.
   ```math
@@ -105,6 +120,7 @@ uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, t
            log p(x_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-2)*&tau}, z_{t})
   ```
   - _p_ 値の帰無仮説は te <= 0.
+</span>
 
 - `xmap`: Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
@@ -120,13 +136,15 @@ uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, t
     
     **_p(x<sub>t+tp</sub> | x<sub>t+1</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>) > p(x<sub>t+tp</sub> |  x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
 
-  - `E` には simplex projection で得られた E に 1 を追加したものを指定.
+  <span style="color: red; ">
+- `E` には simplex projection で得られた E に 1 を追加したものを指定.
   - `te` は次の数式で表される. _x_ は `lib_var`, _y_ は `tar_var`, _z_ は `cond_var`.
   ```math
   \sum_{t} log p(y_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t}) -
            log p(y_{t+tp} |        x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t})
   ```
   - _p_ 値の帰無仮説は te <= 0.
+</span>
 
 ## Important arguments in rUIC package
 
