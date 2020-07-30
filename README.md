@@ -122,6 +122,13 @@ muic_yx <- rUIC::marginal_uic(block, lib_var = "y", tar_var = "x", E = 1:10, tau
     - _p_ value indicates **_te_ < 0**, which means "Probability that y causes x in the sense of transfer entropy".
     - Return _p_ value if `n_boot > 1`.
     
+- `marginal_uic`: Perform simplex projection and uic and return statistics only.
+    - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
+    - UIC is computed using a model average techniaue and `E`, `tau`, and `nn` are marginalized. The users do not have to determine the optimal `E` and `tau` by themselves.
+    - Potential causal variable should be specified by `tar_var` augument.
+    - Specify `cond_var` augument for the multivariate version of `uic`.
+    - See `uic` descriptions as to _te_ and _p_ value.
+    
 ## Important arguments in rUIC package
 
 Arguments identical with those used in rEDM package are not explained below. For arguments used in rEDM package, please see the rEDM tutorial (https://ha0ye.github.io/rEDM/index.html). See the package manual for details.
