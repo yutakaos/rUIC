@@ -104,19 +104,9 @@ muic_yx <- rUIC::marginal_uic(block, lib_var = "y", tar_var = "x", E = 1:10, tau
 - `simplex`: Perform simplex projection and return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - Potential causal variable should be specified by `cond_var` augument.
+    - _te_ value is expressed as follows: log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-2)&tau;</sub>_).
+    - _p_ value indicates _te_ value < 0, which means "Probability of the improvements of prediction compared with when one less embedding dimension is used".
     - Return _p_ value if `n_boot > 1`.
-    - _te_ value is expressed as follows: **log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-2)&tau;</sub>_)**.
-    
-    - _p_ value indicates "Probability of the improvements of prediction compared with when one less embedding dimension is used" as specified in the following inequality:
-    
-    **_p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) > p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
-
-  - `te` は次の数式で表される. _x_ は `lib_var`, _z_ は `cond_var`.
-  ```math
-  \sum_{t} log p(x_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t}) -
-           log p(x_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-2)*&tau}, z_{t})
-  ```
-  - _p_ 値の帰無仮説は te <= 0.
 
 - `xmap`: Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
