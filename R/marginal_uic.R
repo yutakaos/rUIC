@@ -1,7 +1,7 @@
 #' Perform simplex projection and compute marginal unified information-theoretic causality
 #' 
 #' \code{marginal_uic} returns model statistics computed from given multiple time series
-#' based on simplex projection and cross mapping. This function computes UIC using model
+#' based on simplex projection and cross mapping. This function computes UIC using a model
 #' averaging technique (and marginalizing \code{E} and \code{tau}). Thus, the users do not
 #' have to determine the optimal \code{E} and \code{tau} by themselves.
 #' 
@@ -10,12 +10,12 @@
 #' @return
 #' A data.frame where each row represents model statistics computed from a parameter set.
 #' \tabular{ll}{
-#' \code{E_best}   \tab \code{:} embedding dimension, which minimize RMSE for simplex projection \cr
-#' \code{tau_best} \tab \code{:} time-lag, which minimize RMSE for simplex projection \cr
-#' \code{tp}       \tab \code{:} time prediction horizon \cr
-#' \code{nn_best}  \tab \code{:} number of nearest neighbors, which minimize RMSE for simplex projection \cr
-#' \code{te}       \tab \code{:} transfer entropy \cr
-#' \code{pval}     \tab \code{:} bootstrap p-value for te > 0 \cr
+#' \code{E_opt}   \tab \code{:} embedding dimension, which minimize RMSE for simplex projection \cr
+#' \code{tau_opt} \tab \code{:} time-lag, which minimize RMSE for simplex projection \cr
+#' \code{tp}      \tab \code{:} time prediction horizon \cr
+#' \code{nn_opt}  \tab \code{:} number of nearest neighbors, which minimize RMSE for simplex projection \cr
+#' \code{te}      \tab \code{:} transfer entropy \cr
+#' \code{pval}    \tab \code{:} bootstrap p-value for te > 0 \cr
 #' }
 #' 
 #' \code{te} is transfer entropy based on the unified information-theoretic causality test:
@@ -105,10 +105,10 @@ marginal_uic = function (
     xmap = uic$xmap_seq(n_boot, x, y, z, lib, pred, E , nn, tau, tp)
     op = lapply(tp, function (tp_) {
         data.frame(
-            E_best   = E[E_id],
-            tau_best = tau[tau_id],
-            tp = tp_,
-            nn_best  = nn[E_id],
+            E_opt   = E[E_id],
+            tau_opt = tau[tau_id],
+            tp      = tp_,
+            nn_opt  = nn[E_id],
             te   = sum(xmap[xmap$tp == tp_, "te"  ] * simplex$weight),
             pval = sum(xmap[xmap$tp == tp_, "pval"] * simplex$weight)
         )

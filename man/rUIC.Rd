@@ -16,8 +16,8 @@ This package is divided into a set of main functions to perform UIC.
   \itemize{
     \item \code{\link{xmap}        } - cross mapping
     \item \code{\link{simplex}     } - simplex projection
-    \item \code{\link{uic}         } - unified infomation-theoretic causality
-    \item \code{\link{marginal_uic}} - marginal unified infomation-theoretic causality
+    \item \code{\link{uic}         } - unified information-theoretic causality
+    \item \code{\link{marginal_uic}} - marginal unified information-theoretic causality
   }
 }
 \author{

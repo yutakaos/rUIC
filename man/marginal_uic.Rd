@@ -65,12 +65,12 @@ If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.}
 \value{
 A data.frame where each row represents model statistics computed from a parameter set.
 \tabular{ll}{
-\code{E_best}   \tab \code{:} embedding dimension, which minimize RMSE for simplex projection \cr
-\code{tau_best} \tab \code{:} time-lag, which minimize RMSE for simplex projection \cr
-\code{tp}       \tab \code{:} time prediction horizon \cr
-\code{nn_best}  \tab \code{:} number of nearest neighbors, which minimize RMSE for simplex projection \cr
-\code{te}       \tab \code{:} transfer entropy \cr
-\code{pval}     \tab \code{:} bootstrap p-value for te > 0 \cr
+\code{E_opt}   \tab \code{:} embedding dimension, which minimize RMSE for simplex projection \cr
+\code{tau_opt} \tab \code{:} time-lag, which minimize RMSE for simplex projection \cr
+\code{tp}      \tab \code{:} time prediction horizon \cr
+\code{nn_opt}  \tab \code{:} number of nearest neighbors, which minimize RMSE for simplex projection \cr
+\code{te}      \tab \code{:} transfer entropy \cr
+\code{pval}    \tab \code{:} bootstrap p-value for te > 0 \cr
 }
 
 \code{te} is transfer entropy based on the unified information-theoretic causality test:
@@ -84,7 +84,7 @@ where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
 \code{marginal_uic} returns model statistics computed from given multiple time series
 based on simplex projection and cross mapping. This function computes UIC using model
 averaging technique (and marginalizing \code{E} and \code{tau}). Thus, the users do not
-have to determine the optimal \code{E} and \code{tau}.
+have to determine the optimal \code{E} and \code{tau} by themselves.
 }
 \examples{
 ## simulate logistic map
