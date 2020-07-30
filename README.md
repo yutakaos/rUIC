@@ -4,8 +4,7 @@ A quick tutorial of rUIC package (for deails, see the package manual)
 
 ## Installation
 
-__These installation steps are temporal because this package is currently private.__
-__(This message will be deleted in the future)__
+__These installation steps are temporal because this repository is currently private (This message will be deleted in the future).__
 
 1. Click "clone or download" and download the zip file.
 2. Decompress the zip file in a working directory. "rUIC-master" folder will be created.
@@ -41,12 +40,12 @@ block = data.frame(t = 1:tl, x = x, y = y)
 ```r
 # No.1: Determine the optimal embedding dimension using simplex projection
 ## Univariate UIC-version simplex projection
-simp_x <- rUIC::simplex(block, lib_var = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-simp_y <- rUIC::simplex(block, lib_var = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
+simp_x <- rUIC::simplex(block, lib_var = "x", E = 0:8, tau = 1, tp = 1, n_boot = 2000)
+simp_y <- rUIC::simplex(block, lib_var = "y", E = 0:8, tau = 1, tp = 1, n_boot = 2000)
 
 ## Multivariate rUIC-version simplex projection
-simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
-simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1, tp = -1, n_boot = 2000)
+simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 0:8, tau = 1, tp = 1, n_boot = 2000)
+simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 0:8, tau = 1, tp = 1, n_boot = 2000)
 
 # Select the optimal embedding dimension (Here RMSE is used as a criteria; UIC may be used as a criteria)
 Exy <- simp_xy[which.min(simp_xy[simp_xy$pval < 0.05,]$rmse), "E"]
@@ -63,8 +62,8 @@ Eyx <- simp_yx[which.min(simp_yx[simp_yx$pval < 0.05,]$rmse), "E"]
 ### Perform cross-mapping
 ```r
 # No.2: Cross-map
-xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -1)
-xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp = -1)
+xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, tp = -1)
+xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -1)
 ```
 - Cross mapping show that `x` can be accurately predicted from `y` (left panel), suggesting that `x` causally influences `y`. On the other hand, `y` cannot be predicted from `x`, suggesting that  `y` does not have causal influences on `x`.
 
@@ -104,21 +103,20 @@ muic_yx <- rUIC::marginal_uic(block, lib_var = "y", tar_var = "x", E = 1:10, tau
 ## Functions implemented in rUIC package
 - `simplex`: Perform simplex projection and return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
-    - Potential causal variable should be specified by `tar_var` augument.
+    - Potential causal variable should be specified by `cond_var` augument.
     - Return _p_ value if `n_boot > 1`.
+    - _te_ value is expressed as follows: **log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-2)&tau;</sub>_)**.
+    
     - _p_ value indicates "Probability of the improvements of prediction compared with when one less embedding dimension is used" as specified in the following inequality:
     
     **_p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-1)&tau;</sub>) > p(x<sub>t+tp</sub> | y<sub>t</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
 
-<span style="color: red; ">
-  - UIC における `E` を推定するときは `cond_var` に原因となる変数を指定する.
   - `te` は次の数式で表される. _x_ は `lib_var`, _z_ は `cond_var`.
   ```math
   \sum_{t} log p(x_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t}) -
            log p(x_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-2)*&tau}, z_{t})
   ```
   - _p_ 値の帰無仮説は te <= 0.
-</span>
 
 - `xmap`: Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
