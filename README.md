@@ -4,7 +4,7 @@ A quick tutorial of rUIC package (for deails, see the package manual)
 
 ## Installation
 
-__These installation steps are temporal because this repository is currently private (This message will be deleted in the future).__
+__These installation steps are temporal because this repository is currently private (this message will be deleted in the future).__
 
 1. Click "clone or download" and download the zip file.
 2. Decompress the zip file in a working directory. "rUIC-master" folder will be created.
