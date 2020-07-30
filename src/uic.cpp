@@ -28,7 +28,7 @@ public:
     rUIC ()
     {
         set_norm_params_R();
-        style_ccm();
+        set_estimator_R();
     }
     
     void set_norm_params_R (
@@ -41,12 +41,12 @@ public:
         );
     }
     
-    void style_ccm (bool rmse_is_naive = false)
+    void set_estimator_R (bool rmse_is_naive = false)
     {
-        set_rmse_estimator(rmse_is_naive);
+        set_estimator(rmse_is_naive);
     }
     
-    List xmap (
+    List xmap_R (
         NumericMatrix time_series_lib,
         NumericVector time_series_tar,
         NumericMatrix time_series_mvs,
@@ -57,7 +57,7 @@ public:
         if (range_lib.ncol() != 2) Rcpp::stop("ncol(lib) != 2.");
         if (range_prd.ncol() != 2) Rcpp::stop("ncol(pred) != 2.");
         
-        xmap_seq_internal(
+        xmap_seq(
             0,
             as_cpp<num_t>(time_series_lib),
             as_cpp<num_t>(time_series_tar),
@@ -72,7 +72,7 @@ public:
         );
     }
     
-    DataFrame xmap_seq (
+    DataFrame xmap_seq_R (
         int n_boot,
         NumericMatrix time_series_lib,
         NumericVector time_series_tar,
@@ -88,7 +88,7 @@ public:
         if (range_prd.ncol() != 2) Rcpp::stop("ncol(pred) != 2.");
         if (vector_E.size() != vector_nn.size()) Rcpp::stop("length(E) != length(nn)");
         
-        xmap_seq_internal(
+        xmap_seq(
             n_boot,
             as_cpp<num_t>(time_series_lib),
             as_cpp<num_t>(time_series_tar),
@@ -103,7 +103,7 @@ public:
         return model_statistics();
     }
     
-    DataFrame simplex_seq (
+    DataFrame simplex_seq_R (
         int n_boot,
         NumericVector time_series_lib,
         NumericMatrix time_series_mvs,
@@ -123,7 +123,7 @@ public:
         std::vector<std::vector<num_t>> ts_lib_m(n_time);
         for (size_t i = 0; i < n_time; ++i) ts_lib_m[i] = { ts_lib[i] };
         
-        xmap_seq_internal(
+        xmap_seq(
             n_boot,
             ts_lib_m, ts_lib,
             as_cpp<num_t>(time_series_mvs),
@@ -140,7 +140,7 @@ public:
     
 private:
     
-    void xmap_seq_internal (
+    void xmap_seq (
         int n_boot,
         std::vector<std::vector<num_t>> time_series_lib,
         std::vector<num_t> time_series_tar,
@@ -204,7 +204,7 @@ private:
     DataFrame model_statistics ()
     {
         IntegerVector E, nn, tau, tp;
-        NumericVector n_lib, n_pred, rmse, uic, pval;
+        NumericVector n_lib, n_pred, rmseF, rmseR, uic, pval;
         for (auto op : output)
         {
             size_t nn_ = op.nn < op.n_lib ? op.nn : op.n_lib;
@@ -214,7 +214,8 @@ private:
             tp    .push_back(op.tp);
             n_lib .push_back(op.n_lib);
             n_pred.push_back(op.n_pred);
-            rmse  .push_back(op.rmseF);
+            rmseF .push_back(op.rmseF);
+            rmseR .push_back(op.rmseR);
             uic   .push_back(op.uic);
             pval  .push_back(op.pval);
         }
@@ -225,7 +226,8 @@ private:
             Named("nn" ) = nn,
             Named("n_lib" ) = n_lib,
             Named("n_pred") = n_pred,
-            Named("rmse") = rmse,
+            Named("rmse"  ) = rmseF,
+            Named("rmse_R") = rmseR,
             Named("te"  ) = uic,
             Named("pval") = pval
         );
@@ -237,11 +239,11 @@ RCPP_MODULE (rUIC)
 {
     class_<rUIC> ("rUIC")
     .constructor()
-    .method("set_norm"   , &rUIC::set_norm_params_R)
-    .method("style_ccm"  , &rUIC::style_ccm)
-    .method("xmap"       , &rUIC::xmap)
-    .method("xmap_seq"   , &rUIC::xmap_seq)
-    .method("simplex_seq", &rUIC::simplex_seq);
+    .method("set_norm"     , &rUIC::set_norm_params_R)
+    .method("set_estimator", &rUIC::set_estimator_R)
+    .method("xmap"         , &rUIC::xmap_R)
+    .method("xmap_seq"     , &rUIC::xmap_seq_R)
+    .method("simplex_seq"  , &rUIC::simplex_seq_R);
 }
 
 #endif

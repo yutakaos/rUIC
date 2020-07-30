@@ -64,7 +64,7 @@ namespace UIC
         UIC_METHOD ()
         {
             set_norm_params();
-            set_rmse_estimator();
+            set_estimator();
         }
         
         void set_norm_params (
@@ -79,7 +79,7 @@ namespace UIC
             norm.set_norm(norm_type, true, p);
         }
         
-        void set_rmse_estimator (bool naive = false)
+        void set_estimator (bool naive = false)
         {
             if (naive) get_sqerr = [](num_t err, num_t   ) { return err * err; };
             else       get_sqerr = [](num_t err, num_t w2) { return err * err / (1.0 + w2); };
@@ -165,10 +165,10 @@ namespace UIC
         void primitive_simplex_map (bool full_model = true)
         {
             //* set pointers */
-            dist_p = full_model ? &dist_full : &dist_reduced;
-            neis_p = full_model ? &neis_full : &neis_reduced;
-            pred_p = full_model ? &pred_full : &pred_reduced;
-            nenn_p = full_model ? &nenn_full : &nenn_reduced;
+            dist_p  = full_model ? &dist_full  : &dist_reduced;
+            neis_p  = full_model ? &neis_full  : &neis_reduced;
+            pred_p  = full_model ? &pred_full  : &pred_reduced;
+            nenn_p  = full_model ? &nenn_full  : &nenn_reduced;
             sqerr_p = full_model ? &sqerr_full : &sqerr_reduced;
             num_t *rmse_p = full_model ? &this->result.rmseF : &this->result.rmseR;
             

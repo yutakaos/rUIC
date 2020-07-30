@@ -1,7 +1,7 @@
 #' Perform cross mapping
 #' 
 #' \code{xmap} returns model predictions and its statistics computed from
-#' given multipe time series based on cross mapping.
+#' given multiple time series based on cross mapping.
 #' 
 #' @details
 #' \code{norm} specifies the power of Lp distance to use.
@@ -25,13 +25,13 @@
 #' the first and last indices of time series to use for model predictions.
 #' @param lib_var
 #' the names or column indices of library variables.
-#' The specifed variables are used as explanatory variables with time-delay embedding.
+#' The specified variables are used as explanatory variables with time-delay embedding.
 #' @param tar_var
 #' the name or column index of a target variable.
-#' The specifed variable is used as response variables.
+#' The specified variable is used as response variables.
 #' @param cond_var
 #' the names or column indeices of condition data.
-#' The specifed variables are used as explanatory variables (without time-delay embedding).
+#' The specified variables are used as explanatory variables (without time-delay embedding).
 #' @param norm
 #' the power of Lp distance to use. See Details.
 #' @param E
@@ -149,9 +149,11 @@ xmap = function(
     
     uic = new(rUIC)
     uic$set_norm(NORM, LS, p, exclusion_radius, epsilon)
-    uic$style_ccm(is_naive)
+    uic$set_estimator(is_naive)
     op = uic$xmap(x, y, z, lib, pred, E[1], nn[1], tau[1], tp[1])
-    op$stats = op$stats[,-which(colnames(op$stats) == "pval")]
+    
+    stats = colnames(op$stats)
+    op$stats = op$stats[,which(stats != "rmse_R" & stats != "pval")]
     op$model_output$time = op$model_output$time + 1
     op
 }

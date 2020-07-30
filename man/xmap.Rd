@@ -32,13 +32,13 @@ the first and last indices of time series to use for attractor reconstruction.}
 the first and last indices of time series to use for model predictions.}
 
 \item{lib_var}{the names or column indices of library variables.
-The specifed variables are used as explanatory variables with time-delay embedding.}
+The specified variables are used as explanatory variables with time-delay embedding.}
 
 \item{tar_var}{the name or column index of a target variable.
-The specifed variable is used as response variables.}
+The specified variable is used as response variables.}
 
 \item{cond_var}{the names or column indeices of condition data.
-The specifed variables are used as explanatory variables (without time-delay embedding).}
+The specified variables are used as explanatory variables (without time-delay embedding).}
 
 \item{norm}{the power of Lp distance to use. See Details.}
 
@@ -97,7 +97,7 @@ where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
 }
 \description{
 \code{xmap} returns model predictions and its statistics computed from
-given multipe time series based on cross mapping.
+given multiple time series based on cross mapping.
 }
 \details{
 \code{norm} specifies the power of Lp distance to use.

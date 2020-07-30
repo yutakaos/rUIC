@@ -1,33 +1,22 @@
-#' Compute unified information-theoretic causality
+#' Perform simplex projection and compute marginal unified information-theoretic causality
 #' 
-#' \code{uic} returns model statistics computed from given multiple time series
-#' based on cross mapping. This function simultaneously performs unified
-#' information-theoretic causality computations for all possible combinations of
-#' \code{E}, \code{tau} and \code{tp}.
+#' \code{marginal_uic} returns model statistics computed from given multiple time series
+#' based on simplex projection and cross mapping. This function computes UIC using model
+#' averaging technique (and marginalizing \code{E} and \code{tau}). Thus, the users do not
+#' have to determine the optimal \code{E} and \code{tau}.
 #' 
-#' @inheritParams xmap
-#' @param n_boot
-#' the number of bootstraps to use for computing p-value.
+#' @inheritParams uic
 #' 
 #' @return
 #' A data.frame where each row represents model statistics computed from a parameter set.
 #' \tabular{ll}{
-#' \code{E}      \tab \code{:} embedding dimension \cr
-#' \code{tau}    \tab \code{:} time-lag \cr
-#' \code{tp}     \tab \code{:} time prediction horizon \cr
-#' \code{nn}     \tab \code{:} number of nearest neighbors \cr
-#' \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
-#' \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
-#' \code{rmse}   \tab \code{:} unbiased root mean squared error \cr
-#' \code{te}     \tab \code{:} transfer entropy \cr
-#' \code{pval}   \tab \code{:} bootstrap p-value for te > 0 \cr
+#' \code{E_best}   \tab \code{:} embedding dimension, which minimize RMSE for simplex projection \cr
+#' \code{tau_best} \tab \code{:} time-lag, which minimize RMSE for simplex projection \cr
+#' \code{tp}       \tab \code{:} time prediction horizon \cr
+#' \code{nn_best}  \tab \code{:} number of nearest neighbors, which minimize RMSE for simplex projection \cr
+#' \code{te}       \tab \code{:} transfer entropy \cr
+#' \code{pval}     \tab \code{:} bootstrap p-value for te > 0 \cr
 #' }
-#' 
-#' \code{nn} can be different between argument specification and output results
-#' when some nearest neighbors have tied distances.
-#' 
-#' \code{rmse} is the unbiased root mean squared error computed from model predictions.
-#' If \code{is_naive = TRUE}, the raw root mean squared error is returned.
 #' 
 #' \code{te} is transfer entropy based on the unified information-theoretic causality test:
 #' \deqn{
@@ -51,15 +40,17 @@
 #' block <- data.frame(t = 1:tl, x = x, y = y)
 #' 
 #' ## UIC
-#' op0 <- uic(block, lib_var = "x", tar_var = "y", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
-#' op1 <- uic(block, lib_var = "y", tar_var = "x", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
+#' op0 = marginal_uic(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1:3, tp = -4:4,
+#'                    n_boot = 2000)
+#' op1 = marginal_uic(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1:3, tp = -4:4,
+#'                    n_boot = 2000)
 #' par(mfrow = c(2, 1))
 #' with(op0, plot(tp, te, type = "l"))
 #' with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
 #' with(op1, plot(tp, te, type = "l"))
 #' with(op1[op1$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
 #' 
-uic = function (
+marginal_uic = function (
     block, lib = c(1, NROW(block)), pred = lib,
     lib_var = 1, tar_var = 2, cond_var = NULL,
     norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
@@ -69,6 +60,10 @@ uic = function (
     if (length(tar_var) != 1)
     {
         stop("Only a target variable (tar_var) must be specifed.")
+    }
+    if (any(E <= 0))
+    {
+        stop("Should be E > 0.")
     }
     lib  = rbind(lib)
     pred = rbind(pred)
@@ -88,14 +83,38 @@ uic = function (
     
     x = cbind(block[,lib_var])
     y = cbind(block[,tar_var])
+    w = cbind(block[,c(tar_var, cond_var)])
     z = matrix()
     if (!is.null(cond_var)) z = cbind(block[,cond_var])
     
     uic = new(rUIC)
     uic$set_norm(NORM, LS, p, exclusion_radius, epsilon)
     uic$set_estimator(is_naive)
-    op = uic$xmap_seq(n_boot, x, y, z, lib, pred, E , nn, tau, tp)
-    op[,which(colnames(op) != "rmse_R")]
+    
+    simplex = lapply(tau, function (tau_)
+        uic$simplex_seq(1, x, w, lib, pred, E - 1, nn, tau_, tau_)
+    )
+    simplex = do.call(rbind, simplex)
+    simplex = simplex[order(simplex$E),]
+    simplex$weight = with(simplex, exp(-log(rmse) / 2 - n_lib / n_pred / 2))
+    simplex$weight = with(simplex, weight / sum(weight))
+    
+    E_id   = with(simplex, which.max(tapply(weight, E, sum)))
+    tau_id = with(simplex, which.max(tapply(weight, tau, sum)))
+    
+    xmap = uic$xmap_seq(n_boot, x, y, z, lib, pred, E , nn, tau, tp)
+    op = lapply(tp, function (tp_) {
+        data.frame(
+            E_best   = E[E_id],
+            tau_best = tau[tau_id],
+            tp = tp_,
+            nn_best  = nn[E_id],
+            te   = sum(xmap[xmap$tp == tp_, "te"  ] * simplex$weight),
+            pval = sum(xmap[xmap$tp == tp_, "pval"] * simplex$weight)
+        )
+    })
+    op = do.call(rbind, op)
+    op
 }
 
 # End

@@ -32,11 +32,11 @@ the first and last indices of time series to use for attractor reconstruction.}
 the first and last indices of time series to use for model predictions.}
 
 \item{lib_var}{the name or column index of a library (and target) variable.
-The specifed variable is used as a response variable and its time-delay variables are
+The specified variable is used as a response variable and its time-delay variables are
 used as explanatory variables.}
 
 \item{cond_var}{the names or column indeices of condition data.
-The specifed variables are used as explanatory variables (without time-delay embedding).}
+The specified variables are used as explanatory variables (without time-delay embedding).}
 
 \item{norm}{the power of Lp distance to use. See Details.}
 
@@ -77,7 +77,7 @@ A data.frame where each row represents model statistics computed from a paramete
 when some nearest neighbors have tied distances.
 
 \code{rmse} is the unbiased root mean squared error computed from model predictions.
-If \code{is_naive = TRUE}, the raw root mean sqaured error is returned.
+If \code{is_naive = TRUE}, the raw root mean squared error is returned.
 
 \code{te} is transfer entropy based on the difference of two simplex projection:
 \deqn{
@@ -87,7 +87,7 @@ If \code{is_naive = TRUE}, the raw root mean sqaured error is returned.
 where \eqn{x} is library and \eqn{z} is condition.
 }
 \description{
-\code{simplex} returns model statistics computed from given multipe time series
+\code{simplex} returns model statistics computed from given multiple time series
 based on simplex projection. This function simultaneously performs simplex projections
 for all possible combinations of \code{E}, \code{tau} and \code{tp}.
 }
