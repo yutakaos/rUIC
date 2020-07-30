@@ -104,8 +104,8 @@ muic_yx <- rUIC::marginal_uic(block, lib_var = "y", tar_var = "x", E = 1:10, tau
 - `simplex`: Perform simplex projection and return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - Potential causal variable should be specified by `cond_var` augument.
-    - _te_ value is expressed as follows: log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-2)&tau;</sub>_).
-    - _p_ value indicates _te_ value < 0, which means "Probability of the improvements of prediction compared with when one less embedding dimension is used".
+    - _te_ value is expressed as follows: **log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-2)&tau;</sub>_)**.
+    - _p_ value indicates **_te_ < 0**, which means "Probability of the improvements of prediction compared with when one less embedding dimension is used".
     - Return _p_ value if `n_boot > 1`.
 
 - `xmap`: Perform cross-mapping and return model predictions and statistics.
@@ -117,21 +117,11 @@ muic_yx <- rUIC::marginal_uic(block, lib_var = "y", tar_var = "x", E = 1:10, tau
     - `E` should be an optimal embedding dimension (estimated by `simplex`) + 1.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - Potential causal variable should be specified by `tar_var` augument.
+    - Specify `cond_var` augument for the multivariate version of `uic`.
+    - _te_ value is expressed as follows: **log _p_(_y<sub>t+tp</sub>_ | _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_y<sub>t+tp</sub>_ | _x<sub>t-&tau;</sub>_, _x<sub>t-2&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_)**.
+    - _p_ value indicates **_te_ < 0**, which means "Probability that y causes x in the sense of transfer entropy".
     - Return _p_ value if `n_boot > 1`.
-    - _p_ value indicates "Probability that y causes x in the sense of transfer entropy" as specified in the following inequality:
     
-    **_p(x<sub>t+tp</sub> | x<sub>t+1</sub>, x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>) > p(x<sub>t+tp</sub> |  x<sub>t</sub>, x<sub>t-&tau;</sub>, ... x<sub>t-(E-2)&tau;</sub>)_**
-
-  <span style="color: red; ">
-- `E` には simplex projection で得られた E に 1 を追加したものを指定.
-  - `te` は次の数式で表される. _x_ は `lib_var`, _y_ は `tar_var`, _z_ は `cond_var`.
-  ```math
-  \sum_{t} log p(y_{t+tp} | x_{t}, x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t}) -
-           log p(y_{t+tp} |        x_{t-&tau}, \ldots, x_{t-(E-1)*&tau}, z_{t})
-  ```
-  - _p_ 値の帰無仮説は te <= 0.
-</span>
-
 ## Important arguments in rUIC package
 
 Arguments identical with those used in rEDM package are not explained below. For arguments used in rEDM package, please see the rEDM tutorial (https://ha0ye.github.io/rEDM/index.html). See the package manual for details.
