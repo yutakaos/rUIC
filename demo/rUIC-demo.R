@@ -1,15 +1,19 @@
-####
-#### Unified information-theoretic causality (UIC)
-#### Yutaka Osada, Masayuki Ushio, Michio Kondoh
-####
-#### Demonstration
-####
+#------------------------------------------------------------------------------------------#
+# Unified information-theoretic causality (UIC)
+# Yutaka Osada, Masayuki Ushio, Michio Kondoh
+#
+# Demonstration:
+#     rUIC::simplex()
+#     rUIC::xmap()
+#     rUIC::uic()
+#     rUIC::marginal_uic()
+#------------------------------------------------------------------------------------------#
 
 # Load library
-library(rUIC); packageVersion("rUIC") # 0.1.3
-library(tidyverse); packageVersion("tidyverse") # 1.3.0
+library(rUIC);    packageVersion("rUIC")    # 0.1.3
 library(ggplot2); packageVersion("ggplot2") # 3.3.2
-library(cowplot); packageVersion("cowplot"); theme_set(theme_cowplot()) # 1.0.0
+library(cowplot); packageVersion("cowplot") # 1.0.0
+theme_set(theme_cowplot())
 
 # Create output directory
 dir.create("demo_figures")
@@ -24,12 +28,6 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
     y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
 }
 block <- data.frame(t = 1:tl, x = x, y = y)
-
-block_melted <- block %>% pivot_longer(col = c(x,y), names_to = "variable", values_to = "value")
-ts <- ggplot(block_melted, aes(x = t, y = value, color = variable)) +
-    geom_line() +
-    scale_color_manual(values = c("red3", "royalblue")) + 
-    ylab("Value") + xlab("Time") + xlim(100, 200)
 
 # No.1: Determine the optimal embedding dimension using simplex projection
 ## Univariate UIC-version simplex projection
@@ -57,6 +55,12 @@ muic_xy <- rUIC::marginal_uic(block, lib_var = "x", tar_var = "y", E = 1:10, tau
 muic_yx <- rUIC::marginal_uic(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1:3, tp = -4:5, n_boot = 2000)
 
 # ------------------------- Visualize results -------------------------#
+# Visualize time series
+ts <- ggplot(block[100:200,]) +
+    geom_line(aes(x = t, y = x), col = "red3") +
+    geom_line(aes(x = t, y = y), col = "royalblue") +
+    xlab("Time") + ylab("Value")
+
 # Visualize Simplex
 g1 <- ggplot(simp_x, aes(x = E, y = rmse)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +

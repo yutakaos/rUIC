@@ -82,7 +82,7 @@ where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
 }
 \description{
 \code{marginal_uic} returns model statistics computed from given multiple time series
-based on simplex projection and cross mapping. This function computes UIC using model
+based on simplex projection and cross mapping. This function computes UIC using a model
 averaging technique (and marginalizing \code{E} and \code{tau}). Thus, the users do not
 have to determine the optimal \code{E} and \code{tau} by themselves.
 }
