@@ -17,7 +17,7 @@ devtools::install(pkg = 'rUIC-master', reload = TRUE, quick = FALSE)
 
 ### Load library and generate model time series
 ```r
-library(rUIC); packageVersion("rUIC") # v0.1.2
+library(rUIC); packageVersion("rUIC") # v0.1.3
 
 ## simulate logistic map
 tl <- 400  # time length
