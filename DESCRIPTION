@@ -1,6 +1,6 @@
 Package: rUIC
 Type: Package
-Title: Unified Information-theoretic Causality for R
+Title: rUIC: Unified Information-theoretic Causality for R
 Version: 0.1.3
 License: file LICENSE
 Description: R implementation of unified information-theoretic causality.
