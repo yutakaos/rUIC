@@ -11,14 +11,16 @@ The \pkg{rUIC} package is a experimental implementation of UIC algorithms.
     to \pkg{rEDM} because the UIC algorithm was developed based on that of CCM.
 }
 \details{
-This package is divided into a set of main functions to perform UIC.
+This package has three basic functions (\code{xmap}, \code{simplex} and \code{uic})
+    and two wrapper functions (\code{uic.optimal} and \code{uic.marginal}) to perform UIC.
 
 \strong{Main Functions}: 
     \itemize{
-        \item \code{\link{xmap}}         - cross mapping
-        \item \code{\link{simplex}}      - simplex projection
-        \item \code{\link{uic}}          - unified information-theoretic causality
-        \item \code{\link{marginal_uic}} - marginal unified information-theoretic causality
+        \item \code{\link{xmap}}    - cross mapping
+        \item \code{\link{simplex}} - simplex projection
+        \item \code{\link{uic}}     - unified information-theoretic causality (UIC)
+        \item \code{\link{uic.optimal}}  - UIC using the optimal embedding dimension
+        \item \code{\link{uic.marginal}} - UIC marginalizing embedding dimensions
     }
 }
 \author{

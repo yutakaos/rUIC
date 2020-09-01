@@ -1,14 +1,9 @@
 #' Perform cross mapping
 #' 
-#' \code{xmap} returns model predictions and its statistics computed from
+#' \code{xmap} returns model predictions and their statistics computed from
 #' given multiple time series based on cross mapping.
 #' 
 #' @details
-#' \code{norm} specifies the power of Lp distance to use.
-#' In particular, Euclidean distance (\code{norm} = 2), Manhattan distance
-#' (\code{norm} = 1) and Maximum distance (\code{norm} \eqn{\le} 0) can be
-#' used as the special cases of Lp distance.
-#' 
 #' \code{scaling} specifies the methods for local scaling of distance matrix. This argument is
 #' experimental. The following distances can be used as local scaling factors:
 #' the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
@@ -33,16 +28,19 @@
 #' the names or column indeices of condition data.
 #' The specified variables are used as explanatory variables (without time-delay embedding).
 #' @param norm
-#' the power of Lp distance to use. See Details.
+#' the power of Lp distance to use.
+#' If \code{norm} \eqn{\le} 0, Maximum distance is used as the special case of Lp distance.
 #' @param E
-#' the embedding dimension to use for time-delay embedding.
+#' the embedding dimension to use for time-delay embedding. Must be an integer.
 #' @param tau
-#' the time-lag to use for time-delay embedding.
+#' the time-lag to use for time-delay embedding. Must be an integer.
 #' @param tp
-#' the time index to predict.
+#' the time index to predict. Must be an integer.
 #' @param nn
-#' the number of nearest neighbors to use.
+#' the number of nearest neighbors to use. Must be an integer or "e+1".
 #' If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.
+#' @param n_boot
+#' the number of bootstraps to use for computing p-value.
 #' @param scaling
 #' the method for local scaling of distance matrix. See Details.
 #' @param exclusion_radius
@@ -69,13 +67,15 @@
 #' \code{tau}    \tab \code{:} time-lag \cr
 #' \code{tp}     \tab \code{:} time prediction horizon \cr
 #' \code{nn}     \tab \code{:} number of nearest neighbors \cr
+#' \code{Enull}  \tab \code{:} embedding dimension of null model \cr
 #' \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 #' \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
-#' \code{rmse}   \tab \code{:} unbiased root mean squared error \cr
+#' \code{rmse}   \tab \code{:} root mean squared error \cr
 #' \code{te}     \tab \code{:} transfer entropy \cr
+#' \code{pval}   \tab \code{:} bootstrap p-value for te > 0 \cr
 #' }
 #' 
-#' \code{nn} can be different between argument specification and output results
+#' \code{nn} may be different between argument specification and output results
 #' when some nearest neighbors have tied distances.
 #' 
 #' \code{rmse} is the unbiased root mean squared error computed from model predictions.
@@ -83,8 +83,8 @@
 #' 
 #' \code{te} is transfer entropy based on the unified information-theoretic causality test:
 #' \deqn{
-#' \sum_{t} log p(y_{t+tp} | x_{t}     , x_{t- \tau}, \ldots, x_{t-(E-1)\tau}, z_{t}) -
-#'          log p(y_{t+tp} | x_{t-\tau}, x_{t-2\tau}, \ldots, x_{t-(E-1)\tau}, z_{t})
+#' \sum_{t} log p(y_{t+tp} | x_{t}, x_{t- \tau}, \ldots, x_{t-(E-1)\tau}, z_{t}) -
+#'          log p(y_{t+tp} | z_{t})
 #' }
 #' where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
 #' 
@@ -112,7 +112,7 @@
 xmap = function(
     block, lib = c(1, NROW(block)), pred = lib,
     lib_var = 1, tar_var = 2, cond_var = NULL,
-    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1",
+    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
     scaling = c("neighbor", "velocity", "no_scale"),
     exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
 {
@@ -120,6 +120,9 @@ xmap = function(
     {
         stop("Only a target variable (tar_var) must be specifed.")
     }
+    if (length(E)  != 1) stop("E must be an integer.")
+    if (length(tau)!= 1) stop("tau must be an integer.")
+    if (length(tp) != 1) stop("tp must be an integer.")
     lib  = rbind(lib)
     pred = rbind(pred)
     
@@ -129,31 +132,21 @@ xmap = function(
     else if (norm == 1) NORM = 1  # L1 norm
     else if (norm <= 0) NORM = 3  # Max norm
     
-    if (is.character(nn))
-    {
-        if (nn != "e+1")
-        {
-            stop("nn must be spcified as a numeric scalar or vector except for \"e+1\".")
-        }
-        else nn = E + 1
-    }
+    nn = set_nn(nn, E)
     if (is.null(exclusion_radius)) exclusion_radius = 0;
     if (is.null(epsilon)) epsilon = -1
-    LS = match.arg(scaling)
-    LS = switch(LS, "no_scale" = 0, "neighbor" = 1, "velocity" = 2)
+    LS = switch(match.arg(scaling), "no_scale" = 0, "neighbor" = 1, "velocity" = 2)
     
-    x = cbind(block[,lib_var])
-    y = cbind(block[,tar_var])
+    x = as.matrix(block[,lib_var])
+    y = as.matrix(block[,tar_var])
     z = matrix()
-    if (!is.null(cond_var)) z = cbind(block[,cond_var])
+    if (!is.null(cond_var)) z = as.matrix(block[,cond_var])
     
     uic = new(rUIC)
     uic$set_norm(NORM, LS, p, exclusion_radius, epsilon)
     uic$set_estimator(is_naive)
-    op = uic$xmap(x, y, z, lib, pred, E[1], nn[1], tau[1], tp[1])
-    
-    stats = colnames(op$stats)
-    op$stats = op$stats[,which(stats != "rmse_R" & stats != "pval")]
+    op = uic$xmap(n_boot, x, y, z, lib, pred, E[1], nn[1], tau[1], tp[1])
+    op$stats = op$stats[,which(colnames(op$stats) != "rmse_R")]
     op$model_output$time = op$model_output$time + 1
     op
 }

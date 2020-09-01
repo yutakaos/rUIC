@@ -41,7 +41,8 @@ The specified variable is used as response variables.}
 \item{cond_var}{the names or column indeices of condition data.
 The specified variables are used as explanatory variables (without time-delay embedding).}
 
-\item{norm}{the power of Lp distance to use. See Details.}
+\item{norm}{the power of Lp distance to use.
+If \code{norm} \eqn{\le} 0, Maximum distance is used as the special case of Lp distance.}
 
 \item{E}{the embedding dimension to use for time-delay embedding.}
 
@@ -71,12 +72,12 @@ A data.frame where each row represents model statistics computed from a paramete
 \code{nn}     \tab \code{:} number of nearest neighbors \cr
 \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
-\code{rmse}   \tab \code{:} unbiased root mean squared error \cr
+\code{rmse}   \tab \code{:} root mean squared error \cr
 \code{te}     \tab \code{:} transfer entropy \cr
 \code{pval}   \tab \code{:} bootstrap p-value for te > 0 \cr
 }
 
-\code{nn} can be different between argument specification and output results
+\code{nn} may be different between argument specification and output results
 when some nearest neighbors have tied distances.
 
 \code{rmse} is the unbiased root mean squared error computed from model predictions.
@@ -95,6 +96,13 @@ based on cross mapping. This function simultaneously performs unified
 information-theoretic causality computations for all possible combinations of
 \code{E}, \code{tau} and \code{tp}.
 }
+\details{
+\code{scaling} specifies the methods for local scaling of distance matrix. This argument is
+experimental. The following distances can be used as local scaling factors:
+the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
+the mean distances to nearest time indices (\code{scaling = velocity}) and
+the constant distance (\code{scaling = no_scale}).
+}
 \examples{
 ## simulate logistic map
 tl <- 400  # time length
@@ -108,8 +116,8 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
 block <- data.frame(t = 1:tl, x = x, y = y)
 
 ## UIC
-op0 <- uic(block, lib_var = "x", tar_var = "y", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
-op1 <- uic(block, lib_var = "y", tar_var = "x", E = 3, tau = 1, tp = -4:0, n_boot = 2000)
+op0 <- uic(block, lib_var = "x", tar_var = "y", E = 2, tau = 1, tp = -4:4)
+op1 <- uic(block, lib_var = "y", tar_var = "x", E = 2, tau = 1, tp = -4:4)
 par(mfrow = c(2, 1))
 with(op0, plot(tp, te, type = "l"))
 with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))

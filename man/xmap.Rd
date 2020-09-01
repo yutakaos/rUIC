@@ -16,6 +16,7 @@ xmap(
   tau = 1,
   tp = 0,
   nn = "e+1",
+  n_boot = 2000,
   scaling = c("neighbor", "velocity", "no_scale"),
   exclusion_radius = NULL,
   epsilon = NULL,
@@ -40,16 +41,19 @@ The specified variable is used as response variables.}
 \item{cond_var}{the names or column indeices of condition data.
 The specified variables are used as explanatory variables (without time-delay embedding).}
 
-\item{norm}{the power of Lp distance to use. See Details.}
+\item{norm}{the power of Lp distance to use.
+If \code{norm} \eqn{\le} 0, Maximum distance is used as the special case of Lp distance.}
 
-\item{E}{the embedding dimension to use for time-delay embedding.}
+\item{E}{the embedding dimension to use for time-delay embedding. Must be an integer.}
 
-\item{tau}{the time-lag to use for time-delay embedding.}
+\item{tau}{the time-lag to use for time-delay embedding. Must be an integer.}
 
-\item{tp}{the time index to predict.}
+\item{tp}{the time index to predict. Must be an integer.}
 
-\item{nn}{the number of nearest neighbors to use.
+\item{nn}{the number of nearest neighbors to use. Must be an integer or "e+1".
 If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.}
+
+\item{n_boot}{the number of bootstraps to use for computing p-value.}
 
 \item{scaling}{the method for local scaling of distance matrix. See Details.}
 
@@ -76,13 +80,15 @@ A list with model predictions and its statistics.
 \code{tau}    \tab \code{:} time-lag \cr
 \code{tp}     \tab \code{:} time prediction horizon \cr
 \code{nn}     \tab \code{:} number of nearest neighbors \cr
+\code{Enull}  \tab \code{:} embedding dimension of null model \cr
 \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
-\code{rmse}   \tab \code{:} unbiased root mean squared error \cr
+\code{rmse}   \tab \code{:} root mean squared error \cr
 \code{te}     \tab \code{:} transfer entropy \cr
+\code{pval}   \tab \code{:} bootstrap p-value for te > 0 \cr
 }
 
-\code{nn} can be different between argument specification and output results
+\code{nn} may be different between argument specification and output results
 when some nearest neighbors have tied distances.
 
 \code{rmse} is the unbiased root mean squared error computed from model predictions.
@@ -90,21 +96,16 @@ If \code{is_naive = TRUE}, the raw root mean sqaured error is returned.
 
 \code{te} is transfer entropy based on the unified information-theoretic causality test:
 \deqn{
-\sum_{t} log p(y_{t+tp} | x_{t}     , x_{t- \tau}, \ldots, x_{t-(E-1)\tau}, z_{t}) -
-         log p(y_{t+tp} | x_{t-\tau}, x_{t-2\tau}, \ldots, x_{t-(E-1)\tau}, z_{t})
+\sum_{t} log p(y_{t+tp} | x_{t}, x_{t- \tau}, \ldots, x_{t-(E-1)\tau}, z_{t}) -
+         log p(y_{t+tp} | z_{t})
 }
 where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
 }
 \description{
-\code{xmap} returns model predictions and its statistics computed from
+\code{xmap} returns model predictions and their statistics computed from
 given multiple time series based on cross mapping.
 }
 \details{
-\code{norm} specifies the power of Lp distance to use.
-In particular, Euclidean distance (\code{norm} = 2), Manhattan distance
-(\code{norm} = 1) and Maximum distance (\code{norm} \eqn{\le} 0) can be
-used as the special cases of Lp distance.
-
 \code{scaling} specifies the methods for local scaling of distance matrix. This argument is
 experimental. The following distances can be used as local scaling factors:
 the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),

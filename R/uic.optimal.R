@@ -1,9 +1,9 @@
-#' Compute unified information-theoretic causality
+#' Wrapper function for computing optimal unified information-theoretic causality
 #' 
-#' \code{uic} returns model statistics computed from given multiple time series
-#' based on cross mapping. This function simultaneously performs unified
-#' information-theoretic causality computations for all possible combinations of
-#' \code{E}, \code{tau} and \code{tp}.
+#' \code{uic.optimal} returns model statistics computed from given multiple time series
+#' based on simplex projection and cross mapping. This function computes UIC after exploring
+#' the optimal \code{E} based on simplex projection. Thus, the users do not have to determine
+#' the optimal \code{E} by themselves.
 #' 
 #' @details
 #' \code{scaling} specifies the methods for local scaling of distance matrix. This argument is
@@ -12,16 +12,12 @@
 #' the mean distances to nearest time indices (\code{scaling = velocity}) and
 #' the constant distance (\code{scaling = no_scale}).
 #' 
-#' @inheritParams xmap
-#' @param E
-#' the embedding dimension to use for time-delay embedding.
-#' @param tau
-#' the time-lag to use for time-delay embedding.
-#' @param tp
-#' the time index to predict.
+#' @inheritParams uic
 #' @param nn
-#' the number of nearest neighbors to use.
+#' the number of nearest neighbors to use. Must be an integer or "e+1".
 #' If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.
+#' @param alpha
+#' the significant level to use for the "adaptive" simplex method. Default is 0.05.
 #' 
 #' @return
 #' A data.frame where each row represents model statistics computed from a parameter set.
@@ -50,7 +46,7 @@
 #' }
 #' where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
 #' 
-#' @seealso \link{xmap}, \link{simplex}
+#' @seealso \link{simplex}, \link{uic}
 #' 
 #' @examples
 #' ## simulate logistic map
@@ -65,52 +61,41 @@
 #' block <- data.frame(t = 1:tl, x = x, y = y)
 #' 
 #' ## UIC
-#' op0 <- uic(block, lib_var = "x", tar_var = "y", E = 2, tau = 1, tp = -4:4)
-#' op1 <- uic(block, lib_var = "y", tar_var = "x", E = 2, tau = 1, tp = -4:4)
+#' op0 <- uic.optimal(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1, tp = -4:4)
+#' op1 <- uic.optimal(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1, tp = -4:4)
 #' par(mfrow = c(2, 1))
 #' with(op0, plot(tp, te, type = "l"))
 #' with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
 #' with(op1, plot(tp, te, type = "l"))
 #' with(op1[op1$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
 #' 
-uic = function (
+uic.optimal = function (
     block, lib = c(1, NROW(block)), pred = lib,
     lib_var = 1, tar_var = 2, cond_var = NULL,
-    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
+    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000, alpha = 0.05,
     scaling = c("neighbor", "velocity", "no_scale"),
     exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
 {
-    if (length(tar_var) != 1)
+    if (length(nn) != 1)
+        stop("nn must be spcified as an integer or \"e+1\".")
+    
+    op_simplex = lapply(tau, function (x)
+        simplex(
+            block, lib, pred, lib_var, c(tar_var, cond_var),
+            norm, E, tau = x, tp = x, nn, n_boot, Enull = "adaptive", alpha,
+            scaling, exclusion_radius, epsilon, is_naive)
+    )
+    
+    op_uic = lapply(op_simplex, function (op)
     {
-        stop("Only a target variable (tar_var) must be specifed.")
-    }
-    lib  = rbind(lib)
-    pred = rbind(pred)
-    
-    p = pmax(0, norm)
-    NORM = 2  # Lp norm
-    if      (norm == 2) NORM = 0  # L2 norm
-    else if (norm == 1) NORM = 1  # L1 norm
-    else if (norm <= 0) NORM = 3  # Max norm
-    
-    nn = set_nn(nn, E)
-    ord = order(E)
-    E  = E [ord]
-    nn = nn[ord]
-    if (is.null(exclusion_radius)) exclusion_radius = 0;
-    if (is.null(epsilon)) epsilon = -1
-    LS = switch(match.arg(scaling), "no_scale" = 0, "neighbor" = 1, "velocity" = 2)
-    
-    x = as.matrix(block[,lib_var])
-    y = as.matrix(block[,tar_var])
-    z = matrix()
-    if (!is.null(cond_var)) z = as.matrix(block[,cond_var])
-    
-    uic = new(rUIC)
-    uic$set_norm(NORM, LS, p, exclusion_radius, epsilon)
-    uic$set_estimator(is_naive)
-    op = uic$xmap_seq(n_boot, x, y, z, lib, pred, E , nn, tau, tp)
-    op[,which(!colnames(op) %in% c("Enull", "rmse_R"))]
+        optE = with(op, max(c(0, E[pval < alpha]))) + 1
+        uic(
+            block, lib, pred, lib_var, tar_var, cond_var,
+            norm, E = optE, op$tau[1], tp, nn, n_boot,
+            scaling, exclusion_radius, epsilon, is_naive)
+        
+    })
+    do.call(rbind, op_uic)
 }
 
 # End

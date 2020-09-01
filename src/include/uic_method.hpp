@@ -91,10 +91,11 @@ namespace UIC
             n_vprd = UIC::set_valid_indices(&vidx_prd, this->x_prd);
         }
         
-        void make_dist_lib (bool full_model = true)
+        void make_dist_lib (bool full_model = true, int reduced_nd = 1)
         {
             //* compute local scaling parameters */
-            int nd = this->x_lib[0].size() - (full_model ? 0 : this->n_xd);
+            if (full_model || this->E < reduced_nd) reduced_nd = 0;
+            int nd = this->x_lib[0].size() - reduced_nd * this->n_xd;
             std::vector<num_t> scale_lib, scale_prd;
             local_scaling(
                 nd, scale_type, &scale_lib, &scale_prd, this->x_lib,  this->x_prd,
@@ -117,11 +118,20 @@ namespace UIC
                     (*dist_p)[i][j] = d / std::sqrt(scale_prd[i] * scale_lib[j]);
                 }
             }
-            RMSE_F = RMSE_R = false;
-            this->result.rmseF = qnan;
-            this->result.rmseR = qnan;
-            this->result.uic   = qnan;
-            this->result.pval  = qnan;
+            
+            if (full_model)
+            {
+                RMSE_F = false;
+                this->result.rmseF = qnan;
+            }
+            else
+            {
+                RMSE_R = false;
+                this->result.rmseR = qnan;
+                this->result.ER = this->E - reduced_nd;
+            }
+            this->result.uic  = qnan;
+            this->result.pval = qnan;
         }
         
         void set_neighbors (bool full_model = true)

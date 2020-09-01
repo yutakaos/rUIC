@@ -47,6 +47,7 @@ public:
     }
     
     List xmap_R (
+        int n_boot,
         NumericMatrix time_series_lib,
         NumericVector time_series_tar,
         NumericMatrix time_series_mvs,
@@ -57,14 +58,14 @@ public:
         if (range_lib.ncol() != 2) Rcpp::stop("ncol(lib) != 2.");
         if (range_prd.ncol() != 2) Rcpp::stop("ncol(pred) != 2.");
         
-        xmap_seq(
-            0,
+        xmap(
+            n_boot,
             as_cpp<num_t>(time_series_lib),
             as_cpp<num_t>(time_series_tar),
             as_cpp<num_t>(time_series_mvs),
             as_cpp_range(range_lib),
             as_cpp_range(range_prd),
-            {E}, {nn}, {tau}, {tp}
+            {E}, {nn}, {tau}, {tp}, {0}
         );
         return List::create(
             Named("model_output") = model_output(time_series_tar),
@@ -103,6 +104,38 @@ public:
         return model_statistics();
     }
     
+    DataFrame simplex_R (
+        int n_boot,
+        NumericVector time_series_lib,
+        NumericMatrix time_series_mvs,
+        IntegerMatrix range_lib,
+        IntegerMatrix range_prd,
+        int E, int nn, int tau,
+        NumericVector vector_tp,
+        NumericVector vector_Enull)
+    {
+        if (range_lib.ncol() != 2) Rcpp::stop("ncol(lib) != 2.");
+        if (range_prd.ncol() != 2) Rcpp::stop("ncol(pred) != 2.");
+        if (vector_tp.size() != vector_Enull.size()) Rcpp::stop("length(tp) != length(Enull)");
+        
+        size_t n_time = time_series_lib.size();
+        std::vector<std::vector<num_t>> ts_lib(n_time);
+        for (size_t i = 0; i < n_time; ++i) ts_lib[i] = { time_series_lib(i) };
+        
+        xmap(
+            n_boot, ts_lib,
+            as_cpp<num_t>(time_series_lib),
+            as_cpp<num_t>(time_series_mvs),
+            as_cpp_range(range_lib),
+            as_cpp_range(range_prd),
+            {E}, {nn}, {tau},
+            as_cpp<int>(vector_tp),
+            as_cpp<int>(vector_Enull),
+            false
+        );
+        return model_statistics();
+    }
+    
     DataFrame simplex_seq_R (
         int n_boot,
         NumericVector time_series_lib,
@@ -112,20 +145,19 @@ public:
         NumericVector vector_E,
         NumericVector vector_nn,
         NumericVector vector_tau,
-        NumericVector vector_tp )
+        NumericVector vector_tp)
     {
         if (range_lib.ncol() != 2) Rcpp::stop("ncol(lib) != 2.");
         if (range_prd.ncol() != 2) Rcpp::stop("ncol(pred) != 2.");
         if (vector_E.size() != vector_nn.size()) Rcpp::stop("length(E) != length(nn)");
         
         size_t n_time = time_series_lib.size();
-        std::vector<num_t> ts_lib = as_cpp<num_t>(time_series_lib);
-        std::vector<std::vector<num_t>> ts_lib_m(n_time);
-        for (size_t i = 0; i < n_time; ++i) ts_lib_m[i] = { ts_lib[i] };
+        std::vector<std::vector<num_t>> ts_lib(n_time);
+        for (size_t i = 0; i < n_time; ++i) ts_lib[i] = { time_series_lib(i) };
         
         xmap_seq(
-            n_boot,
-            ts_lib_m, ts_lib,
+            n_boot, ts_lib,
+            as_cpp<num_t>(time_series_lib),
             as_cpp<num_t>(time_series_mvs),
             as_cpp_range(range_lib),
             as_cpp_range(range_prd),
@@ -139,6 +171,48 @@ public:
     }
     
 private:
+    
+    void xmap (
+        int n_boot,
+        std::vector<std::vector<num_t>> time_series_lib,
+        std::vector<num_t> time_series_tar,
+        std::vector<std::vector<num_t>> time_series_mvs,
+        std::vector<std::pair<int, int>> range_lib,
+        std::vector<std::pair<int, int>> range_prd,
+        int E,
+        int nn,
+        int tau,
+        std::vector<int> tp,
+        std::vector<int> ER,
+        bool is_uic = true)
+    {
+        std::vector<UIC::ResultSet<num_t>>().swap(output); 
+        
+        if (n_boot < 0) n_boot = 0;
+        std::vector<int> seed(n_boot);
+        for (int r = 0; r < n_boot; ++r) seed[r] = std::rand();
+        
+        set_time_indices(range_lib, range_prd);
+        set_E_and_nn(E, nn);
+        set_tau(tau);
+        set_data_lib(time_series_lib, is_uic);
+        set_data_mvs(time_series_mvs);
+        set_valid_indices();
+        make_dist_lib(true);
+        for (size_t i = 0; i < tp.size(); ++i)
+        {
+            make_dist_lib(false, E - ER[i]);
+            set_tp(tp[i]);
+            set_data_tar(time_series_tar);
+            set_neighbors(true);
+            set_neighbors(false);
+            primitive_simplex_map(true);
+            primitive_simplex_map(false);
+            compute_uic();
+            bootstrap_pval(seed);
+            output.push_back(result);
+        }
+    }
     
     void xmap_seq (
         int n_boot,
@@ -170,7 +244,7 @@ private:
                 set_data_mvs(time_series_mvs);
                 set_valid_indices();
                 make_dist_lib(true);
-                make_dist_lib(false);
+                make_dist_lib(false, 1);
                 for (auto tp: tp_ip)
                 {
                     set_tp(tp);
@@ -203,7 +277,7 @@ private:
     
     DataFrame model_statistics ()
     {
-        IntegerVector E, nn, tau, tp;
+        IntegerVector E, nn, tau, tp, ER;
         NumericVector n_lib, n_pred, rmseF, rmseR, uic, pval;
         for (auto op : output)
         {
@@ -212,6 +286,7 @@ private:
             nn    .push_back(nn_);
             tau   .push_back(op.tau);
             tp    .push_back(op.tp);
+            ER    .push_back(op.ER);
             n_lib .push_back(op.n_lib);
             n_pred.push_back(op.n_pred);
             rmseF .push_back(op.rmseF);
@@ -224,6 +299,7 @@ private:
             Named("tau") = tau,
             Named("tp" ) = tp,
             Named("nn" ) = nn,
+            Named("Enull" ) = ER,
             Named("n_lib" ) = n_lib,
             Named("n_pred") = n_pred,
             Named("rmse"  ) = rmseF,
@@ -243,6 +319,7 @@ RCPP_MODULE (rUIC)
     .method("set_estimator", &rUIC::set_estimator_R)
     .method("xmap"         , &rUIC::xmap_R)
     .method("xmap_seq"     , &rUIC::xmap_seq_R)
+    .method("simplex"      , &rUIC::simplex_R)
     .method("simplex_seq"  , &rUIC::simplex_seq_R);
 }
 

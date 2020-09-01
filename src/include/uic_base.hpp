@@ -19,7 +19,7 @@ namespace UIC
     template <typename num_t>
     struct ResultSet
     {
-        int E, nn, tau, tp;
+        int E, nn, tau, tp, ER;
         int n_lib, n_pred;
         num_t rmseF, rmseR, uic, pval;
     };
@@ -73,8 +73,8 @@ namespace UIC
         
         void set_time_indices (time_range_t &range_lib_ip, time_range_t &range_prd_ip)
         {
-            if (range_lib_ip.size() == 0) Rcpp::stop("No time-ranges for library.");
-            if (range_prd_ip.size() == 0) Rcpp::stop("No time-ranges for prediction.");
+            if (range_lib_ip.size() == 0) Rcpp::stop("No time ranges for library.");
+            if (range_prd_ip.size() == 0) Rcpp::stop("No time ranges for prediction.");
             
             time_range_t().swap(range_lib);
             time_range_t().swap(range_prd);
