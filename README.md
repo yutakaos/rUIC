@@ -55,7 +55,7 @@ Eyx <- with(simp_yx, max(c(0, E[pval < 0.05])))
 
 <figure>
 <img src="demo/demo_figures/simplex_rmse.png" width="70%">
-<figcaption><i>Figure 2 | RMSE of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>, y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>, x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill compared with null model (specified by 'Enull'). For example, a red point in the top-right panel means that RMSE at E = 1 significantly improved than that at E = 0 while RMSE at E > 1 is not significantly better than RMSE at E = 1, suggesting that the optimal embedding dimension for x is 1.</i></figcaption>
+<figcaption><i>Figure 2 | RMSE of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>, y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>, x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill compared with null model (specified by 'Enull'). For example, a red point in the top-right panel means that RMSE at E = 1 significantly improved than that at E = 0 while RMSEs at E > 1 are not significantly better than RMSE at E = 1, suggesting that the optimal embedding dimension for x is 1.</i></figcaption>
 </figure>
 
 
@@ -158,14 +158,14 @@ Arguments identical with those used in rEDM package are not explained below. For
 
 - `nn` : the number of neighbors used for prediction
     - `num_neighbors` argument in rEDM.
-    - `"e+1"` may be used (nn = E + 1). If a scalar value is specified, nn = rep(nn, length(E)).
+    - `"e+1"` may be used (nn = E + 1). If a scalar value is specified, `nn = rep(nn, length(E))`.
     - If vector is specified and if `length(E) != length(nn)`, error will be returned.
 
 - `n_boot` :  the number of bootstrap to be used for computing p-value  
     - The number of bootstrap to calculate p value.
 
 - `Enull` : the method to determine the embedding dimension of null model
-    - If "e-1" is used, Enull is E - 1. If "adaptive" is used, Enull is the largest E, which satisfied E < Enull and p-value < alpha (alpha is significant level). 
+    - If `"e-1"` is used, `Enull` is `E` - 1. If `"adaptive"` is used, `Enull` is the largest `E`, which satisfied `E < Enull` and `p-value < alpha` (`alpha` is the significant level). 
 
 - `scaling` : the local scaling (neighbor, velocity, no_scale)
     - **This argument is experimental. May be changed in near future.**
