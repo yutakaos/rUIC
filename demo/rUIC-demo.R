@@ -52,7 +52,7 @@ uic_xy <- rUIC::uic(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, t
 uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -4:4)
 
 # No.4: Wrapper functions for computing UIC
-## compute UIC using optimal embedding dimension (the same results of No.3)
+## compute UIC using optimal embedding dimension (the same results as No.3)
 uic_opt_xy <- rUIC::uic.optimal(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1, tp = -4:4)
 uic_opt_yx <- rUIC::uic.optimal(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1, tp = -4:4)
 ## compute UIC marginalizing embedding dimension
