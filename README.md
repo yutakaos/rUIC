@@ -103,7 +103,7 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 1:10, 
 
 <figure>
 <img src="demo/demo_figures/uic_wrapper.png" width="70%" align="middle">
-<figcaption><i>Figure 5 | UIC at different time-lags (tp) using uic.optimal (top) and uic.marginal (bottom). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags.</i></figcaption>
+<figcaption><i>Figure 5 | UIC at different time-lags (tp) using rUIC::uic.optimal() (top) and rUIC::uic.marginal() (bottom). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags.</i></figcaption>
 </figure>
 
 
