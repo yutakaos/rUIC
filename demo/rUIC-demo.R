@@ -6,7 +6,8 @@
 #     rUIC::simplex()
 #     rUIC::xmap()
 #     rUIC::uic()
-#     rUIC::marginal_uic()
+#     rUIC::uic.optimal()
+#     rUIC::uic.marginal()
 #------------------------------------------------------------------------------------------#
 
 # Load library
