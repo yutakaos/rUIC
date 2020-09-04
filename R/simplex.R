@@ -17,9 +17,9 @@
 #' The specified variable is used as a response variable and its time-delay variables are
 #' used as explanatory variables.
 #' @param Enull
-#' specifies the method to determine the embedding dimension for time-delay embedding of
-#' null model. If "e-1" is used, Enull is E - 1. If "adaptive" is used, Enull is the most
-#' largest E, which satisfied E < Enull and p-value < alpha. 
+#' specifies the method to determine the embedding dimension of null model. If "e-1" is used,
+#' Enull is E - 1. If "adaptive" is used, Enull is the largest E, which satisfied E < Enull
+#' and p-value < alpha. 
 #' @param alpha
 #' the significant level to use if Enull = "adaptive". Default is 0.05.
 #' 
