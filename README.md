@@ -88,7 +88,7 @@ uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, t
 
 ### Wrapper functions for computing UIC
 
-Two wrapper functions are implemented to compute UIC without manual exploreing embedding dimensions. `rUIC::uic.optimal` compute UIC using optimal embedding dimension, which returns the same results as No.3. `rUIC::uic.optimal` compute UIC using model average technique (and marginalizing explored embedding dimensions).
+Two wrapper functions are implemented to compute UIC without manual exploreing embedding dimensions. `rUIC::uic.optimal` compute UIC using optimal embedding dimension, which returns the same results as No.3. `rUIC::uic.mraginal` compute UIC using model average technique (and marginalizing explored embedding dimensions).
 
 ```r
 # No.4: Wrapper functions for computing UIC
