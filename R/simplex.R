@@ -110,6 +110,7 @@ simplex = function (
     uic$set_norm(NORM, LS, p, exclusion_radius, epsilon)
     uic$set_estimator(is_naive)
     
+    Enull = sapply(strsplit(tolower(Enull), " "), paste, collapse = "")
     Enull = match.arg(Enull)
     if (Enull == "e-1")
     {
