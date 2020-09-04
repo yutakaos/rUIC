@@ -71,22 +71,22 @@ g1 <- ggplot(simp_x, aes(x = E, y = rmse)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
     ylab("RMSE") + theme(legend.position = "none") +
-    ggtitle(expression("{"~x[t]~","~x[t-1]~", ...,"~x[t-E]~"}"))
+    ggtitle(expression("{"~x[t]~","~x[t-1]~", ...,"~x[t-(E-1)]~"}"))
 g2 <- ggplot(simp_y, aes(x = E, y = rmse)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
     ylab("RMSE") + theme(legend.position = "none") +
-    ggtitle(expression("{"~y[t]~","~y[t-1]~", ...,"~y[t-E]~"}"))
+    ggtitle(expression("{"~y[t]~","~y[t-1]~", ...,"~y[t-(E-1)]~"}"))
 g3 <- ggplot(simp_xy, aes(x = E, y = rmse)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
     ylab("RMSE") + theme(legend.position = "none") +
-    ggtitle(expression("{"~x[t]~","~x[t-1]~", ..."~x[t-E]~","~y[t]~"}"))
+    ggtitle(expression("{"~x[t]~","~x[t-1]~", ..."~x[t-(E-1)]~","~y[t]~"}"))
 g4 <- ggplot(simp_yx, aes(x = E, y = rmse)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
     ylab("RMSE") + theme(legend.position = "none") +
-    ggtitle(expression("{"~y[t]~","~y[t-1]~", ..."~y[t-E]~","~x[t]~"}"))
+    ggtitle(expression("{"~y[t]~","~y[t-1]~", ..."~y[t-(E-1)]~","~x[t]~"}"))
 
 # Visualize cross-map
 g5 <- ggplot(xmap_xy$model_output, aes(x = data, y = pred)) +
