@@ -158,14 +158,14 @@ Arguments identical with those used in rEDM package are not explained below. For
 
 - `nn` : the number of neighbors used for prediction
     - `num_neighbors` argument in rEDM.
-    - `"e+1"` may be used (nn = E + 1). If a scalar value is specified, `nn = rep(nn, length(E))`.
-    - If vector is specified and if `length(E) != length(nn)`, error will be returned.
+    - "e+1" may be used (nn = E + 1). If a scalar value is specified, nn = rep(nn, length(E)).
+    - If vector is specified and if length(E) != length(nn), error will be returned.
 
 - `n_boot` :  the number of bootstrap to be used for computing p-value  
     - The number of bootstrap to calculate p value.
 
 - `Enull` : the method to determine the embedding dimension of null model
-    - If `"e-1"` is used, `Enull` is `E` - 1. If `"adaptive"` is used, `Enull` is the largest `E`, which satisfied `E < Enull` and `p-value < alpha` (`alpha` is the significant level). 
+    - If "e-1" is used, Enull is E - 1. If "adaptive" is used, Enull is the largest E, which satisfied E < Enull and p-value < alpha (`alpha` is the significant level). 
 
 - `scaling` : the local scaling (neighbor, velocity, no_scale)
     - **This argument is experimental. May be changed in near future.**
