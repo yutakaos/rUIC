@@ -2,7 +2,7 @@
  * Software License Agreement (BSD License)
  * 
  * Copyright 2020  Yutaka Osada. All rights reserved.
- *     - Modification for ruic.
+ *     - Modification for rUIC.
  * 
  * based on nanoflann (version:0x132)
  * 
