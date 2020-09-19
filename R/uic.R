@@ -88,10 +88,10 @@ uic = function (
     pred = rbind(pred)
     
     p = pmax(0, norm)
-    NORM = 2  # Lp norm
+    NORM = 3  # Lp norm
     if      (norm == 2) NORM = 0  # L2 norm
     else if (norm == 1) NORM = 1  # L1 norm
-    else if (norm <= 0) NORM = 3  # Max norm
+    else if (norm <= 0) NORM = 2  # Max norm
     
     nn = set_nn(nn, E)
     ord = order(E)

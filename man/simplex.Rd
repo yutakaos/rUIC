@@ -54,9 +54,9 @@ If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.}
 
 \item{n_boot}{the number of bootstraps to use for computing p-value.}
 
-\item{Enull}{specifies the method to determine the embedding dimension for time-delay embedding of
-null model. If "e-1" is used, Enull is E - 1. If "adaptive" is used, Enull is the most
-largest E, which satisfied E < Enull and p-value < alpha.}
+\item{Enull}{specifies the method to determine the embedding dimension of null model. If "e-1" is used,
+Enull is E - 1. If "adaptive" is used, Enull is the largest E, which satisfied E < Enull
+and p-value < alpha.}
 
 \item{alpha}{the significant level to use if Enull = "adaptive". Default is 0.05.}
 
