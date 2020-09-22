@@ -81,10 +81,12 @@ uic.marginal = function (
             norm, E + 1, opS$tau[1], tp, nn, n_boot,
             scaling, exclusion_radius, epsilon, is_naive)
         
-        op = lapply(tp, function (x) 
-            apply(subset(opU, tp == x) * opS$weight, 2, sum)
-        )
-        data.frame(do.call(rbind, op))
+        opM = lapply(tp, function (x) {
+            op = apply(subset(opU, tp == x) * opS$weight, 2, sum)
+            op[c("tau", "tp")] = c(opS$tau[1], x)
+            op
+        })
+        data.frame(do.call(rbind, opM))
     })
     do.call(rbind, op_uic)
 }
