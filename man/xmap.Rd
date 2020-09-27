@@ -11,7 +11,7 @@ xmap(
   lib_var = 1,
   tar_var = 2,
   cond_var = NULL,
-  norm = 2,
+  norm = 1,
   E = 1,
   tau = 1,
   tp = 0,
@@ -106,8 +106,8 @@ where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
 given multiple time series based on cross mapping.
 }
 \details{
-\code{scaling} specifies the methods for local scaling of distance matrix. This argument is
-experimental. The following distances can be used as local scaling factors:
+\code{scaling} specifies the methods for local scaling of distance matrix.
+The following distances can be used as local scaling factors:
 the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
 the mean distances to nearest time indices (\code{scaling = velocity}) and
 the constant distance (\code{scaling = no_scale}).
