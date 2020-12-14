@@ -51,7 +51,7 @@ simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 0:8, tau = 1,
 Exy <- with(simp_xy, max(c(0, E[pval < 0.05])))
 Eyx <- with(simp_yx, max(c(0, E[pval < 0.05])))
 ```
-The optimal embedding dimension used for `rUIC::uic()` should be determined based on multivariate simplex projection.<br>
+The optimal embedding dimension used for `rUIC::uic` should be determined based on multivariate simplex projection.<br>
 
 <figure>
 <img src="demo/demo_figures/simplex_rmse.png" width="70%">
@@ -65,7 +65,7 @@ The optimal embedding dimension used for `rUIC::uic()` should be determined base
 xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, tp = -1)
 xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -1)
 ```
-Cross mapping shows that y can be accurately predicted from x (right panel) while x cannot be predicted from y (left panel). It suggests that x causally influences y.
+Cross mapping shows that x can be accurately predicted from y (right panel) while y cannot be predicted from x (left panel). It suggests that the system has the unidirectional, causal influence from x to y.
 
 <figure>
 <img src="demo/demo_figures/xmap.png" width="70%">
@@ -83,7 +83,7 @@ The result suggests that x causally drives y and the optimal time-lag is 1, bein
 
 <figure>
 <img src="demo/demo_figures/uic.png" width="70%" align="middle">
-<figcaption><i>Figure 4 | UIC at different time-lags (tp). Red points indicate UIC values are significant. Gray region in the right panel indicate the largest UIC value among the tested time-lags, which suggests that causal influence from x to y occur at time-lag 1 (i.e., the causal time-lag = -tp). </i></figcaption>
+<figcaption><i>Figure 4 | UIC results at different time-lags (tp). Red points indicate UIC values are significant. Gray region in the right panel indicate the largest UIC value among the tested time-lags, which suggests that causal influence from x to y occur at time-lag 1 (i.e., the causal time-lag = -tp). </i></figcaption>
 </figure>
 
 
