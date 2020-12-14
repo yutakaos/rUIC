@@ -161,7 +161,7 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 - `nn` : the number of neighbors used for prediction
     - **num_neighbors** argument in rEDM.
     - "e+1" may be used (nn = E + 1). If a scalar value is specified, nn = rep(nn, length(E)).
-    - If vector is specified and if length(E) $neq$ length(nn), error will be returned.
+    - If vector is specified and if length(E) \neq length(nn), error will be returned.
 
 - `n_boot` :  the number of bootstrap to be used for computing p-value  
     - The number of bootstrap to calculate p value.
