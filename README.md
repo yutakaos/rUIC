@@ -115,7 +115,7 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
     - _te_ value of simplex projection is expressed as follows:<br>
 **log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(Enull-1)&tau;</sub>_)**,<br>
     where **_x<sub>t</sub>_** is `lib_var` and **_y<sub>t</sub>_** is `cond_var`.
-    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis **_te_ > 0**, which means that **the model with embedding dimension = _E_ improves forecast skills compared to that with embedding dimension = _Enull_**.
+    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis _te_ > 0, which means that **the model with embedding dimension = _E_ improves forecast skills compared to that with embedding dimension = _Enull_**.
 
 - `xmap`: Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
@@ -130,7 +130,7 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
     - _te_ value of uic is expressed as follows:<br>
 **log _p_(_y<sub>t+tp</sub>_ | _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_, _z<sub>t</sub>_) - log _p_(_y<sub>t+tp</sub>_ | _x<sub>t-&tau;</sub>_, _x<sub>t-2&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_, _z<sub>t</sub>_)**,<br>
     where **_x<sub>t</sub>_** is `lib_var`, **_y<sub>t</sub>_** is `tar_var` and **_z<sub>t</sub>_** is `cond_var`.
-    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis **_te_ > 0**, which means **y causes x in the sense of transfer entropy**.
+    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis _te_ > 0, which means **y causes x in the sense of transfer entropy**.
 
 - `uic.optimal`: Wrapper function for computing UIC, which return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
@@ -145,23 +145,23 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
     - Specify `cond_var` for the multivariate UIC.
 
 
-## Arguments in rUIC package
+## Function arguments in rUIC package
 
-Arguments identical with those used in rEDM package are not explained below. For arguments used in rEDM package, please see the rEDM tutorial (https://ha0ye.github.io/rEDM/index.html). See the package manual for details.
+Several arguments in rUIC package is identical with those used in rEDM package. We explain only unique arguments below. For other arguments, please see the rEDM tutorial (https://ha0ye.github.io/rEDM/index.html).
 
 - `lib_var` : the name or column index of library data
     - A variable to be used for time-delay embedding.
 
 - `tar_var` : the name or column index of target data
-    - A variable to be predicted (same with `target_column` argument in rEDM).
+    - A variable to be predicted (same with **target_column** in rEDM).
 
-- `cond_var` : the name or column index of condition data
-    - A third variable to be used for multivariate prediction, or detection of indirect interactions.
+- `cond_var` : the name or column index of conditional data
+    - A third variable to be used for multivariate prediction or detection of indirect interactions.
 
 - `nn` : the number of neighbors used for prediction
-    - `num_neighbors` argument in rEDM.
+    - **num_neighbors** argument in rEDM.
     - "e+1" may be used (nn = E + 1). If a scalar value is specified, nn = rep(nn, length(E)).
-    - If vector is specified and if length(E) != length(nn), error will be returned.
+    - If vector is specified and if length(E) $neq$ length(nn), error will be returned.
 
 - `n_boot` :  the number of bootstrap to be used for computing p-value  
     - The number of bootstrap to calculate p value.
