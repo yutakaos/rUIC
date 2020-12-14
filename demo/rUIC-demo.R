@@ -11,9 +11,9 @@
 #------------------------------------------------------------------------------------------#
 
 # Load library
-library(rUIC);    packageVersion("rUIC")    # 0.1.4
+library(rUIC);    packageVersion("rUIC")    # 0.1.5
 library(ggplot2); packageVersion("ggplot2") # 3.3.2
-library(cowplot); packageVersion("cowplot") # 1.0.0
+library(cowplot); packageVersion("cowplot") # 1.1.0
 theme_set(theme_cowplot())
 
 # Create output directory
@@ -31,13 +31,13 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
 block <- data.frame(t = 1:tl, x = x, y = y)
 
 # No.1: Determine the optimal embedding dimension using simplex projection
-## Univariate UIC-version simplex projection
-simp_x <- rUIC::simplex(block, lib_var = "x", E = 1:8, tau = 1, tp = 1)
-simp_y <- rUIC::simplex(block, lib_var = "y", E = 1:8, tau = 1, tp = 1)
+## Univariate simplex projection
+simp_x <- rUIC::simplex(block, lib_var = "x", E = 0:8, tau = 1, tp = 1)
+simp_y <- rUIC::simplex(block, lib_var = "y", E = 0:8, tau = 1, tp = 1)
 
-## Multivariate UIC-version simplex projection
-simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 1:8, tau = 1, tp = 1, Enull = "adaptive")
-simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1, tp = 1, Enull = "adaptive")
+## Multivariate simplex projection
+simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
+simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
 
 # Select the optimal embedding dimension
 Exy <- with(simp_xy, max(c(0, E[pval < 0.05])))
@@ -53,11 +53,11 @@ uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, t
 
 # No.4: Wrapper functions for computing UIC
 ## compute UIC using optimal embedding dimension (the same results as No.3)
-uic_opt_xy <- rUIC::uic.optimal(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1, tp = -4:4)
-uic_opt_yx <- rUIC::uic.optimal(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1, tp = -4:4)
+uic_opt_xy <- rUIC::uic.optimal(block, lib_var = "x", tar_var = "y", E = 0:8, tau = 1, tp = -4:4)
+uic_opt_yx <- rUIC::uic.optimal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
 ## compute UIC marginalizing embedding dimension
-uic_mar_xy <- rUIC::uic.marginal(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1, tp = -4:4)
-uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1, tp = -4:4)
+uic_mar_xy <- rUIC::uic.marginal(block, lib_var = "x", tar_var = "y", E = 0:9, tau = 1, tp = -4:4)
+uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
 
 # ------------------------- Visualize results -------------------------#
 # Visualize time series

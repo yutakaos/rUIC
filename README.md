@@ -4,7 +4,7 @@ A quick tutorial of rUIC package (for deails, see the package manual)
 
 ## Installation
 
-__These installation steps are temporal because this repository is currently private (this message will be deleted in the future).__
+__These installation steps are temporal because the repository is currently private (this section will be changed in the future).__
 
 1. Click "clone or download" and download the zip file.
 2. Decompress the zip file in a working directory. "rUIC-master" folder will be created.
@@ -15,9 +15,9 @@ devtools::install(pkg = 'rUIC-master', reload = TRUE, quick = FALSE)
 ```
 ## A quick tutorial
 
-### Load library and generate model time series
+### Load library and generate model time-series
 ```r
-library(rUIC); packageVersion("rUIC") # v0.1.4
+library(rUIC); packageVersion("rUIC") # v0.1.5
 
 ## simulate logistic map
 tl <- 400  # time length
@@ -32,30 +32,30 @@ block = data.frame(t = 1:tl, x = x, y = y)
 ```
 <figure>
 <img src="demo/demo_figures/time_series.png" width="70%">
-<figcaption><i>Figure 1 | Model time series. Red and blue lines indicate time series of x and y, respectively.</i></figcaption>
+<figcaption><i>Figure 1 | Model time-series. Red and blue lines indicate time-series of x and y, respectively. </i></figcaption>
 </figure>
  
 
 ### Perform simplex projection and determine the optimal embedding dimension
 ```r
 # No.1: Determine the optimal embedding dimension using simplex projection
-## Univariate UIC-version simplex projection
-simp_x <- rUIC::simplex(block, lib_var = "x", E = 1:8, tau = 1, tp = 1)
-simp_y <- rUIC::simplex(block, lib_var = "y", E = 1:8, tau = 1, tp = 1)
+## Univariate simplex projection
+simp_x <- rUIC::simplex(block, lib_var = "x", E = 0:8, tau = 1, tp = 1)
+simp_y <- rUIC::simplex(block, lib_var = "y", E = 0:8, tau = 1, tp = 1)
 
-## Multivariate UIC-version simplex projection
-simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 1:8, tau = 1, tp = 1, Enull = "adaptive")
-simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 1:8, tau = 1, tp = 1, Enull = "adaptive")
+## Multivariate simplex projection
+simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
+simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
 
-# Select the optimal embedding dimension
+# Determine the optimal embedding dimension
 Exy <- with(simp_xy, max(c(0, E[pval < 0.05])))
 Eyx <- with(simp_yx, max(c(0, E[pval < 0.05])))
 ```
-- The optimal embedding dimensions used for `rUIC::uic()` should be determined based on multivariate simplex projection.<br>
+The optimal embedding dimension used for `rUIC::uic()` should be determined based on multivariate simplex projection.<br>
 
 <figure>
 <img src="demo/demo_figures/simplex_rmse.png" width="70%">
-<figcaption><i>Figure 2 | RMSE of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>, y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>, x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill compared with null model (specified by 'Enull'). For example, a red point in the top-right panel means that RMSE at E = 1 significantly improved than that at E = 0 while RMSEs at E > 1 are not significantly better than RMSE at E = 1, suggesting that the optimal embedding dimension for x is 1.</i></figcaption>
+<figcaption><i>Figure 2 | Results of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>, y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>, x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill (RMSE) compared with null model (specified by 'Enull'). </i></figcaption>
 </figure>
 
 
@@ -65,45 +65,46 @@ Eyx <- with(simp_yx, max(c(0, E[pval < 0.05])))
 xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, tp = -1)
 xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -1)
 ```
-- Cross mapping show that x can be accurately predicted from y (left panel), suggesting that x causally influences y. On the other hand, y cannot be predicted from x, suggesting that y does not have causal influences on x.
+Cross mapping shows that y can be accurately predicted from x (right panel) while x cannot be predicted from y (left panel). It suggests that x causally influences y.
 
 <figure>
 <img src="demo/demo_figures/xmap.png" width="70%">
-<figcaption><i>Figure 3 | Predicted and observed values based on cross-mapping. Red dashed lines indicate 1:1 line.</i></figcaption>
+<figcaption><i>Figure 3 | Predicted and observed values based on cross-mapping. Red dashed lines indicate a 1:1 line. </i></figcaption>
 </figure>
 
 
-### Compute UIC for different time-lag (`tp`)
+### Compute UIC for different time-lag
 ```r
 # No.3: Compute UIC
 uic_xy <- rUIC::uic(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, tp = -4:4)
 uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -4:4)
 ```
-- The result suggests that x causally drives y and the effect time-lag is 1, being consistent with the model equations.
+The result suggests that x causally drives y and the optimal time-lag is 1, being consistent with the model equations.
 
 <figure>
 <img src="demo/demo_figures/uic.png" width="70%" align="middle">
-<figcaption><i>Figure 4 | UIC at different time-lags (tp). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags, which suggests that causal influences from x to y occur at time lag -1.</i></figcaption>
+<figcaption><i>Figure 4 | UIC at different time-lags (tp). Red points indicate UIC values are significant. Gray region in the right panel indicate the largest UIC value among the tested time-lags, which suggests that causal influence from x to y occur at time-lag 1 (i.e., the causal time-lag = -tp). </i></figcaption>
 </figure>
+
 
 ### Wrapper functions for computing UIC
 
-Two wrapper functions are implemented to compute UIC without manual exploreing embedding dimensions. `rUIC::uic.optimal` compute UIC using optimal embedding dimension, which returns the same results as No.3. `rUIC::uic.marginal` compute UIC using model average technique (and marginalizing explored embedding dimensions).
+Two wrapper functions are implemented to compute UIC without manually exploring embedding dimensions. `rUIC::uic.optimal` compute UIC by the optimal embedding dimension, which returns the same results as No.3. `rUIC::uic.marginal` compute UIC by model average technique (and marginalizing explored embedding dimensions).
 
 ```r
 # No.4: Wrapper functions for computing UIC
 ## compute UIC using optimal embedding dimension (the same results as No.3)
-uic_opt_xy <- rUIC::uic.optimal(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1, tp = -4:4)
-uic_opt_yx <- rUIC::uic.optimal(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1, tp = -4:4)
+uic_opt_xy <- rUIC::uic.optimal(block, lib_var = "x", tar_var = "y", E = 0:8, tau = 1, tp = -4:4)
+uic_opt_yx <- rUIC::uic.optimal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
 
 ## compute UIC marginalizing embedding dimension
-uic_mar_xy <- rUIC::uic.marginal(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1, tp = -4:4)
-uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1, tp = -4:4)
+uic_mar_xy <- rUIC::uic.marginal(block, lib_var = "x", tar_var = "y", E = 0:8, tau = 1, tp = -4:4)
+uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
 ```
 
 <figure>
 <img src="demo/demo_figures/uic_wrapper.png" width="70%" align="middle">
-<figcaption><i>Figure 5 | UIC at different time-lags (tp) using rUIC::uic.optimal() (top) and rUIC::uic.marginal() (bottom). Red points indicate significant UIC values. Gray region in the right panel indicate the largest UIC among the tested time-lags.</i></figcaption>
+<figcaption><i>Figure 5 | UIC results at different time-lags (tp) using rUIC::uic.optimal (top) and rUIC::uic.marginal (bottom). Red points indicate that UIC values are significant. Gray region in the right panels indicate the largest UIC value among the tested time-lags. </i></figcaption>
 </figure>
 
 
