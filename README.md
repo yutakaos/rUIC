@@ -115,7 +115,7 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
     - _te_ value of simplex projection is expressed as follows:<br>
 **log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(Enull-1)&tau;</sub>_)**,<br>
     where **_x<sub>t</sub>_** is `lib_var` and **_y<sub>t</sub>_** is `cond_var`.
-    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis **_te_ > 0**, which means that the model with embedding dimension = _E_ improves forecast skills compared to that with embedding dimension = _Enull_.
+    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis **_te_ > 0**, which means that **the model with embedding dimension = _E_ improves forecast skills compared to that with embedding dimension = _Enull_**.
 
 - `xmap`: Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
@@ -123,14 +123,14 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
     - Specify `cond_var` for the multivariate cross-mapping.
 
 - `uic`: Perform uic and return statistics only.
-    - `E` should be **the optimal embedding dimension (estimated by `simplex`) + 1**.
+    - `E` should be the optimal embedding dimension (estimated by `simplex`) **+ 1**.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - Potential causal variables should be specified by `tar_var`.
     - Specify `cond_var` for the multivariate UIC.
     - _te_ value of uic is expressed as follows:<br>
 **log _p_(_y<sub>t+tp</sub>_ | _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_, _z<sub>t</sub>_) - log _p_(_y<sub>t+tp</sub>_ | _x<sub>t-&tau;</sub>_, _x<sub>t-2&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_, _z<sub>t</sub>_)**,<br>
     where **_x<sub>t</sub>_** is `lib_var`, **_y<sub>t</sub>_** is `tar_var` and **_z<sub>t</sub>_** is `cond_var`.
-    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis **_te_ > 0**, which means "y causes x in the sense of transfer entropy".
+    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis **_te_ > 0**, which means **y causes x in the sense of transfer entropy**.
 
 - `uic.optimal`: Wrapper function for computing UIC, which return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
