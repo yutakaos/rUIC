@@ -30,7 +30,7 @@
 #' \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 #' \code{rmse}   \tab \code{:} root mean squared error \cr
 #' \code{te}     \tab \code{:} transfer entropy \cr
-#' \code{pval}   \tab \code{:} bootstrap p-value for te > 0 \cr
+#' \code{pval}   \tab \code{:} bootstrap p-value to test alternative hypothesis, te > 0 \cr
 #' }
 #' 
 #' \code{nn} may be different between argument specification and output results
@@ -61,8 +61,8 @@
 #' block <- data.frame(t = 1:tl, x = x, y = y)
 #' 
 #' ## UIC
-#' op0 <- uic.optimal(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1, tp = -4:4)
-#' op1 <- uic.optimal(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1, tp = -4:4)
+#' op0 <- uic.optimal(block, lib_var = "x", tar_var = "y", E = 0:8, tau = 1, tp = -4:4)
+#' op1 <- uic.optimal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
 #' par(mfrow = c(2, 1))
 #' with(op0, plot(tp, te, type = "l"))
 #' with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))

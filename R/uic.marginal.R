@@ -2,7 +2,7 @@
 #' 
 #' \code{uic.marginal} returns model statistics computed from given multiple time series
 #' based on simplex projection and cross mapping. This function computes UIC using a model
-#' averaging technique (and marginalizing \code{E}). Thus, the users do not have to determine
+#' averaging technique (i.e., marginalizing \code{E}). Thus, the users do not have to determine
 #' the optimal \code{E} by themselves.
 #' 
 #' @details
@@ -28,7 +28,7 @@
 #' \code{n_pred} \tab \code{:} model-averaged number of time indices used for model predictions \cr
 #' \code{rmse}   \tab \code{:} model-averaged root mean squared error \cr
 #' \code{te}     \tab \code{:} model-averaged transfer entropy \cr
-#' \code{pval}   \tab \code{:} model-averaged bootstrap p-value for te > 0 \cr
+#' \code{pval}   \tab \code{:} bootstrap p-value to test alternative hypothesis, te > 0 \cr
 #' }
 #' 
 #' @seealso \link{simplex}, \link{uic}
@@ -46,8 +46,8 @@
 #' block <- data.frame(t = 1:tl, x = x, y = y)
 #' 
 #' ## UIC
-#' op0 <- uic.marginal(block, lib_var = "x", tar_var = "y", E = 1:10, tau = 1, tp = -4:4)
-#' op1 <- uic.marginal(block, lib_var = "y", tar_var = "x", E = 1:10, tau = 1, tp = -4:4)
+#' op0 <- uic.marginal(block, lib_var = "x", tar_var = "y", E = 0:8, tau = 1, tp = -4:4)
+#' op1 <- uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
 #' par(mfrow = c(2, 1))
 #' with(op0, plot(tp, te, type = "l"))
 #' with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))

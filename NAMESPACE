@@ -1,6 +1,5 @@
 useDynLib(rUIC, .registration = TRUE)
 
-export(set_nn)
 export(uic.optimal)
 export(uic.marginal)
 export(simplex)

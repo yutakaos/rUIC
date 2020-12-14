@@ -72,7 +72,7 @@
 #' \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 #' \code{rmse}   \tab \code{:} root mean squared error \cr
 #' \code{te}     \tab \code{:} transfer entropy \cr
-#' \code{pval}   \tab \code{:} bootstrap p-value for te > 0 \cr
+#' \code{pval}   \tab \code{:} bootstrap p-value to test alternative hypothesis, te > 0 \cr
 #' }
 #' 
 #' \code{nn} may be different between argument specification and output results
