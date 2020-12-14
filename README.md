@@ -160,23 +160,26 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 
 - `nn` : the number of neighbors used for prediction
     - **num_neighbors** argument in rEDM.
-    - "e+1" may be used (nn = E + 1). If a scalar value is specified, nn = rep(nn, length(E)).
-    - If vector is specified and if length(E) \neq length(nn), error will be returned.
+    - "e+1" can be used if nn = E + 1.
+    - If a scalar value is specified, nn = rep(nn, length(E)). The vector with length(E) != length(nn) cannot be specified.
 
-- `n_boot` :  the number of bootstrap to be used for computing p-value  
-    - The number of bootstrap to calculate p value.
+- `n_boot` :  the number of bootstrap to be used for computing _p_ value  
+    - The number of bootstrap to calculate _p_ value.
+    - _p_ value is returned if n_boot > 1.
 
 - `Enull` : the method to determine the embedding dimension of null model
-    - If "e-1" is used, Enull is E - 1. If "adaptive" is used, Enull is the largest E, which satisfied E < Enull and p-value < alpha (`alpha` is the significant level). 
+    - "e-1" may be used if Enull = E - 1.
+    - When "adaptive" is used, Enull is the largest E for E < Enull and pval < alpha (`alpha` is the significant level).
 
-- `scaling` : the local scaling (neighbor, velocity, no_scale)
-    - **This argument is experimental. May be changed in near future.**
-    - Method for local scaling of distance matrix. Implemented to improve noise-robustness.
+- `scaling` : the local scaling (neighbor, velocity or no_scale)
+    - **This argument is experimental. May be changed in the future.**
+    - Method for local scaling of distance matrix. It may improve noise robustness.
 
 - `is_naive` : whether rEDM-style estimator is used
-    - **This argument is experimental. May be changed in near future.**
-    - Whether to return naive estimator, whose bias is not corrected. If `FALSE`, the estimator bias is corrected using weights of neighbors.
-    - If `TRUE`, the result will be similar to Convergent Cross Mapping (CCM)
+    - **This argument is experimental. May be changed in the future.**
+    - Whether to return naive estimator. If `FALSE`, the estimator bias is corrected using weights of neighbors.
+    - If `TRUE`, the result will be similar to Convergent Cross Mapping (CCM) in rEDM package.
+
 
 ## Outputs in rUIC package
 - `E` : Embedding dimension
@@ -186,6 +189,6 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 - `Enull` : Embedding dimension of null model
 - `n_lib` : The number of time indices used for attractor reconstruction
 - `n_pred` : The number of time indices used for model predictions
-- `rmse` : Unbiased Root Mean Squared Error (RMSE)
+- `rmse` : Root mean squared error (RMSE)
 - `te` : Transfer entropy
-- `pval` : Bootstrap p-value for `te` > 0
+- `pval` : Bootstrap p-value to test alternative hypothesis te > 0
