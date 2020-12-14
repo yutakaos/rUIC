@@ -153,13 +153,13 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
     - A variable to be used for time-delay embedding.
 
 - `tar_var` : the name or column index of target data
-    - A variable to be predicted (same with **target_column** in rEDM).
+    - A variable to be predicted (same with **target_column** in rEDM package).
 
 - `cond_var` : the name or column index of conditional data
     - A third variable to be used for multivariate prediction or detection of indirect interactions.
 
 - `nn` : the number of neighbors used for prediction
-    - **num_neighbors** argument in rEDM.
+    - **num_neighbors** argument in rEDM package.
     - "e+1" can be used if nn = E + 1.
     - If a scalar value is specified, nn = rep(nn, length(E)). The vector with length(E) != length(nn) cannot be specified.
 
@@ -168,7 +168,7 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
     - _p_ value is returned if n_boot > 1.
 
 - `Enull` : the method to determine the embedding dimension of null model
-    - "e-1" may be used if Enull = E - 1.
+    - "e-1" can be used if Enull = E - 1.
     - When "adaptive" is used, Enull is the largest E for E < Enull and pval < alpha (`alpha` is the significant level).
 
 - `scaling` : the local scaling (neighbor, velocity or no_scale)
@@ -177,8 +177,8 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 
 - `is_naive` : whether rEDM-style estimator is used
     - **This argument is experimental. May be changed in the future.**
-    - Whether to return naive estimator. If `FALSE`, the estimator bias is corrected using weights of neighbors.
-    - If `TRUE`, the result will be similar to Convergent Cross Mapping (CCM) in rEDM package.
+    - Whether to return naive estimator. If FALSE, the estimator bias is corrected using weights of neighbors.
+    - If TRUE, the result will be similar to Convergent Cross Mapping (CCM) in rEDM package.
 
 
 ## Outputs in rUIC package
