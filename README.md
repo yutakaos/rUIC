@@ -177,7 +177,8 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 
 - `is_naive` : whether rEDM-style estimator is used
     - **This argument is experimental. May be changed in the future.**
-    - Whether to return naive estimator. If FALSE, the estimator bias is corrected using weights of neighbors.
+    - Whether to return naive estimator.
+    - If FALSE, the estimator bias is corrected using weights of neighbors.
     - If TRUE, the result will be similar to Convergent Cross Mapping (CCM) in rEDM package.
 
 
