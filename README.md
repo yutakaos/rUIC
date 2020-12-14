@@ -112,10 +112,10 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
 - `simplex`: Perform simplex projection and return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - Potential causal variables should be specified by `cond_var`.
-    - _te_ value is expressed as follows:
-**log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(Enull-1)&tau;</sub>_)**,
+    - _te_ value is expressed as follows:<br>
+**log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(Enull-1)&tau;</sub>_)**,<br>
     where **_x<sub>t</sub>_** is `lib_var` and **_y<sub>t</sub>_** is `cond_var`.
-    - Bootstrap _p_ value in the output tests alternative hypothesis _te_ > 0, which means "Probability of the improvements of prediction compared with null model with `Enull` embedding dimension".
+    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis _te_ > 0, which means the probability of improvements in model predictions between `E` and `Enull` embedding dimensions.
 
 - `xmap`: Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
