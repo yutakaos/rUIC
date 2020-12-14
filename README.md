@@ -111,10 +111,11 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
 ## Functions implemented in rUIC package
 - `simplex`: Perform simplex projection and return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
-    - Potential causal variable should be specified by `cond_var` augument.
-    - _te_ value is expressed as follows: **log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(Enull-1)&tau;</sub>_)**, where **_x<sub>t</sub>_** is `lib_var` and **_y<sub>t</sub>_** is `cond_var`.
-    - _p_ value indicates **_te_ < 0**, which means "Probability of the improvements of prediction compared with null model with `Enull` embedding dimension".
-    - Return _p_ value if `n_boot > 1`.
+    - Potential causal variables should be specified by `cond_var`.
+    - _te_ value is expressed as follows:
+**log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(Enull-1)&tau;</sub>_)**,
+    where **_x<sub>t</sub>_** is `lib_var` and **_y<sub>t</sub>_** is `cond_var`.
+    - Bootstrap _p_ value in the output tests alternative hypothesis _te_ > 0, which means "Probability of the improvements of prediction compared with null model with `Enull` embedding dimension".
 
 - `xmap`: Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
@@ -128,8 +129,7 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
     - Specify `cond_var` augument for the multivariate version of `uic`.
     - _te_ value is expressed as follows: **log _p_(_y<sub>t+tp</sub>_ | _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_, _z<sub>t</sub>_) - log _p_(_y<sub>t+tp</sub>_ | _x<sub>t-&tau;</sub>_, _x<sub>t-2&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_, _z<sub>t</sub>_)**, where **_x<sub>t</sub>_** is `lib_var`, **_y<sub>t</sub>_** is `tar_var` and **_z<sub>t</sub>_** is `cond_var`.
     - _p_ value indicates **_te_ < 0**, which means "Probability that y causes x in the sense of transfer entropy".
-    - Return _p_ value if `n_boot > 1`.
-    
+
 - `uic.optimal`: Wrapper function for computing UIC, which return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - UIC is computed using the optimal embedding dimension. The users do not have to determine the optimal `E` by themselves.
