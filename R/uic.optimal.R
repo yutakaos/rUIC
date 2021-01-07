@@ -74,7 +74,7 @@ uic.optimal = function (
     lib_var = 1, tar_var = 2, cond_var = NULL,
     norm = 1, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000, alpha = 0.05,
     scaling = c("neighbor", "velocity", "no_scale"),
-    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
+    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE, seed = NULL)
 {
     if (length(nn) != 1)
         stop("nn must be spcified as an integer or \"e+1\".")
@@ -83,7 +83,7 @@ uic.optimal = function (
         simplex(
             block, lib, pred, lib_var, c(tar_var, cond_var),
             norm, E, tau = x, tp = x, nn, n_boot, Enull = "adaptive", alpha,
-            scaling, exclusion_radius, epsilon, is_naive)
+            scaling, exclusion_radius, epsilon, is_naive, seed)
     )
     
     op_uic = lapply(op_simplex, function (op)
@@ -92,7 +92,7 @@ uic.optimal = function (
         uic(
             block, lib, pred, lib_var, tar_var, cond_var,
             norm, E = optE, op$tau[1], tp, nn, n_boot,
-            scaling, exclusion_radius, epsilon, is_naive)
+            scaling, exclusion_radius, epsilon, is_naive, seed)
         
     })
     do.call(rbind, op_uic)

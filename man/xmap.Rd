@@ -20,7 +20,8 @@ xmap(
   scaling = c("neighbor", "velocity", "no_scale"),
   exclusion_radius = NULL,
   epsilon = NULL,
-  is_naive = FALSE
+  is_naive = FALSE,
+  seed = NULL
 )
 }
 \arguments{
@@ -62,6 +63,8 @@ If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.}
 \item{epsilon}{the filtering to exclude nearest neighbors if epsilon is farther than their distances.}
 
 \item{is_naive}{specifies whether the rEDM-style estimator is used.}
+
+\item{seed}{the random seed.}
 }
 \value{
 A list with model predictions and its statistics.
@@ -85,7 +88,7 @@ A list with model predictions and its statistics.
 \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 \code{rmse}   \tab \code{:} root mean squared error \cr
 \code{te}     \tab \code{:} transfer entropy \cr
-\code{pval}   \tab \code{:} bootstrap p-value for te > 0 \cr
+\code{pval}   \tab \code{:} bootstrap p-value to test alternative hypothesis, te > 0 \cr
 }
 
 \code{nn} may be different between argument specification and output results

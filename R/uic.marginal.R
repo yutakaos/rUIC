@@ -59,7 +59,7 @@ uic.marginal = function (
     lib_var = 1, tar_var = 2, cond_var = NULL,
     norm = 1, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
     scaling = c("neighbor", "velocity", "no_scale"),
-    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
+    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE, seed = NULL)
 {
     if (length(nn) != 1)
         stop("nn must be spcified as an integer or \"e+1\".")
@@ -68,7 +68,7 @@ uic.marginal = function (
         op = simplex(
             block, lib, pred, lib_var, c(tar_var, cond_var),
             norm, E, tau = x, tp = x, nn, 0, Enull = "e-1", 0.05,
-            scaling, exclusion_radius, epsilon, is_naive)
+            scaling, exclusion_radius, epsilon, is_naive, seed)
         op$weight = with(op, exp(-log(rmse) / 2 - n_lib / n_pred / 2))
         op$weight = with(op, weight / sum(weight))
         op
@@ -79,7 +79,7 @@ uic.marginal = function (
         opU = uic(
             block, lib, pred, lib_var, tar_var, cond_var,
             norm, E + 1, opS$tau[1], tp, nn, n_boot,
-            scaling, exclusion_radius, epsilon, is_naive)
+            scaling, exclusion_radius, epsilon, is_naive, seed)
         
         opM = lapply(tp, function (x) {
             op = apply(subset(opU, tp == x) * opS$weight, 2, sum)

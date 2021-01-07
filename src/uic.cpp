@@ -31,6 +31,11 @@ public:
         set_estimator_R();
     }
     
+    void set_seed_R (size_t seed)
+    {
+        std::srand(seed);
+    }
+    
     void set_norm_params_R (
         size_t norm_type = 1, size_t scale_type = 1, double p = 0.5,
         int exclusion_radius = 0, double epsilon = -1)
@@ -315,6 +320,7 @@ RCPP_MODULE (rUIC)
 {
     class_<rUIC> ("rUIC")
     .constructor()
+    .method("set_seed"     , &rUIC::set_seed_R)
     .method("set_norm"     , &rUIC::set_norm_params_R)
     .method("set_estimator", &rUIC::set_estimator_R)
     .method("xmap"         , &rUIC::xmap_R)

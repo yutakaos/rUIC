@@ -79,7 +79,7 @@ simplex = function (
     norm = 1, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
     Enull = c("e-1", "adaptive"), alpha = 0.05,
     scaling = c("neighbor", "velocity", "no_scale"),
-    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
+    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE, seed = NULL)
 {
     if (length(lib_var) != 1)
     {
@@ -106,6 +106,7 @@ simplex = function (
     z = as.matrix(block[,cond_var])
     
     uic = new(rUIC)
+    if (!is.null(seed)) uic$set_seed(seed)
     uic$set_norm(NORM, LS, p, exclusion_radius, epsilon)
     uic$set_estimator(is_naive)
     

@@ -78,7 +78,7 @@ uic = function (
     lib_var = 1, tar_var = 2, cond_var = NULL,
     norm = 1, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
     scaling = c("neighbor", "velocity", "no_scale"),
-    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
+    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE, seed = NULL)
 {
     if (length(tar_var) != 1)
     {
@@ -107,6 +107,7 @@ uic = function (
     if (!is.null(cond_var)) z = as.matrix(block[,cond_var])
     
     uic = new(rUIC)
+    if (!is.null(seed)) uic$set_seed(seed)
     uic$set_norm(NORM, LS, p, exclusion_radius, epsilon)
     uic$set_estimator(is_naive)
     op = uic$xmap_seq(n_boot, x, y, z, lib, pred, E , nn, tau, tp)
