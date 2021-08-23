@@ -3,15 +3,9 @@
 A quick tutorial of rUIC package (for deails, see the package manual)
 
 ## Installation
-
-__These installation steps are temporal because the repository is currently private (this section will be changed in the future).__
-
-1. Click "clone or download" and download the zip file.
-2. Decompress the zip file in a working directory. "rUIC-master" folder will be created.
-3. Excute the following command.
 ``` r
-library(devtools)
-devtools::install(pkg = 'rUIC-master', reload = TRUE, quick = FALSE)
+library(remotes)
+remotes::install_github("yutakaos/rUIC")
 ```
 ## A quick tutorial
 
