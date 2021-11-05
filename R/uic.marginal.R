@@ -8,9 +8,9 @@
 #' @details
 #' \code{scaling} specifies the methods for local scaling of distance matrix.
 #' The following distances can be used as local scaling factors:
-#' the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
-#' the mean distances to nearest time indices (\code{scaling = velocity}) and
-#' the constant distance (\code{scaling = no_scale}).
+#' the constant distance (\code{scaling = no_scale}),
+#' the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}), and
+#' the mean distances to nearest time indices (\code{scaling = velocity}).
 #' 
 #' @inheritParams uic
 #' @param nn
@@ -58,7 +58,7 @@ uic.marginal = function (
     block, lib = c(1, NROW(block)), pred = lib,
     lib_var = 1, tar_var = 2, cond_var = NULL,
     norm = 1, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
-    scaling = c("neighbor", "velocity", "no_scale"),
+    scaling = c("no_scale", "neighbor", "velocity"),
     exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE, seed = NULL)
 {
     if (length(nn) != 1)
