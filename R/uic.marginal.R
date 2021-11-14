@@ -1,35 +1,16 @@
-#' Wrapper function for computing marginal unified information-theoretic causality
+#' Wrapper function for computing unified information-theoretic causality
+#' for the marginal embedding dimension.
 #' 
 #' \code{uic.marginal} returns model statistics computed from given multiple time series
-#' based on simplex projection and cross mapping. This function computes UIC using a model
+#' based on simplex projection and cross mapping. This function computes UICs using a model
 #' averaging technique (i.e., marginalizing \code{E}). Thus, the users do not have to determine
 #' the optimal \code{E} by themselves.
 #' 
-#' @details
-#' \code{scaling} specifies the methods for local scaling of distance matrix.
-#' The following distances can be used as local scaling factors:
-#' the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
-#' the mean distances to nearest time indices (\code{scaling = velocity}) and
-#' the constant distance (\code{scaling = no_scale}).
-#' 
 #' @inheritParams uic
-#' @param nn
-#' the number of nearest neighbors to use. Must be an integer or "e+1".
-#' If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.
 #' 
 #' @return
 #' A data.frame where each row represents model statistics computed from a parameter set.
-#' \tabular{ll}{
-#' \code{E}      \tab \code{:} model-averaged embedding dimension \cr
-#' \code{tau}    \tab \code{:} time-lag \cr
-#' \code{tp}     \tab \code{:} time prediction horizon \cr
-#' \code{nn}     \tab \code{:} model-averaged number of nearest neighbors \cr
-#' \code{n_lib}  \tab \code{:} model-averaged number of time indices used for attractor reconstruction \cr
-#' \code{n_pred} \tab \code{:} model-averaged number of time indices used for model predictions \cr
-#' \code{rmse}   \tab \code{:} model-averaged root mean squared error \cr
-#' \code{te}     \tab \code{:} model-averaged transfer entropy \cr
-#' \code{pval}   \tab \code{:} bootstrap p-value to test alternative hypothesis, te > 0 \cr
-#' }
+#' See the details in Value section of \code{uic}.
 #' 
 #' @seealso \link{simplex}, \link{uic}
 #' 
@@ -57,18 +38,17 @@
 uic.marginal = function (
     block, lib = c(1, NROW(block)), pred = lib,
     lib_var = 1, tar_var = 2, cond_var = NULL,
-    norm = 1, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
-    scaling = c("neighbor", "velocity", "no_scale"),
-    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE, seed = NULL)
+    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1",
+    scaling = c("no_scale", "neighbor", "velocity"),
+    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
 {
-    if (length(nn) != 1)
-        stop("nn must be spcified as an integer or \"e+1\".")
+    if (length(nn) != 1) stop("'nn' must be spcified as an integer or \"e+1\".")
     
     op_simplex = lapply(tau, function (x) {
         op = simplex(
             block, lib, pred, lib_var, c(tar_var, cond_var),
-            norm, E, tau = x, tp = x, nn, 0, Enull = "e-1", 0.05,
-            scaling, exclusion_radius, epsilon, is_naive, seed)
+            norm, E, tau = x, tp = x, nn, Enull = "e-1", 0.05,
+            scaling, exclusion_radius, epsilon, is_naive)
         op$weight = with(op, exp(-log(rmse) / 2 - n_lib / n_pred / 2))
         op$weight = with(op, weight / sum(weight))
         op
@@ -78,8 +58,8 @@ uic.marginal = function (
     {
         opU = uic(
             block, lib, pred, lib_var, tar_var, cond_var,
-            norm, E + 1, opS$tau[1], tp, nn, n_boot,
-            scaling, exclusion_radius, epsilon, is_naive, seed)
+            norm, E + 1, opS$tau[1], tp, nn,
+            scaling, exclusion_radius, epsilon, is_naive)
         
         opM = lapply(tp, function (x) {
             op = apply(subset(opU, tp == x) * opS$weight, 2, sum)
@@ -88,7 +68,11 @@ uic.marginal = function (
         })
         data.frame(do.call(rbind, opM))
     })
-    do.call(rbind, op_uic)
+    op_uic = do.call(rbind, op_uic)
+    
+    int_par = c("E","nn","E_R","nn_R","n_lib","n_pred")
+    op_uic[,int_par] = round(op_uic[,int_par], 1)
+    op_uic
 }
 
 # End

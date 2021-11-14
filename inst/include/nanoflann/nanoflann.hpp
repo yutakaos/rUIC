@@ -44,8 +44,8 @@
  *  #include <nanoflann_Lp.hpp> in your code.
  */
 
-#ifndef _ruic_NANOFLANN_LP_HPP_
-#define _ruic_NANOFLANN_LP_HPP_
+#ifndef _NANOFLANN_LP_HPP_
+#define _NANOFLANN_LP_HPP_
 
 //* Header(s) */
 #include <algorithm>
@@ -698,6 +698,11 @@ namespace nanoflann
         void set_norm (NORM norm_type = L2, bool do_root = true, num_t p = 0.5)
         {
             norm.set_norm(norm_type, do_root, p);
+        }
+        
+        void set_norm (NormStruct<num_t> norm_ip)
+        {
+            norm = norm_ip;
         }
         
         size_t knn_search (

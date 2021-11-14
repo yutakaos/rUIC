@@ -3,14 +3,13 @@
  *------------------------------------------------------------------------------------------#
  */
 
-
-#ifndef _ruic_local_scaling_hpp_
-#define _ruic_local_scaling_hpp_
+#ifndef _uic_local_scaling_hpp_
+#define _uic_local_scaling_hpp_
 
 //* Header(s) */
 #include <limits> // std::numeric_limits
 #include <vector> // std::vector
-#include <nanoflann_uic.hpp>
+#include "nanoflann/nanoflann.hpp"
 
 
 namespace UIC
@@ -112,29 +111,25 @@ namespace UIC
         const std::vector<int> &vidx_lib,
         const std::vector<int> &vidx_prd,
         const int exclusion_radius,
-        const nanoflann::NORM norm_type,
-        const num_t p = 0.5)
+        const nanoflann::NormStruct<num_t> &norm)
     {
         std::vector<num_t>().swap(*scale_lib);
         std::vector<num_t>().swap(*scale_prd);
-        if (scale_type == no_scale || n_dim == 0)
+        if (scale_type == UIC::no_scale || n_dim == 0)
         {
             (*scale_lib).resize(vidx_lib.size(), 1);
             (*scale_prd).resize(vidx_prd.size(), 1);
-            return;
         }
-        else if (scale_type == neighbor)
+        else if (scale_type == UIC::neighbor)
         {
             nanoflann::KDTreeSingleIndexAdaptor<num_t> kd_tree;
             kd_tree.initialize(n_dim, x_lib, idx_time_lib, exclusion_radius);
-            kd_tree.set_norm(norm_type, true, p);
+            kd_tree.set_norm(norm);
             dist::scaling_neighbor(scale_lib, n_dim, kd_tree, vidx_lib, x_lib, idx_time_lib);
             dist::scaling_neighbor(scale_prd, n_dim, kd_tree, vidx_prd, x_prd, idx_time_prd);
         }
-        else if (scale_type == velocity)
+        else if (scale_type == UIC::velocity)
         {
-            nanoflann::NormStruct<num_t> norm;
-            norm.set_norm(norm_type, true, p);
             dist::scaling_velocity(scale_lib, n_dim, norm, vidx_lib, x_lib, idx_time_lib);
             dist::scaling_velocity(scale_prd, n_dim, norm, vidx_prd, x_prd, idx_time_prd);
         }

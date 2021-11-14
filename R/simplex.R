@@ -4,23 +4,25 @@
 #' based on simplex projection. This function simultaneously performs simplex projections
 #' for all possible combinations of \code{E}, \code{tau} and \code{tp}.
 #' 
-#' @details
-#' \code{scaling} specifies the methods for local scaling of distance matrix.
-#' The following distances can be used as local scaling factors:
-#' the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
-#' the mean distances to nearest time indices (\code{scaling = velocity}) and
-#' the constant distance (\code{scaling = no_scale}).
-#' 
 #' @inheritParams uic
 #' @param lib_var
 #' the name or column index of a library (and target) variable.
 #' The specified variable is used as a response variable and its time-delay variables are
 #' used as explanatory variables.
 #' @param Enull
-#' specifies the method to determine the embedding dimension of null model. If "e-1" is used,
-#' Enull is E - 1. If "adaptive" is used, Enull is the largest E for E < Enull and pval < alpha. 
+#' specifies the method to determine the embedding dimension of reference model (\code{E_R}).
+#' If "e-1" is used, \code{E_R} is E - 1. If "adaptive" is used, \code{E_R} depends on
+#' the model results with lower embedding dimensions. 
 #' @param alpha
 #' the significant level to use when Enull = "adaptive". Default is 0.05.
+#' 
+#' @details
+#' Transfer entropy is computed as follows:
+#' \deqn{
+#' \sum_{t} log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(E -1)\tau}, z_{t}) -
+#'          log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(E_R-1)\tau}, z_{t})
+#' }
+#' where \eqn{x} is library and \eqn{z} is condition.
 #' 
 #' @return
 #' A data.frame where each row represents model statistics computed from a parameter set.
@@ -29,26 +31,15 @@
 #' \code{tau}    \tab \code{:} time-lag \cr
 #' \code{tp}     \tab \code{:} time prediction horizon \cr
 #' \code{nn}     \tab \code{:} number of nearest neighbors \cr
-#' \code{Enull}  \tab \code{:} embedding dimension of null model \cr
+#' \code{E_R}    \tab \code{:} embedding dimension of reference model \cr
+#' \code{nn_R}   \tab \code{:} number of nearest neighbors of reference model \cr
 #' \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 #' \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 #' \code{rmse}   \tab \code{:} root mean squared error \cr
 #' \code{te}     \tab \code{:} transfer entropy \cr
-#' \code{pval}   \tab \code{:} bootstrap p-value to test alternative hypothesis, te > 0 \cr
+#' \code{pval}   \tab \code{:} p-value to test alternative hypothesis, te > 0 \cr
 #' }
-#' 
-#' \code{nn} may be different between argument specification and output results
-#' when some nearest neighbors have tied distances.
-#' 
-#' \code{rmse} is the unbiased root mean squared error computed from model predictions.
-#' If \code{is_naive = TRUE}, the raw root mean squared error is returned.
-#' 
-#' \code{te} is transfer entropy based on the difference of two simplex projection:
-#' \deqn{
-#' \sum_{t} log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(E -1)\tau}, z_{t}) -
-#'          log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(Enull-1)\tau}, z_{t})
-#' }
-#' where \eqn{x} is library and \eqn{z} is condition.
+#' Note that the mumimum value of p-value is 0.001.
 #' 
 #' @seealso \link{xmap}, \link{uic}
 #' 
@@ -75,16 +66,13 @@
 #' 
 simplex = function (
     block, lib = c(1, NROW(block)), pred = lib,
-    lib_var = 1, cond_var = 2,
-    norm = 1, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
+    lib_var = 1, cond_var = NULL,
+    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1",
     Enull = c("e-1", "adaptive"), alpha = 0.05,
-    scaling = c("neighbor", "velocity", "no_scale"),
-    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE, seed = NULL)
+    scaling = c("no_scale", "neighbor", "velocity"),
+    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
 {
-    if (length(lib_var) != 1)
-    {
-        stop("Only a target variable (tar_var) must be specifed.")
-    }
+    if (length(lib_var) != 1) stop("The length of 'lib_var' must be 1.")
     lib  = rbind(lib)
     pred = rbind(pred)
     
@@ -94,19 +82,19 @@ simplex = function (
     else if (norm == 1) NORM = 1  # L1 norm
     else if (norm <= 0) NORM = 2  # Max norm
     
-    nn = set_nn(nn, E)
-    ord = order(E)
-    E  = E [ord]
-    nn = nn[ord]
+    nn  = set_nn(nn, E)
+    idx = order(E)
+    E   = E [idx]
+    nn  = nn[idx]
     if (is.null(exclusion_radius)) exclusion_radius = 0;
     if (is.null(epsilon)) epsilon = -1
     LS = switch(match.arg(scaling), "no_scale" = 0, "neighbor" = 1, "velocity" = 2)
     
-    x = as.matrix(block[,lib_var])
-    z = as.matrix(block[,cond_var])
+    x = as.matrix(block[,lib_var ])  # data.frame to matrix
+    z = matrix()
+    if (!is.null(cond_var)) z = as.matrix(block[,cond_var])
     
     uic = new(rUIC)
-    if (!is.null(seed)) uic$set_seed(seed)
     uic$set_norm(NORM, LS, p, exclusion_radius, epsilon)
     uic$set_estimator(is_naive)
     
@@ -114,7 +102,7 @@ simplex = function (
     Enull = match.arg(Enull)
     if (Enull == "e-1")
     {
-        op = uic$simplex_seq(n_boot, x, z, lib, pred, E, nn, tau, tp)
+        op = uic$simplex_seq(x, z, lib, pred, E, nn, tau, tp)
         op = op[order(op$tau),]
         op = op[order(op$tp),]
     }
@@ -126,7 +114,7 @@ simplex = function (
             Enull = rep(0, length(tp))
             for (i in seq_along(E))
             {
-                op_i = uic$simplex(n_boot, x, z, lib, pred, E[i], nn[i], tau_, tp, Enull)
+                op_i = uic$simplex(x, z, lib, pred, E[i], nn[i], tau_, tp, Enull)
                 Enull[op_i$pval < alpha] = with(op_i, E[pval < alpha]) 
                 op = rbind(op, op_i)
             }

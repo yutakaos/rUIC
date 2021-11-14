@@ -11,7 +11,7 @@ remotes::install_github("yutakaos/rUIC")
 
 ### Load library and generate model time-series
 ```r
-library(rUIC); packageVersion("rUIC") # v0.1.5
+library(rUIC); packageVersion("rUIC") # v0.2.0
 
 ## simulate logistic map
 tl <- 400  # time length
@@ -24,6 +24,7 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
 }
 block = data.frame(t = 1:tl, x = x, y = y)
 ```
+
 <figure>
 <img src="demo/demo_figures/time_series.png" width="70%">
 <figcaption><i>Figure 1 | Model time-series. Red and blue lines indicate time-series of x and y, respectively. </i></figcaption>
@@ -34,16 +35,16 @@ block = data.frame(t = 1:tl, x = x, y = y)
 ```r
 # No.1: Determine the optimal embedding dimension using simplex projection
 ## Univariate simplex projection
-simp_x <- rUIC::simplex(block, lib_var = "x", E = 0:8, tau = 1, tp = 1)
-simp_y <- rUIC::simplex(block, lib_var = "y", E = 0:8, tau = 1, tp = 1)
+simp_x <- rUIC::simplex(block, lib_var = "x", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
+simp_y <- rUIC::simplex(block, lib_var = "y", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
 
 ## Multivariate simplex projection
 simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
 simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
 
 # Determine the optimal embedding dimension
-Exy <- with(simp_xy, max(c(0, E[pval < 0.05])))
-Eyx <- with(simp_yx, max(c(0, E[pval < 0.05])))
+Exy <- with(simp_xy, max(c(0, E[pval < 0.05]))) + 1
+Eyx <- with(simp_yx, max(c(0, E[pval < 0.05]))) + 1
 ```
 The optimal embedding dimension used for `rUIC::uic` should be determined based on multivariate simplex projection.<br>
 
@@ -56,8 +57,8 @@ The optimal embedding dimension used for `rUIC::uic` should be determined based 
 ### Perform cross-mapping
 ```r
 # No.2: Cross-map
-xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, tp = -1)
-xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -1)
+xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -1)
+xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp = -1)
 ```
 Cross mapping shows that x can be accurately predicted from y (right panel) while y cannot be predicted from x (left panel). It suggests that the system has the unidirectional, causal influence from x to y.
 
@@ -70,8 +71,8 @@ Cross mapping shows that x can be accurately predicted from y (right panel) whil
 ### Compute UIC for different time-lag
 ```r
 # No.3: Compute UIC
-uic_xy <- rUIC::uic(block, lib_var = "x", tar_var = "y", E = Exy + 1, tau = 1, tp = -4:4)
-uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx + 1, tau = 1, tp = -4:4)
+uic_xy <- rUIC::uic(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -4:4)
+uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp = -4:4)
 ```
 The result suggests that x causally drives y and the optimal time-lag is 1, being consistent with the model equations.
 

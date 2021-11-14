@@ -9,20 +9,18 @@ simplex(
   lib = c(1, NROW(block)),
   pred = lib,
   lib_var = 1,
-  cond_var = 2,
-  norm = 1,
+  cond_var = NULL,
+  norm = 2,
   E = 1,
   tau = 1,
   tp = 0,
   nn = "e+1",
-  n_boot = 2000,
   Enull = c("e-1", "adaptive"),
   alpha = 0.05,
-  scaling = c("neighbor", "velocity", "no_scale"),
+  scaling = c("no_scale", "neighbor", "velocity"),
   exclusion_radius = NULL,
   epsilon = NULL,
-  is_naive = FALSE,
-  seed = NULL
+  is_naive = FALSE
 )
 }
 \arguments{
@@ -51,24 +49,23 @@ If \code{norm} \eqn{\le} 0, Maximum distance is used as the special case of Lp d
 \item{tp}{the time index to predict.}
 
 \item{nn}{the number of nearest neighbors to use.
-If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.}
+If \code{nn = "e+1"} (or \code{nn = -1}), \code{nn} is set to \code{E} + 1.
+If \code{nn = 0}, \code{nn} is set to the number of all data.
+Output \code{nn} is sometimes different from the specified (see Details section in \code{xmap}).}
 
-\item{n_boot}{the number of bootstraps to use for computing p-value.}
-
-\item{Enull}{specifies the method to determine the embedding dimension of null model. If "e-1" is used,
-Enull is E - 1. If "adaptive" is used, Enull is the largest E for E < Enull and pval < alpha.}
+\item{Enull}{specifies the method to determine the embedding dimension of reference model (\code{E_R}).
+If "e-1" is used, \code{E_R} is E - 1. If "adaptive" is used, \code{E_R} depends on
+the model results with lower embedding dimensions.}
 
 \item{alpha}{the significant level to use when Enull = "adaptive". Default is 0.05.}
 
-\item{scaling}{the method for local scaling of distance matrix. See Details.}
+\item{scaling}{the method for local scaling of distance matrix. See Details section in \code{xmap}.}
 
 \item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within exclusion radius.}
 
 \item{epsilon}{the filtering to exclude nearest neighbors if epsilon is farther than their distances.}
 
-\item{is_naive}{specifies whether the rEDM-style estimator is used.}
-
-\item{seed}{the random seed.}
+\item{is_naive}{specifies whether naive estimator is used or not. See Details section in \code{xmap}.}
 }
 \value{
 A data.frame where each row represents model statistics computed from a parameter set.
@@ -77,26 +74,15 @@ A data.frame where each row represents model statistics computed from a paramete
 \code{tau}    \tab \code{:} time-lag \cr
 \code{tp}     \tab \code{:} time prediction horizon \cr
 \code{nn}     \tab \code{:} number of nearest neighbors \cr
-\code{Enull}  \tab \code{:} embedding dimension of null model \cr
+\code{E_R}    \tab \code{:} embedding dimension of reference model \cr
+\code{nn_R}   \tab \code{:} number of nearest neighbors of reference model \cr
 \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 \code{rmse}   \tab \code{:} root mean squared error \cr
 \code{te}     \tab \code{:} transfer entropy \cr
-\code{pval}   \tab \code{:} bootstrap p-value to test alternative hypothesis, te > 0 \cr
+\code{pval}   \tab \code{:} p-value to test alternative hypothesis, te > 0 \cr
 }
-
-\code{nn} may be different between argument specification and output results
-when some nearest neighbors have tied distances.
-
-\code{rmse} is the unbiased root mean squared error computed from model predictions.
-If \code{is_naive = TRUE}, the raw root mean squared error is returned.
-
-\code{te} is transfer entropy based on the difference of two simplex projection:
-\deqn{
-\sum_{t} log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(E -1)\tau}, z_{t}) -
-         log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(Enull-1)\tau}, z_{t})
-}
-where \eqn{x} is library and \eqn{z} is condition.
+Note that the mumimum value of p-value is 0.001.
 }
 \description{
 \code{simplex} returns model statistics computed from given multiple time series
@@ -104,11 +90,12 @@ based on simplex projection. This function simultaneously performs simplex proje
 for all possible combinations of \code{E}, \code{tau} and \code{tp}.
 }
 \details{
-\code{scaling} specifies the methods for local scaling of distance matrix.
-The following distances can be used as local scaling factors:
-the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
-the mean distances to nearest time indices (\code{scaling = velocity}) and
-the constant distance (\code{scaling = no_scale}).
+Transfer entropy is computed as follows:
+\deqn{
+\sum_{t} log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(E -1)\tau}, z_{t}) -
+         log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(E_R-1)\tau}, z_{t})
+}
+where \eqn{x} is library and \eqn{z} is condition.
 }
 \examples{
 ## simulate logistic map

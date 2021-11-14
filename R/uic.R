@@ -5,13 +5,6 @@
 #' information-theoretic causality computations for all possible combinations of
 #' \code{E}, \code{tau} and \code{tp}.
 #' 
-#' @details
-#' \code{scaling} specifies the methods for local scaling of distance matrix.
-#' The following distances can be used as local scaling factors:
-#' the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
-#' the mean distances to nearest time indices (\code{scaling = velocity}) and
-#' the constant distance (\code{scaling = no_scale}).
-#' 
 #' @inheritParams xmap
 #' @param E
 #' the embedding dimension to use for time-delay embedding.
@@ -21,7 +14,17 @@
 #' the time index to predict.
 #' @param nn
 #' the number of nearest neighbors to use.
-#' If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.
+#' If \code{nn = "e+1"} (or \code{nn = -1}), \code{nn} is set to \code{E} + 1.
+#' If \code{nn = 0}, \code{nn} is set to the number of all data.
+#' Output \code{nn} is sometimes different from the specified (see Details section in \code{xmap}).
+#' 
+#' @details
+#' Transfer entropy is computed as follows:
+#' \deqn{
+#' \sum_{t} log p(y_{t+tp} | x_{t}     , x_{t- \tau}, \ldots, x_{t-(E-1)\tau}, z_{t}) -
+#'          log p(y_{t+tp} | x_{t-\tau}, x_{t-2\tau}, \ldots, x_{t-(E-1)\tau}, z_{t})
+#' }
+#' where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
 #' 
 #' @return
 #' A data.frame where each row represents model statistics computed from a parameter set.
@@ -30,25 +33,15 @@
 #' \code{tau}    \tab \code{:} time-lag \cr
 #' \code{tp}     \tab \code{:} time prediction horizon \cr
 #' \code{nn}     \tab \code{:} number of nearest neighbors \cr
+#' \code{E_R}    \tab \code{:} embedding dimension of reference model \cr
+#' \code{nn_R}   \tab \code{:} number of nearest neighbors of reference model \cr
 #' \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 #' \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 #' \code{rmse}   \tab \code{:} root mean squared error \cr
 #' \code{te}     \tab \code{:} transfer entropy \cr
-#' \code{pval}   \tab \code{:} bootstrap p-value to test alternative hypothesis, te > 0 \cr
+#' \code{pval}   \tab \code{:} p-value to test alternative hypothesis, te > 0 \cr
 #' }
-#' 
-#' \code{nn} may be different between argument specification and output results
-#' when some nearest neighbors have tied distances.
-#' 
-#' \code{rmse} is the unbiased root mean squared error computed from model predictions.
-#' If \code{is_naive = TRUE}, the raw root mean squared error is returned.
-#' 
-#' \code{te} is transfer entropy based on the unified information-theoretic causality test:
-#' \deqn{
-#' \sum_{t} log p(y_{t+tp} | x_{t}     , x_{t- \tau}, \ldots, x_{t-(E-1)\tau}, z_{t}) -
-#'          log p(y_{t+tp} | x_{t-\tau}, x_{t-2\tau}, \ldots, x_{t-(E-1)\tau}, z_{t})
-#' }
-#' where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
+#' Note that the mumimum value of p-value is 0.001.
 #' 
 #' @seealso \link{xmap}, \link{simplex}
 #' 
@@ -76,14 +69,11 @@
 uic = function (
     block, lib = c(1, NROW(block)), pred = lib,
     lib_var = 1, tar_var = 2, cond_var = NULL,
-    norm = 1, E = 1, tau = 1, tp = 0, nn = "e+1", n_boot = 2000,
-    scaling = c("neighbor", "velocity", "no_scale"),
-    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE, seed = NULL)
+    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1",
+    scaling = c("no_scale", "neighbor", "velocity"),
+    exclusion_radius = NULL, epsilon = NULL, is_naive = FALSE)
 {
-    if (length(tar_var) != 1)
-    {
-        stop("Only a target variable (tar_var) must be specifed.")
-    }
+    if (length(tar_var) != 1) stop("The length of 'tar_var' must be 1.")
     lib  = rbind(lib)
     pred = rbind(pred)
     
@@ -93,25 +83,24 @@ uic = function (
     else if (norm == 1) NORM = 1  # L1 norm
     else if (norm <= 0) NORM = 2  # Max norm
     
-    nn = set_nn(nn, E)
-    ord = order(E)
-    E  = E [ord]
-    nn = nn[ord]
+    nn  = set_nn(nn, E)
+    idx = order(E)
+    E   = E [idx]
+    nn  = nn[idx]
     if (is.null(exclusion_radius)) exclusion_radius = 0;
     if (is.null(epsilon)) epsilon = -1
     LS = switch(match.arg(scaling), "no_scale" = 0, "neighbor" = 1, "velocity" = 2)
     
-    x = as.matrix(block[,lib_var])
+    x = as.matrix(block[,lib_var])  # data.frame to matrix
     y = as.matrix(block[,tar_var])
     z = matrix()
     if (!is.null(cond_var)) z = as.matrix(block[,cond_var])
     
     uic = new(rUIC)
-    if (!is.null(seed)) uic$set_seed(seed)
     uic$set_norm(NORM, LS, p, exclusion_radius, epsilon)
     uic$set_estimator(is_naive)
-    op = uic$xmap_seq(n_boot, x, y, z, lib, pred, E , nn, tau, tp)
-    op[,which(!colnames(op) %in% c("Enull", "rmse_R"))]
+    op = uic$xmap_seq(x, y, z, lib, pred, E , nn, tau, tp)
+    op[,which(!colnames(op) %in% "rmse_R")]
 }
 
 # End

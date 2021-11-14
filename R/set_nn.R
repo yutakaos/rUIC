@@ -13,9 +13,9 @@
 #' An integer vector.
 #' 
 #' @examples
-#' set_nn("e+1", 1:4)  # 2 3 4 5
-#' set_nn(5, 1:4)      # 5 5 5 5
-#' set_nn(3:6, 1:4)    # 3 4 5 6
+#' # set_nn("e+1", 1:4)  # -1 -1 -1 -1
+#' # set_nn(5, 1:4)      #  5  5  5  5
+#' # set_nn(3:6, 1:4)    #  3  4  5  6
 #' 
 set_nn = function (nn, E)
 {
@@ -24,7 +24,8 @@ set_nn = function (nn, E)
         if (is.character(nn))
         {
             nn = paste(strsplit(tolower(nn), " ")[[1]], collapse = "")
-            if (nn == "e+1") return(E + 1)
+            if (nn == "e+1") nn = rep(-1, length(E))
+            return(nn)
         }
         else if (as.integer(nn))
         {

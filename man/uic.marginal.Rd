@@ -2,7 +2,8 @@
 % Please edit documentation in R/uic.marginal.R
 \name{uic.marginal}
 \alias{uic.marginal}
-\title{Wrapper function for computing marginal unified information-theoretic causality}
+\title{Wrapper function for computing unified information-theoretic causality
+for the marginal embedding dimension.}
 \usage{
 uic.marginal(
   block,
@@ -11,17 +12,15 @@ uic.marginal(
   lib_var = 1,
   tar_var = 2,
   cond_var = NULL,
-  norm = 1,
+  norm = 2,
   E = 1,
   tau = 1,
   tp = 0,
   nn = "e+1",
-  n_boot = 2000,
-  scaling = c("neighbor", "velocity", "no_scale"),
+  scaling = c("no_scale", "neighbor", "velocity"),
   exclusion_radius = NULL,
   epsilon = NULL,
-  is_naive = FALSE,
-  seed = NULL
+  is_naive = FALSE
 )
 }
 \arguments{
@@ -51,47 +50,28 @@ If \code{norm} \eqn{\le} 0, Maximum distance is used as the special case of Lp d
 
 \item{tp}{the time index to predict.}
 
-\item{nn}{the number of nearest neighbors to use. Must be an integer or "e+1".
-If \code{nn = "e+1"}, \code{nn} is set as \code{E} + 1.}
+\item{nn}{the number of nearest neighbors to use.
+If \code{nn = "e+1"} (or \code{nn = -1}), \code{nn} is set to \code{E} + 1.
+If \code{nn = 0}, \code{nn} is set to the number of all data.
+Output \code{nn} is sometimes different from the specified (see Details section in \code{xmap}).}
 
-\item{n_boot}{the number of bootstraps to use for computing p-value.}
-
-\item{scaling}{the method for local scaling of distance matrix. See Details.}
+\item{scaling}{the method for local scaling of distance matrix. See Details section in \code{xmap}.}
 
 \item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within exclusion radius.}
 
 \item{epsilon}{the filtering to exclude nearest neighbors if epsilon is farther than their distances.}
 
-\item{is_naive}{specifies whether the rEDM-style estimator is used.}
-
-\item{seed}{the random seed.}
+\item{is_naive}{specifies whether naive estimator is used or not. See Details section in \code{xmap}.}
 }
 \value{
 A data.frame where each row represents model statistics computed from a parameter set.
-\tabular{ll}{
-\code{E}      \tab \code{:} model-averaged embedding dimension \cr
-\code{tau}    \tab \code{:} time-lag \cr
-\code{tp}     \tab \code{:} time prediction horizon \cr
-\code{nn}     \tab \code{:} model-averaged number of nearest neighbors \cr
-\code{n_lib}  \tab \code{:} model-averaged number of time indices used for attractor reconstruction \cr
-\code{n_pred} \tab \code{:} model-averaged number of time indices used for model predictions \cr
-\code{rmse}   \tab \code{:} model-averaged root mean squared error \cr
-\code{te}     \tab \code{:} model-averaged transfer entropy \cr
-\code{pval}   \tab \code{:} bootstrap p-value to test alternative hypothesis, te > 0 \cr
-}
+See the details in Value section of \code{uic}.
 }
 \description{
 \code{uic.marginal} returns model statistics computed from given multiple time series
-based on simplex projection and cross mapping. This function computes UIC using a model
+based on simplex projection and cross mapping. This function computes UICs using a model
 averaging technique (i.e., marginalizing \code{E}). Thus, the users do not have to determine
 the optimal \code{E} by themselves.
-}
-\details{
-\code{scaling} specifies the methods for local scaling of distance matrix.
-The following distances can be used as local scaling factors:
-the mean distances to nearest neighbors of the embedding space (\code{scaling = neighbor}),
-the mean distances to nearest time indices (\code{scaling = velocity}) and
-the constant distance (\code{scaling = no_scale}).
 }
 \examples{
 ## simulate logistic map
