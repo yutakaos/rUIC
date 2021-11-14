@@ -110,7 +110,7 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
     - _te_ value of simplex projection is expressed as follows:<br>
 **log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(Enull-1)&tau;</sub>_)**,<br>
     where **_x<sub>t</sub>_** is `lib_var` and **_y<sub>t</sub>_** is `cond_var`.
-    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis _te_ > 0, which means that **the model with embedding dimension = _E_ improves forecast skills compared to that with embedding dimension = _Enull_**.
+    - `pval` in the output indicates _p_ value to test alternative hypothesis _te_ > 0, which means that **the full model improves forecast skills compared to reference (null) model**.
 
 - `xmap`: Perform cross-mapping and return model predictions and statistics.
     - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
@@ -125,7 +125,7 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
     - _te_ value of uic is expressed as follows:<br>
 **log _p_(_y<sub>t+tp</sub>_ | _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_, _z<sub>t</sub>_) - log _p_(_y<sub>t+tp</sub>_ | _x<sub>t-&tau;</sub>_, _x<sub>t-2&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_, _z<sub>t</sub>_)**,<br>
     where **_x<sub>t</sub>_** is `lib_var`, **_y<sub>t</sub>_** is `tar_var` and **_z<sub>t</sub>_** is `cond_var`.
-    - `pval` in the output indicates bootstrap _p_ value to test alternative hypothesis _te_ > 0, which means **y causes x in the sense of transfer entropy**.
+    - `pval` in the output indicates _p_ value to test alternative hypothesis _te_ > 0, which means **y causes x in the sense of transfer entropy**.
 
 - `uic.optimal`: Wrapper function for computing UIC, which return statistics only.
     - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
@@ -156,24 +156,20 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 - `nn` : the number of neighbors used for prediction
     - **num_neighbors** argument in rEDM package.
     - "e+1" can be used if nn = E + 1.
-    - If a scalar value is specified, nn = rep(nn, length(E)). The vector with length(E) != length(nn) cannot be specified.
-
-- `n_boot` :  the number of bootstrap to be used for computing _p_ value  
-    - The number of bootstrap to calculate _p_ value.
-    - _p_ value is returned if n_boot > 1.
+    - If a scalar value is specified, nn = rep(nn, length(E)). The vector with length(E) == length(nn) can be also used.
 
 - `Enull` : the method to determine the embedding dimension of null model
     - "e-1" can be used if Enull = E - 1.
     - When "adaptive" is used, Enull is the largest E for E < Enull and pval < alpha (`alpha` is the significant level).
 
-- `scaling` : the local scaling (neighbor, velocity or no_scale)
+- `scaling` : the local scaling (no_scale, neighbor or velocity)
     - **This argument is experimental. May be changed in the future.**
     - Method for local scaling of distance matrix. It may improve noise robustness.
 
 - `is_naive` : whether rEDM-style estimator is used
     - **This argument is experimental. May be changed in the future.**
     - Whether to return naive estimator.
-    - If FALSE, the estimator bias is corrected using weights of neighbors.
+    - If FALSE, the estimator bias is adjusted using weights of neighbors.
     - If TRUE, the result will be similar to Convergent Cross Mapping (CCM) in rEDM package.
 
 
@@ -182,9 +178,10 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 - `tau` : Time-lag for attractor reconstruction (NOT time-lag of causal influence)
 - `tp` : Time prediction horizon (interpreted as time-lag of causal influence)
 - `nn` : The number of nearest neighbors
-- `Enull` : Embedding dimension of null model
+- `E_R` : Embedding dimension of reference model
+- `nn_R` : The number of nearest neighbors of reference model
 - `n_lib` : The number of time indices used for attractor reconstruction
 - `n_pred` : The number of time indices used for model predictions
 - `rmse` : Root mean squared error (RMSE)
 - `te` : Transfer entropy
-- `pval` : Bootstrap p-value to test alternative hypothesis te > 0
+- `pval` : The p-value to test alternative hypothesis te > 0
