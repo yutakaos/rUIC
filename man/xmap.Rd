@@ -9,7 +9,7 @@ xmap(
   lib = c(1, NROW(block)),
   pred = lib,
   lib_var = 1,
-  tar_var = 2,
+  tar_var = lib_var,
   cond_var = NULL,
   norm = 2,
   E = 1,

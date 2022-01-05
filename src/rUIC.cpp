@@ -57,16 +57,16 @@ public:
         if (range_lib.ncol() != 2) Rcpp::stop("ncol(lib) != 2.");
         if (range_prd.ncol() != 2) Rcpp::stop("ncol(pred) != 2.");
         
+        std::vector<num_t> Y = as_cpp<num_t>(time_series_tar);
         xmap(
-            as_cpp<num_t>(time_series_lib),
-            as_cpp<num_t>(time_series_tar),
+            as_cpp<num_t>(time_series_lib) , Y,
             as_cpp<num_t>(time_series_cond),
             as_cpp_range(range_lib),
             as_cpp_range(range_prd),
             {E}, {nn}, {tau}, {tp}, {0}
         );
         return List::create(
-            Named("model_output") = model_output(),
+            Named("model_output") = model_output(Y),
             Named("stats") = model_statistics()
         );
     }
@@ -159,14 +159,14 @@ public:
 private:
     
     void xmap (
-        std::vector<std::vector<num_t>> time_series_lib,
-        std::vector<num_t> time_series_tar,
+        const std::vector<std::vector<num_t>> &time_series_lib,
+        const std::vector<num_t> &time_series_tar,
         std::vector<std::vector<num_t>> time_series_cond,
-        std::vector<std::pair<int, int>> range_lib,
-        std::vector<std::pair<int, int>> range_prd,
+        const std::vector<std::pair<int, int>> &range_lib,
+        const std::vector<std::pair<int, int>> &range_prd,
         int E, int nn, int tau,
-        std::vector<int> tp,
-        std::vector<int> Enull,
+        const std::vector<int> &tp,
+        const std::vector<int> &Enull,
         bool is_uic = true)
     {
         UIC::clear_and_resize(output);
@@ -192,15 +192,15 @@ private:
     }
     
     void xmap_seq (
-        std::vector<std::vector<num_t>> time_series_lib,
-        std::vector<num_t> time_series_tar,
+        const std::vector<std::vector<num_t>> &time_series_lib,
+        const std::vector<num_t> &time_series_tar,
         std::vector<std::vector<num_t>> time_series_cond,
-        std::vector<std::pair<int, int>> range_lib,
-        std::vector<std::pair<int, int>> range_prd,
-        std::vector<int> E,
-        std::vector<int> nn,
-        std::vector<int> tau_ip,
-        std::vector<int> tp_ip,
+        const std::vector<std::pair<int, int>> &range_lib,
+        const std::vector<std::pair<int, int>> &range_prd,
+        const std::vector<int> &E,
+        const std::vector<int> &nn,
+        const std::vector<int> &tau_ip,
+        const std::vector<int> &tp_ip,
         bool is_uic = true)
     {
         UIC::clear_and_resize(output);
@@ -231,13 +231,15 @@ private:
         }
     }
     
-    DataFrame model_output ()
+    DataFrame model_output (const std::vector<num_t> &Y)
     {
-        std::vector<int> time_indices;
-        for (auto x : time_prd) time_indices.push_back(x.first);
+        std::vector<int>   time;
+        std::vector<num_t> data;
+        for (auto x : time_prd) time.push_back(x.first);
+        UIC::set_data_tar(&data, Y, range_prd);
         return DataFrame::create(
-            Named("time") = wrap(time_indices),
-            Named("data") = wrap(y_prd),
+            Named("time") = wrap(time),
+            Named("data") = wrap(data),
             Named("pred") = wrap(model_full.pred),
             Named("enn" ) = wrap(model_full.nenn)
         );

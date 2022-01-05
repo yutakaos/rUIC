@@ -10,7 +10,6 @@
 #include <functional> // std::function
 #include <limits>     // std::numeric_limits
 #include <vector>     // std::vector
-#include "alglib/statistics.hpp"
 #include "uic_base.hpp"
 #include "local_scaling.hpp"
 
@@ -110,7 +109,7 @@ namespace UIC
             (*model_p).PRED = false;
             (*model_p).sse  = qnan;
             (*model_p).E  = this->E - reduced_E;
-            (*model_p).nn = (this->nn < 0) ? (*model_p).E + 1 : this->nn;
+            (*model_p).nn = (this->nn < 0) ? (*model_p).E + 1 + this->ndim_z : this->nn;
         }
         
         void set_neighbors (bool full_model = true)
@@ -193,17 +192,18 @@ namespace UIC
                 num_t x = 0, w2 = 0, sum_w = 0, se;
                 for (int k = 0; k < nn; ++k)
                 {
-                    x  += weight[k] * this->y_lib[vidx_prd[neis[k]]];
+                    x  += weight[k] * this->y_lib[vidx_lib[neis[k]]];
                     w2 += weight[k] * weight[k];
                     sum_w += weight[k];
                 }
                 x  /= sum_w;
                 w2 /= (sum_w * sum_w);
                 se = calc_se(this->y_prd[vidx_prd[i]] - x, w2);
+                
                 sum_se += se;
                 ++n_pred;
-                (*model_p).pred[vidx_prd[i]] = x;
-                (*model_p).nenn[vidx_prd[i]] = 1.0 / w2;
+                (*model_p).pred[vidx_prd[i] + this->tp] = x;
+                (*model_p).nenn[vidx_prd[i] + this->tp] = 1.0 / w2;
                 (*model_p).se.push_back(se);
             }
             (*model_p).PRED = true;
@@ -216,22 +216,22 @@ namespace UIC
             if (!model_full.PRED || !model_ref.PRED) return;
             UIC::ResultSet<num_t> &RES = this->result;
             int n_pred = RES.n_pred;
-            RES.E = model_full.E;
-            RES.E0 = model_ref.E;
-            RES.nn = model_full.nn;
-            RES.nn0 = model_ref.nn;
-            RES.rmse = std::sqrt(model_full.sse / num_t(n_pred));
-            RES.rmse0 = std::sqrt(model_ref.sse / num_t(n_pred));
+            RES.E  = model_full.E;
+            RES.E0 = model_ref .E;
+            RES.nn  = model_full.nn;
+            RES.nn0 = model_ref .nn;
+            RES.rmse  = std::sqrt(model_full.sse / num_t(n_pred));
+            RES.rmse0 = std::sqrt(model_ref .sse / num_t(n_pred));
             RES.uic = log(RES.rmse0) - log(RES.rmse);
             
-            //* compute p-value */
-            alglib::real_1d_array x;
-            x.setlength(n_pred);
-            for (int i = 0; i < n_pred; ++i) x(i) = model_full.se[i] - model_ref.se[i];
-            double delta, both, left, right;
-            delta = (model_full.sse - model_ref.sse) * (1.0 - 1.0 / num_t(n_pred));
-            alglib::wilcoxonsignedranktest(x, n_pred, delta, both, left, right);
-            RES.pval = right;
+            //* compute p-value (Jackknife method) */
+            num_t delta = (RES.rmse - RES.rmse0) * (num_t(n_pred) - 1.0);
+            num_t x = 0;
+            for (int i = 0; i < n_pred; ++i)
+            {
+                if (delta >= model_ref.se[i] - model_full.se[i]) x += 1.0;
+            }
+            RES.pval = x / num_t(n_pred);
         }
     };
 }

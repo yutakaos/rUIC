@@ -45,24 +45,25 @@ namespace UIC
     class UIC_BASE
     {
         typedef std::vector<std::pair<int, int>> range_t;
+        typedef std::vector<std::vector<num_t>> matrix_t;
         
     protected:
         
-        int E, nn, tau, tp, ndim_x;
+        int E, nn, tau, tp, ndim_x, ndim_z;
         
         ResultSet<num_t> result;
         std::vector<num_t> y_lib;
         std::vector<num_t> y_prd;
         std::vector<std::vector<num_t>> x_lib; 
         std::vector<std::vector<num_t>> x_prd;
-        std::vector<std::pair<int, int>> time_lib; // [time, id]
-        std::vector<std::pair<int, int>> time_prd; // [time, id]
+        range_t time_lib;  // [time, id]
+        range_t time_prd;  // [time, id]
+        range_t range_lib; // [time, time]
+        range_t range_prd; // [time, time]
         
     private:
         
         int n_time; // input data length
-        range_t range_lib;
-        range_t range_prd;
         const int nnmax = std::numeric_limits<int>::max();
         
     public:
@@ -86,7 +87,7 @@ namespace UIC
             tp = result.tp = tp_ip;
         }
         
-        void set_time_indices (range_t &range_lib_ip, range_t &range_prd_ip)
+        void set_time_indices (const range_t &range_lib_ip, const range_t &range_prd_ip)
         {
             if (range_lib_ip.size() == 0) Rcpp::stop("No time ranges for library.");
             if (range_prd_ip.size() == 0) Rcpp::stop("No time ranges for prediction.");
@@ -110,7 +111,7 @@ namespace UIC
         
         void set_lib (
             const std::vector<std::vector<num_t>> &X,
-            std::vector<std::vector<num_t>> &Z = std::vector<std::vector<num_t>>(),
+            std::vector<std::vector<num_t>> &Z = matrix_t(),
             bool uic = true)
         {
             n_time = X.size();
@@ -120,24 +121,21 @@ namespace UIC
             
             if (Z.size() == 0) Z.resize(n_time);
             if (int(Z.size()) != n_time) Rcpp::stop("Different time length between X and Z.");
+            ndim_z = Z[0].size();
             UIC::set_data_lib(&x_lib, Z, range_lib);
             UIC::set_data_lib(&x_prd, Z, range_prd);
-
+            
             const bool forward = !uic;
             std::vector<std::vector<num_t>> x_lib_add, x_prd_add;
             UIC::set_data_lib(&x_lib_add, X, range_lib, E, tau, forward);
             UIC::set_data_lib(&x_prd_add, X, range_prd, E, tau, forward);
-            for (int i = 0; i < n_time; ++i)
-            {
-                UIC::bind(&x_lib[i], x_lib_add[i]);
-                UIC::bind(&x_prd[i], x_prd_add[i]);
-            }
+            for (size_t i = 0; i < x_lib.size(); ++i) UIC::bind(&x_lib[i], x_lib_add[i]);
+            for (size_t i = 0; i < x_prd.size(); ++i) UIC::bind(&x_prd[i], x_prd_add[i]);
         }
         
         void set_tar (const std::vector<num_t> &Y)
         {
             if (int(Y.size()) != n_time) Rcpp::stop("Different time length between X and Y.");
-            
             UIC::set_data_tar(&y_lib, Y, range_lib, tp);
             UIC::set_data_tar(&y_prd, Y, range_prd, tp);
         }

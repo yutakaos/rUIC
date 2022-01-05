@@ -89,38 +89,6 @@ namespace UIC
         }
     }
     
-    //* Construct time-delay embedding coordinates */
-    template <typename num_t>
-    inline void delay_embedding (
-        std::vector<std::vector<num_t>> *delay_coord,
-        const std::vector<std::vector<num_t>> &X,
-        const std::pair<int, int> &time_range,
-        const int E,
-        const int tau,
-        const bool forward = true)
-    {
-        const num_t qnan = std::numeric_limits<num_t>::quiet_NaN();
-        int nd = X[0].size();
-        int t0 = time_range.first;
-        int t1 = time_range.second + 1;
-        int nt = t1 - t0;
-        
-        clear_and_resize(*delay_coord, nt);
-        for (int t = 0; t < nt; ++t)
-        {
-            (*delay_coord)[t].resize(E * nd);
-            for (int i = 0; i < E; ++i)
-            {
-                int T = i * tau;
-                int L = (forward ? i : E - i - 1) * nd;
-                for (int k = 0; k < nd; ++k)
-                {
-                    (*delay_coord)[t][L + k] = t < T ? qnan : X[t0 + t - T][k];
-                }
-            }
-        }
-    }
-    
     //* Set library data */
     template <typename num_t>
     inline void set_data_lib (
@@ -131,11 +99,27 @@ namespace UIC
         const int tau = 1,
         const bool forward = true)
     {
+        const num_t qnan = std::numeric_limits<num_t>::quiet_NaN();
         clear_and_resize(*output, 0);
+        int nd = data[0].size();
         for (auto &tr : time_range)
         {
-            std::vector<std::vector<num_t>> delay_coord;
-            delay_embedding(&delay_coord, data, tr, E, tau, forward);
+            int nt = tr.second - tr.first + 1;
+            std::vector<std::vector<num_t>> delay_coord(nt);
+            for (int t = 0; t < nt; ++t)
+            {
+                //* Time-delay embedding coordinates */
+                delay_coord[t].resize(E * nd);
+                for (int i = 0; i < E; ++i)
+                {
+                    int T = t - i * tau;
+                    int L = (forward ? i : E - i - 1) * nd;
+                    for (int k = 0; k < nd; ++k)
+                    {
+                        delay_coord[t][L + k] = T < 0 ? qnan : data[tr.first + T][k];
+                    }
+                }
+            }
             bind(output, delay_coord);
         }
     }
@@ -146,7 +130,7 @@ namespace UIC
         std::vector<num_t> *output,
         const std::vector<num_t> &data,
         const std::vector<std::pair<int, int>> &time_range,
-        const int tp)
+        const int tp = 0)
     {
         const num_t qnan = std::numeric_limits<num_t>::quiet_NaN();
         clear_and_resize(*output);
