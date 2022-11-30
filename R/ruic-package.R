@@ -5,10 +5,10 @@
 #'     \strong{Maintainer}  : Yutaka Osada
 #'     \strong{Contributors}: Masayuki Ushio
 #' @description
-#'     The \pkg{rUIC} package is a experimental implementation of UIC algorithms.
+#'     The \pkg{rUIC} package is an implementation of UIC algorithms.
 #'     UIC is based on the unified theory of convergent cross mapping (CCM) and
 #'     transfer entropy (TE). The functions of this package have similar interface
-#'     to \pkg{rEDM} because the UIC algorithm was developed based on that of CCM.
+#'     to \pkg{rEDM}.
 #' @details
 #'     This package has three basic functions (\code{xmap}, \code{simplex} and \code{uic})
 #'     and two wrapper functions (\code{uic.optimal} and \code{uic.marginal}) to perform UIC.

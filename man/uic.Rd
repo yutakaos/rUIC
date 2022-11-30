@@ -2,12 +2,13 @@
 % Please edit documentation in R/uic.R
 \name{uic}
 \alias{uic}
-\title{Compute unified information-theoretic causality}
+\title{Unfied Information-Theoretic Causality}
 \usage{
 uic(
   block,
   lib = c(1, NROW(block)),
   pred = lib,
+  group = NULL,
   lib_var = 1,
   tar_var = 2,
   cond_var = NULL,
@@ -16,85 +17,89 @@ uic(
   tau = 1,
   tp = 0,
   nn = "e+1",
-  scaling = c("no_scale", "neighbor", "velocity"),
+  num_surr = 1000,
   exclusion_radius = NULL,
   epsilon = NULL,
-  is_naive = FALSE
+  is_naive = FALSE,
+  knn_method = c("KD", "BF")
 )
 }
 \arguments{
 \item{block}{a data.frame or matrix where each column is a time series.}
 
-\item{lib}{a two-column matrix (or two-element vector) where each row specifies
-the first and last indices of time series to use for attractor reconstruction.}
+\item{lib}{a two-column matrix (or two-element vector) where each row specifies the
+first and last indices of time series to use for attractor reconstruction.}
 
-\item{pred}{a two-column matrix (or two-element vector) where each row specifies
-the first and last indices of time series to use for model predictions.}
+\item{pred}{a two-column matrix (or two-element vector) where each row specifies the
+first and last indices of time series to use for model predictions.}
 
-\item{lib_var}{the names or column indices of library variables.
-The specified variables are used as explanatory variables with time-delay embedding.}
+\item{group}{the name or column index of a group variable, which specifies different
+groups of time series data.}
 
-\item{tar_var}{the name or column index of a target variable.
-The specified variable is used as response variables.}
+\item{lib_var}{the names or column indices of library variables.}
 
-\item{cond_var}{the names or column indeices of condition data.
-The specified variables are used as explanatory variables (without time-delay embedding).}
+\item{tar_var}{the names or column indices of target variables.}
 
-\item{norm}{the power of Lp distance to use.
-If \code{norm} \eqn{\le} 0, Maximum distance is used as the special case of Lp distance.}
+\item{cond_var}{the names or column indeices of condition variables, which are used as
+library variables without time-delay embedding.}
 
-\item{E}{the embedding dimension to use for time-delay embedding.}
+\item{norm}{the power of Lp distance. Maximum distance is used if \code{norm} <= 0.}
 
-\item{tau}{the time-lag to use for time-delay embedding.}
+\item{E}{the embedding dimensions used for time-delay embedding.}
 
-\item{tp}{the time index to predict.}
+\item{tau}{the time-lags used for time-delay embedding.}
 
-\item{nn}{the number of nearest neighbors to use.
-If \code{nn = "e+1"} (or \code{nn = -1}), \code{nn} is set to \code{E} + 1.
-If \code{nn = 0}, \code{nn} is set to the number of all data.
-Output \code{nn} is sometimes different from the specified (see Details section in \code{xmap}).}
+\item{tp}{the time indices to predict.}
 
-\item{scaling}{the method for local scaling of distance matrix. See Details section in \code{xmap}.}
+\item{nn}{the number of nearest neighbors. Must be an integer or "e+1".
+If \code{nn = "e+1"} or \code{nn = 0}, \code{nn} is set to \code{E} + 1.
+If \code{nn < 0}, \code{nn} is set to the number of all data.}
 
-\item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within exclusion radius.}
+\item{num_surr}{the number of surrogate data generated to compute p-value.}
 
-\item{epsilon}{the filtering to exclude nearest neighbors if epsilon is farther than their distances.}
+\item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within
+exclusion radius.}
 
-\item{is_naive}{specifies whether naive estimator is used or not. See Details section in \code{xmap}.}
+\item{epsilon}{the filtering to exclude nearest neighbors if their distance is farther
+away than epsilon.}
+
+\item{is_naive}{specifies whether naive estimator is used or not.}
+
+\item{knn_method}{the method to search nearest neighbors.
+The KD-tree ("KD") or brute-force ("BF") search can be used.}
 }
 \value{
 A data.frame where each row represents model statistics computed from a parameter set.
 \tabular{ll}{
 \code{E}      \tab \code{:} embedding dimension \cr
+\code{E0}     \tab \code{:} embedding dimension of reference model \cr
 \code{tau}    \tab \code{:} time-lag \cr
 \code{tp}     \tab \code{:} time prediction horizon \cr
 \code{nn}     \tab \code{:} number of nearest neighbors \cr
-\code{E_R}    \tab \code{:} embedding dimension of reference model \cr
-\code{nn_R}   \tab \code{:} number of nearest neighbors of reference model \cr
 \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 \code{rmse}   \tab \code{:} root mean squared error \cr
 \code{te}     \tab \code{:} transfer entropy \cr
 \code{pval}   \tab \code{:} p-value to test alternative hypothesis, te > 0 \cr
+\code{n_surr} \tab \code{:} number of surrogate data \cr
 }
-Note that the mumimum value of p-value is 0.001.
 }
 \description{
 \code{uic} returns model statistics computed from given multiple time series
-based on cross mapping. This function simultaneously performs unified
-information-theoretic causality computations for all possible combinations of
-\code{E}, \code{tau} and \code{tp}.
+using cross mapping. This function computes perform cross mappings for all
+possible combinations of \code{E}, \code{tau} and \code{tp}.
 }
 \details{
 Transfer entropy is computed as follows:
 \deqn{
-\sum_{t} log p(y_{t+tp} | x_{t}     , x_{t- \tau}, \ldots, x_{t-(E-1)\tau}, z_{t}) -
-         log p(y_{t+tp} | x_{t-\tau}, x_{t-2\tau}, \ldots, x_{t-(E-1)\tau}, z_{t})
+\sum_{t} log p(Y_{t+tp} | X_{t}     , X_{t- \tau}, \ldots, X_{t-(E-1)\tau}, Z_{t}) -
+         log p(Y_{t+tp} | X_{t-\tau}, X_{t-2\tau}, \ldots, X_{t-(E-1)\tau}, Z_{t})
 }
-where \eqn{x} is library, \eqn{y} is target and \eqn{z} is condition.
+where \eqn{X}, \eqn{Y} and \eqn{Z} are library, target and condition variables,
+respectively.
 }
 \examples{
-## simulate logistic map
+# simulate logistic map
 tl <- 400  # time length
 x <- y <- rep(NA, tl)
 x[1] <- 0.4
@@ -103,16 +108,14 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
     x[t+1] = x[t] * (3.8 - 3.8 * x[t] - 0.0 * y[t])
     y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
 }
-block <- data.frame(t = 1:tl, x = x, y = y)
+block <- data.frame(t=1:tl, x=x, y=y)
 
-## UIC
-op0 <- uic(block, lib_var = "x", tar_var = "y", E = 2, tau = 1, tp = -4:4)
-op1 <- uic(block, lib_var = "y", tar_var = "x", E = 2, tau = 1, tp = -4:4)
-par(mfrow = c(2, 1))
-with(op0, plot(tp, te, type = "l"))
-with(op0[op0$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
-with(op1, plot(tp, te, type = "l"))
-with(op1[op1$pval < 0.05,], points(tp, te, pch = 16, col = "red"))
+# UIC
+out0 <- uic(block, lib_var="x", tar_var="y", E=2, tau=1, tp=-4:0)
+out1 <- uic(block, lib_var="y", tar_var="x", E=2, tau=1, tp=-4:0)
+par(mfrow=c(2, 1))
+with(out0, plot(tp, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
+with(out1, plot(tp, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
 
 }
 \seealso{

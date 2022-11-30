@@ -1,2 +1,0 @@
-
-Rcpp::loadModule("rUIC", TRUE)

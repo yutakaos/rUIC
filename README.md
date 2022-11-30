@@ -1,17 +1,15 @@
 # rUIC : Unified Information-theoretic Causality for R
 
-A quick tutorial of rUIC package (for deails, see the package manual)
-
 ## Installation
 ``` r
 library(remotes)
 remotes::install_github("yutakaos/rUIC")
 ```
-## A quick tutorial
+## Quick tutorials
 
 ### Load library and generate model time-series
 ```r
-library(rUIC); packageVersion("rUIC") # v0.2.0
+library(rUIC); packageVersion("rUIC") # v0.9.0
 
 ## simulate logistic map
 tl <- 400  # time length
@@ -22,12 +20,12 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
     x[t+1] = x[t] * (3.8 - 3.8 * x[t] - 0.0 * y[t])
     y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
 }
-block = data.frame(t = 1:tl, x = x, y = y)
+block = data.frame(t=1:tl, x=x, y=y)
 ```
 
 <figure>
-<img src="demo/demo_figures/time_series.png" width="70%">
-<figcaption><i>Figure 1 | Model time-series. Red and blue lines indicate time-series of x and y, respectively. </i></figcaption>
+<img src="inst/demo/figures/time_series.png" width="70%">
+<figcaption><i>Figure 1 | Model time-series. Red and blue lines indicate time-series of x and y, respectively.</i></figcaption>
 </figure>
  
 
@@ -35,12 +33,12 @@ block = data.frame(t = 1:tl, x = x, y = y)
 ```r
 # No.1: Determine the optimal embedding dimension using simplex projection
 ## Univariate simplex projection
-simp_x <- rUIC::simplex(block, lib_var = "x", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
-simp_y <- rUIC::simplex(block, lib_var = "y", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
+simp_x <- simplex(block, lib_var="x", E=0:8, tau=1, tp=1, alpha=0.05)
+simp_y <- simplex(block, lib_var="y", E=0:8, tau=1, tp=1, alpha=0.05)
 
 ## Multivariate simplex projection
-simp_xy <- rUIC::simplex(block, lib_var = "x", cond_var = "y", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
-simp_yx <- rUIC::simplex(block, lib_var = "y", cond_var = "x", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
+simp_xy <- simplex(block, lib_var="x", cond_var="y", E=0:8, tau=1, tp=1, alpha=0.05)
+simp_yx <- simplex(block, lib_var="y", cond_var="x", E=0:8, tau=1, tp=1, alpha=0.05)
 
 # Determine the optimal embedding dimension
 Exy <- with(simp_xy, max(c(0, E[pval < 0.05]))) + 1
@@ -49,21 +47,21 @@ Eyx <- with(simp_yx, max(c(0, E[pval < 0.05]))) + 1
 The optimal embedding dimension used for `rUIC::uic` should be determined based on multivariate simplex projection.<br>
 
 <figure>
-<img src="demo/demo_figures/simplex_rmse.png" width="70%">
-<figcaption><i>Figure 2 | Results of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>, y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>, x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill (RMSE) compared with null model (specified by 'Enull'). </i></figcaption>
+<img src="inst/demo/figures/simplex_rmse.png" width="70%">
+<figcaption><i>Figure 2 | Results of simplex projection. Simplex projections were performed using different embeddings: {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>} (top-left), {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>} (top-right), {x<sub>t</sub>, x<sub>t-1</sub>, ..., x<sub>t-(E-1)</sub>, y<sub>t</sub>} (bottom-left) and {y<sub>t</sub>, y<sub>t-1</sub>, ..., y<sub>t-(E-1)</sub>, x<sub>t</sub>} (bottom-right). Red points indicate significant improvements in forecasting skill (RMSE). </i></figcaption>
 </figure>
 
 
 ### Perform cross-mapping
 ```r
 # No.2: Cross-map
-xmap_xy <- rUIC::xmap(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -1)
-xmap_yx <- rUIC::xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp = -1)
+xmap_xy <- xmap(block, lib_var="x", tar_var="y", E=Exy, tau=1, tp=-1)
+xmap_yx <- xmap(block, lib_var="y", tar_var="x", E=Eyx, tau=1, tp=-1)
 ```
-Cross mapping shows that x can be accurately predicted from y (right panel) while y cannot be predicted from x (left panel). It suggests that the system has the unidirectional, causal influence from x to y.
+Cross mapping shows that x can be accurately predicted from y (right panel) while y cannot be predicted from x (left panel). It suggests that the system has the unidirectional causal influence from x to y.
 
 <figure>
-<img src="demo/demo_figures/xmap.png" width="70%">
+<img src="inst/demo/figures/xmap.png" width="70%">
 <figcaption><i>Figure 3 | Predicted and observed values based on cross-mapping. Red dashed lines indicate a 1:1 line. </i></figcaption>
 </figure>
 
@@ -71,14 +69,14 @@ Cross mapping shows that x can be accurately predicted from y (right panel) whil
 ### Compute UIC for different time-lag
 ```r
 # No.3: Compute UIC
-uic_xy <- rUIC::uic(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -4:4)
-uic_yx <- rUIC::uic(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp = -4:4)
+uic_xy <- uic(block, lib_var="x", tar_var="y", E=Exy, tau=1, tp=-4:4)
+uic_yx <- uic(block, lib_var="y", tar_var="x", E=Eyx, tau=1, tp=-4:4)
 ```
 The result suggests that x causally drives y and the optimal time-lag is 1, being consistent with the model equations.
 
 <figure>
-<img src="demo/demo_figures/uic.png" width="70%" align="middle">
-<figcaption><i>Figure 4 | UIC results at different time-lags (tp). Red points indicate UIC values are significant. Gray region in the right panel indicate the largest UIC value among the tested time-lags, which suggests that causal influence from x to y occur at time-lag 1 (i.e., the causal time-lag = -tp). </i></figcaption>
+<img src="inst/demo/figures/uic.png" width="70%" align="middle">
+<figcaption><i>Figure 4 | UIC results at different time-lags (tp). Red points indicate UIC values (TEs) are significant. Gray region in the right panel indicate the largest UIC value among the tested time-lags, which suggests that causal influence from x to y occur at time-lag 1 (i.e., the causal time-lag = -tp). </i></figcaption>
 </figure>
 
 
@@ -89,37 +87,36 @@ Two wrapper functions are implemented to compute UIC without manually exploring 
 ```r
 # No.4: Wrapper functions for computing UIC
 ## compute UIC using optimal embedding dimension (the same results as No.3)
-uic_opt_xy <- rUIC::uic.optimal(block, lib_var = "x", tar_var = "y", E = 0:8, tau = 1, tp = -4:4)
-uic_opt_yx <- rUIC::uic.optimal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
+uic_opt_xy <- uic.optimal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4)
+uic_opt_yx <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4)
 
 ## compute UIC marginalizing embedding dimension
-uic_mar_xy <- rUIC::uic.marginal(block, lib_var = "x", tar_var = "y", E = 0:8, tau = 1, tp = -4:4)
-uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
+uic_mar_xy <- uic.marginal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4)
+uic_mar_yx <- uic.marginal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4)
 ```
 
 <figure>
-<img src="demo/demo_figures/uic_wrapper.png" width="70%" align="middle">
+<img src="inst/demo/figures/uic_wrapper.png" width="70%" align="middle">
 <figcaption><i>Figure 5 | UIC results at different time-lags (tp) using rUIC::uic.optimal (top) and rUIC::uic.marginal (bottom). Red points indicate that UIC values are significant. Gray region in the right panels indicate the largest UIC value among the tested time-lags. </i></figcaption>
 </figure>
 
 
 ## Functions implemented in rUIC package
 - `simplex`: Perform simplex projection and return statistics only.
-    - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
+    - `E`, `tau` and `tp` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - Potential causal variables should be specified by `cond_var`.
     - _te_ value of simplex projection is expressed as follows:<br>
-**log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(Enull-1)&tau;</sub>_)**,<br>
+**log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E-1)&tau;</sub>_) - log _p_(_x<sub>t+tp</sub>_ | _y<sub>t</sub>_, _x<sub>t</sub>_, _x<sub>t-&tau;</sub>_, ... _x<sub>t-(E0-1)&tau;</sub>_)**,<br>
     where **_x<sub>t</sub>_** is `lib_var` and **_y<sub>t</sub>_** is `cond_var`.
     - `pval` in the output indicates _p_ value to test alternative hypothesis _te_ > 0, which means that **the full model improves forecast skills compared to reference (null) model**.
 
-- `xmap`: Perform cross-mapping and return model predictions and statistics.
-    - `E`, `tau`, `tp`, and `nn` accept a scalar value only.
+- `xmap`: Perform cross-mapping and return model predictions.
+    - `E`, `tau` and `tp` accept a scalar value only.
     - Potential causal variables should be specified by `tar_var`.
     - Specify `cond_var` for the multivariate cross-mapping.
 
 - `uic`: Perform uic and return statistics only.
-    - `E` should be the optimal embedding dimension (estimated by `simplex`) **+ 1**.
-    - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
+    - `E`, `tau` and `tp` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - Potential causal variables should be specified by `tar_var`.
     - Specify `cond_var` for the multivariate UIC.
     - _te_ value of uic is expressed as follows:<br>
@@ -128,13 +125,13 @@ uic_mar_yx <- rUIC::uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, t
     - `pval` in the output indicates _p_ value to test alternative hypothesis _te_ > 0, which means **y causes x in the sense of transfer entropy**.
 
 - `uic.optimal`: Wrapper function for computing UIC, which return statistics only.
-    - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
+    - `E`, `tau` and `tp` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - UIC is computed using the optimal embedding dimension.
     - Potential causal variables should be specified by `tar_var`.
     - Specify `cond_var` for the multivariate UIC.
 
 - `uic.marginal`: Wrapper function for computing UIC, which return statistics only.
-    - `E`, `tau`, `tp`, and `nn` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
+    - `E`, `tau` and `tp` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - UIC is computed using a model average technique (i.e., marginalizing `E`).
     - Potential causal variables should be specified by `tar_var`.
     - Specify `cond_var` for the multivariate UIC.
@@ -156,32 +153,22 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 - `nn` : the number of neighbors used for prediction
     - **num_neighbors** argument in rEDM package.
     - "e+1" can be used if nn = E + 1.
-    - If a scalar value is specified, nn = rep(nn, length(E)). The vector with length(E) == length(nn) can be also used.
-
-- `Enull` : the method to determine the embedding dimension of null model
-    - "e-1" can be used if Enull = E - 1.
-    - When "adaptive" is used, Enull is the largest E for E < Enull and pval < alpha (`alpha` is the significant level).
-
-- `scaling` : the local scaling (no_scale, neighbor or velocity)
-    - **This argument is experimental. May be changed in the future.**
-    - Method for local scaling of distance matrix. It may improve noise robustness.
 
 - `is_naive` : whether rEDM-style estimator is used
-    - **This argument is experimental. May be changed in the future.**
     - Whether to return naive estimator.
     - If FALSE, the estimator bias is adjusted using weights of neighbors.
     - If TRUE, the result will be similar to Convergent Cross Mapping (CCM) in rEDM package.
 
 
 ## Outputs in rUIC package
-- `E` : Embedding dimension
+- `E`   : Embedding dimension
+- `E0`  : Embedding dimension of reference model
 - `tau` : Time-lag for attractor reconstruction (NOT time-lag of causal influence)
 - `tp` : Time prediction horizon (interpreted as time-lag of causal influence)
 - `nn` : The number of nearest neighbors
-- `E_R` : Embedding dimension of reference model
-- `nn_R` : The number of nearest neighbors of reference model
 - `n_lib` : The number of time indices used for attractor reconstruction
 - `n_pred` : The number of time indices used for model predictions
 - `rmse` : Root mean squared error (RMSE)
 - `te` : Transfer entropy
 - `pval` : The p-value to test alternative hypothesis te > 0
+- `n_surr` : The number of surrogate data generated to compute p-value

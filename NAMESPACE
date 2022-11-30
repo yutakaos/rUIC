@@ -1,8 +1,11 @@
-useDynLib(rUIC, .registration = TRUE)
 
-export(uic.optimal)
-export(uic.marginal)
+useDynLib(rUIC, .registration=TRUE)
+
+export(xmap)
 export(simplex)
 export(uic)
-export(xmap)
-importFrom("methods", "new")
+export(uic.optimal)
+export(uic.marginal)
+
+importFrom(Rcpp, evalCpp)
+import(RcppArmadillo)

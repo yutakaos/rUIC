@@ -2,12 +2,13 @@
 % Please edit documentation in R/simplex.R
 \name{simplex}
 \alias{simplex}
-\title{Perform simplex projection}
+\title{Simplex Projection}
 \usage{
 simplex(
   block,
   lib = c(1, NROW(block)),
   pred = lib,
+  group = NULL,
   lib_var = 1,
   cond_var = NULL,
   norm = 2,
@@ -15,90 +16,93 @@ simplex(
   tau = 1,
   tp = 0,
   nn = "e+1",
-  Enull = c("e-1", "adaptive"),
-  alpha = 0.05,
-  scaling = c("no_scale", "neighbor", "velocity"),
+  num_surr = 1000,
+  alpha = NULL,
   exclusion_radius = NULL,
   epsilon = NULL,
-  is_naive = FALSE
+  is_naive = FALSE,
+  knn_method = c("KD", "BF")
 )
 }
 \arguments{
 \item{block}{a data.frame or matrix where each column is a time series.}
 
-\item{lib}{a two-column matrix (or two-element vector) where each row specifies
-the first and last indices of time series to use for attractor reconstruction.}
+\item{lib}{a two-column matrix (or two-element vector) where each row specifies the
+first and last indices of time series to use for attractor reconstruction.}
 
-\item{pred}{a two-column matrix (or two-element vector) where each row specifies
-the first and last indices of time series to use for model predictions.}
+\item{pred}{a two-column matrix (or two-element vector) where each row specifies the
+first and last indices of time series to use for model predictions.}
+
+\item{group}{the name or column index of a group variable, which specifies different
+groups of time series data.}
 
 \item{lib_var}{the name or column index of a library (and target) variable.
 The specified variable is used as a response variable and its time-delay variables are
 used as explanatory variables.}
 
-\item{cond_var}{the names or column indeices of condition data.
-The specified variables are used as explanatory variables (without time-delay embedding).}
+\item{cond_var}{the names or column indeices of condition variables, which are used as
+library variables without time-delay embedding.}
 
-\item{norm}{the power of Lp distance to use.
-If \code{norm} \eqn{\le} 0, Maximum distance is used as the special case of Lp distance.}
+\item{norm}{the power of Lp distance. Maximum distance is used if \code{norm} <= 0.}
 
-\item{E}{the embedding dimension to use for time-delay embedding.}
+\item{E}{the embedding dimensions used for time-delay embedding.}
 
-\item{tau}{the time-lag to use for time-delay embedding.}
+\item{tau}{the time-lags used for time-delay embedding.}
 
-\item{tp}{the time index to predict.}
+\item{tp}{the time indices to predict.}
 
-\item{nn}{the number of nearest neighbors to use.
-If \code{nn = "e+1"} (or \code{nn = -1}), \code{nn} is set to \code{E} + 1.
-If \code{nn = 0}, \code{nn} is set to the number of all data.
-Output \code{nn} is sometimes different from the specified (see Details section in \code{xmap}).}
+\item{nn}{the number of nearest neighbors. Must be an integer or "e+1".
+If \code{nn = "e+1"} or \code{nn = 0}, \code{nn} is set to \code{E} + 1.
+If \code{nn < 0}, \code{nn} is set to the number of all data.}
 
-\item{Enull}{specifies the method to determine the embedding dimension of reference model (\code{E_R}).
-If "e-1" is used, \code{E_R} is E - 1. If "adaptive" is used, \code{E_R} depends on
-the model results with lower embedding dimensions.}
+\item{num_surr}{the number of surrogate data generated to compute p-value.}
 
-\item{alpha}{the significant level to use when Enull = "adaptive". Default is 0.05.}
+\item{alpha}{the significant level to determine the embedding dimension of reference model
+(i.e., E0). If \code{alpha = NULL}, E0 is set to E - 1. If \code{0 < alpha < 1} 
+E0 depends on the model results with lower embedding dimensions.}
 
-\item{scaling}{the method for local scaling of distance matrix. See Details section in \code{xmap}.}
+\item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within
+exclusion radius.}
 
-\item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within exclusion radius.}
+\item{epsilon}{the filtering to exclude nearest neighbors if their distance is farther
+away than epsilon.}
 
-\item{epsilon}{the filtering to exclude nearest neighbors if epsilon is farther than their distances.}
+\item{is_naive}{specifies whether naive estimator is used or not.}
 
-\item{is_naive}{specifies whether naive estimator is used or not. See Details section in \code{xmap}.}
+\item{knn_method}{the method to search nearest neighbors.
+The KD-tree ("KD") or brute-force ("BF") search can be used.}
 }
 \value{
 A data.frame where each row represents model statistics computed from a parameter set.
 \tabular{ll}{
 \code{E}      \tab \code{:} embedding dimension \cr
+\code{E0}     \tab \code{:} embedding dimension of reference model \cr
 \code{tau}    \tab \code{:} time-lag \cr
 \code{tp}     \tab \code{:} time prediction horizon \cr
 \code{nn}     \tab \code{:} number of nearest neighbors \cr
-\code{E_R}    \tab \code{:} embedding dimension of reference model \cr
-\code{nn_R}   \tab \code{:} number of nearest neighbors of reference model \cr
 \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 \code{rmse}   \tab \code{:} root mean squared error \cr
 \code{te}     \tab \code{:} transfer entropy \cr
 \code{pval}   \tab \code{:} p-value to test alternative hypothesis, te > 0 \cr
+\code{n_surr} \tab \code{:} number of surrogate data \cr
 }
-Note that the mumimum value of p-value is 0.001.
 }
 \description{
 \code{simplex} returns model statistics computed from given multiple time series
-based on simplex projection. This function simultaneously performs simplex projections
-for all possible combinations of \code{E}, \code{tau} and \code{tp}.
+using simplex projection. This function performs simplex projections for all
+possible combinations of \code{E}, \code{tau} and \code{tp}.
 }
 \details{
 Transfer entropy is computed as follows:
 \deqn{
-\sum_{t} log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(E -1)\tau}, z_{t}) -
-         log p(x_{t+tp} | x_{t}, x_{t-\tau}, \ldots, x_{t-(E_R-1)\tau}, z_{t})
+\sum_{t} log p(X_{t+tp} | X_{t}, X_{t-\tau}, \ldots, X_{t-(E -1)\tau}, Z_{t}) -
+         log p(X_{t+tp} | X_{t}, X_{t-\tau}, \ldots, X_{t-(E0-1)\tau}, Z_{t})
 }
-where \eqn{x} is library and \eqn{z} is condition.
+where \eqn{X} and \eqn{Z} are library and condition variables, respectively.
 }
 \examples{
-## simulate logistic map
+# simulate logistic map
 tl <- 400  # time length
 x <- y <- rep(NA, tl)
 x[1] <- 0.4
@@ -107,16 +111,14 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
     x[t+1] = x[t] * (3.8 - 3.8 * x[t] - 0.0 * y[t])
     y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
 }
-block <- data.frame(t = 1:tl, x = x, y = y)
+block <- data.frame(t=1:tl, x=x, y=y)
 
-## simplex projecton
-op0 <- simplex(block, lib_var = "x", cond_var = "y", E = 0:8, tau = 1, tp = 1)
-op1 <- simplex(block, lib_var = "y", cond_var = "x", E = 0:8, tau = 1, tp = 1)
-par(mfrow = c(2, 1))
-with(op0, plot(E, te, type = "l"))
-with(op0[op0$pval < 0.05,], points(E, te, pch = 16, col = "red"))
-with(op1, plot(E, te, type = "l"))
-with(op1[op1$pval < 0.05,], points(E, te, pch = 16, col = "red"))
+# simplex projecton
+out0 <- simplex(block, lib_var="x", cond_var="y", E=0:8, tau=1, tp=1)
+out1 <- simplex(block, lib_var="y", cond_var="x", E=0:8, tau=1, tp=1)
+par(mfrow=c(2, 1))
+with(out0, plot(E, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
+with(out1, plot(E, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
 
 }
 \seealso{

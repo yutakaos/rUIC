@@ -1,6 +1,6 @@
 #------------------------------------------------------------------------------------------#
 # Unified information-theoretic causality (UIC)
-# Yutaka Osada, Masayuki Ushio, Michio Kondoh
+# Yutaka Osada, Masayuki Ushio
 #
 # Demonstration:
 #     rUIC::simplex()
@@ -15,8 +15,8 @@ library(remotes)
 remotes::install_github("yutakaos/rUIC")
 
 # Load library
-library(rUIC);    packageVersion("rUIC")    # 0.2.0
-library(ggplot2); packageVersion("ggplot2") # 3.3.5
+library(rUIC);    packageVersion("rUIC")    # 0.9.0
+library(ggplot2); packageVersion("ggplot2") # 3.3.6
 library(cowplot); packageVersion("cowplot") # 1.1.1
 theme_set(theme_cowplot())
 
@@ -32,42 +32,42 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
     x[t+1] = x[t] * (3.8 - 3.8 * x[t] - 0.0 * y[t])
     y[t+1] = y[t] * (3.5 - 3.5 * y[t] - 0.1 * x[t])
 }
-block <- data.frame(t = 1:tl, x = x, y = y)
+block <- data.frame(t=1:tl, x=x, y=y)
 
 # No.1: Determine the optimal embedding dimension using simplex projection
-## Univariate UIC-version simplex projection
-simp_x <- simplex(block, lib_var = "x", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
-simp_y <- simplex(block, lib_var = "y", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
+# Univariate UIC-version simplex projection
+simp_x <- simplex(block, lib_var="x", E=0:8, tau=1, tp=1, alpha=0.05)
+simp_y <- simplex(block, lib_var="y", E=0:8, tau=1, tp=1, alpha=0.05)
 
-## Multivariate UIC-version simplex projection
-simp_xy <- simplex(block, lib_var = "x", cond_var = "y", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
-simp_yx <- simplex(block, lib_var = "y", cond_var = "x", E = 0:8, tau = 1, tp = 1, Enull = "adaptive")
+# Multivariate UIC-version simplex projection
+simp_xy <- simplex(block, lib_var="x", cond_var="y", E=0:8, tau=1, tp=1, alpha=0.05)
+simp_yx <- simplex(block, lib_var="y", cond_var="x", E=0:8, tau=1, tp=1, alpha=0.05)
 
 # Select the optimal embedding dimension
 Exy <- with(simp_xy, max(c(0, E[pval < 0.05]))) + 1
 Eyx <- with(simp_yx, max(c(0, E[pval < 0.05]))) + 1
 
 # No.2: Cross-map
-xmap_xy <- xmap(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -1)
-xmap_yx <- xmap(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp = -1)
+xmap_xy <- xmap(block, lib_var="x", tar_var="y", E=Exy, tau=1, tp=-1)
+xmap_yx <- xmap(block, lib_var="y", tar_var="x", E=Eyx, tau=1, tp=-1)
 
 # No.3: Compute UIC
-uic_xy <- uic(block, lib_var = "x", tar_var = "y", E = Exy, tau = 1, tp = -4:4)
-uic_yx <- uic(block, lib_var = "y", tar_var = "x", E = Eyx, tau = 1, tp = -4:4)
+uic_xy <- uic(block, lib_var="x", tar_var="y", E=Exy, tau=1, tp=-4:4)
+uic_yx <- uic(block, lib_var="y", tar_var="x", E=Eyx, tau=1, tp=-4:4)
 
 # No.4: Wrapper functions for computing UIC
-## compute UIC using optimal embedding dimension (the same results as No.3)
-uic_opt_xy <- uic.optimal(block, lib_var = "x", tar_var = "y", E = 0:8, tau = 1, tp = -4:4)
-uic_opt_yx <- uic.optimal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
-## compute UIC marginalizing embedding dimension
-uic_mar_xy <- uic.marginal(block, lib_var = "x", tar_var = "y", E = 0:8, tau = 1, tp = -4:4)
-uic_mar_yx <- uic.marginal(block, lib_var = "y", tar_var = "x", E = 0:8, tau = 1, tp = -4:4)
+# compute UIC using optimal embedding dimension (the same results as No.3)
+uic_opt_xy <- uic.optimal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4)
+uic_opt_yx <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4)
+# compute UIC marginalizing embedding dimension
+uic_mar_xy <- uic.marginal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4)
+uic_mar_yx <- uic.marginal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4)
 
 # ------------------------- Visualize results -------------------------#
 # Visualize time series
 ts <- ggplot(block[100:200,]) +
-    geom_line(aes(x = t, y = x), col = "red3") +
-    geom_line(aes(x = t, y = y), col = "royalblue") +
+    geom_line(aes(x=t, y=x), col="red3") +
+    geom_line(aes(x=t, y=y), col="royalblue") +
     xlab("Time") + ylab("Value")
 
 # Visualize Simplex
@@ -95,12 +95,12 @@ g1_4 <- ggplot(simp_yx, aes(x = E, y = rmse)) +
 g1 = plot_grid(g1_1, g1_2, g1_3, g1_4, nrow = 2, align = "hv")
 
 # Visualize cross-map
-g2_1 <- ggplot(xmap_xy$model_output, aes(x = data, y = pred)) +
+g2_1 <- ggplot(xmap_xy, aes(x = data, y = pred)) +
     geom_abline(intercept = 0, slope = 1, linetype = 2, color = "red3") +
     xlim(0.2, 0.9) + ylim(0.2, 0.9) +
     geom_point(alpha = 0.7) + xlab("Observed") + ylab("Predicted") +
     ggtitle(expression("x cross-map y (y cause x?)"))
-g2_2 <- ggplot(xmap_yx$model_output, aes(x = data, y = pred)) +
+g2_2 <- ggplot(xmap_yx, aes(x = data, y = pred)) +
     geom_abline(intercept = 0, slope = 1, linetype = 2, color = "red3") +
     xlim(0.18, 1) + ylim(0.18, 1) + 
     geom_point(alpha = 0.7) + xlab("Observed") + ylab("Predicted") +
@@ -142,14 +142,14 @@ g4_2 <- ggplot(uic_opt_yx, aes(x = tp, y = te)) +
 g4_3 <- ggplot(uic_mar_xy, aes(x = tp, y = te)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
-    scale_x_continuous(breaks = -4:5) + ylim(-0.033, 0.47) +
+    scale_x_continuous(breaks = -4:5) + ylim(-0.04, 0.48) +
     xlab("tp") + ylab("UIC") + ggtitle(expression("marginal UIC (y cause x?)")) +
     theme(legend.position = "none")
 g4_4 <- ggplot(uic_mar_yx, aes(x = tp, y = te)) +
     geom_vline(xintercept = -1, size = 3, alpha = 0.2) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
-    scale_x_continuous(breaks = -4:5) + ylim(-0.033, 0.47) +
+    scale_x_continuous(breaks = -4:5) + ylim(-0.04, 0.48) +
     xlab("tp") + ylab("UIC") + ggtitle(expression("marginal UIC (x cause y?)")) +
     theme(legend.position = "none")
 
