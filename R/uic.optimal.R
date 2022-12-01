@@ -45,6 +45,7 @@ uic.optimal = function (
     exclusion_radius = NULL, epsilon = NULL,
     is_naive = FALSE, knn_method = c("KD","BF"))
 {
+    if (num_surr <= 0) stop("num_surr must be a positive integer.")
     out <- lapply(tau, function (x)
     {
         # exploring optimal E using simplex projection
