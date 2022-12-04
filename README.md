@@ -1,5 +1,7 @@
 # rUIC : Unified Information-theoretic Causality for R
 
+For japanese, please see https://github.com/yutakaos/archives/tree/master/jp/uic/.
+
 ## Installation
 ``` r
 library(remotes)
@@ -11,7 +13,7 @@ remotes::install_github("yutakaos/rUIC")
 ```r
 library(rUIC); packageVersion("rUIC") # v0.9.0
 
-## simulate logistic map
+# simulate logistic map
 tl <- 400  # time length
 x <- y <- rep(NA, tl)
 x[1] <- 0.4
@@ -31,7 +33,6 @@ block = data.frame(t=1:tl, x=x, y=y)
 
 ### Perform simplex projection and determine the optimal embedding dimension
 ```r
-# No.1: Determine the optimal embedding dimension using simplex projection
 ## Univariate simplex projection
 simp_x <- simplex(block, lib_var="x", E=0:8, tau=1, tp=1, alpha=0.05)
 simp_y <- simplex(block, lib_var="y", E=0:8, tau=1, tp=1, alpha=0.05)
@@ -54,7 +55,6 @@ The optimal embedding dimension used for `rUIC::uic` should be determined based 
 
 ### Perform cross-mapping
 ```r
-# No.2: Cross-map
 xmap_xy <- xmap(block, lib_var="x", tar_var="y", E=Exy, tau=1, tp=-1)
 xmap_yx <- xmap(block, lib_var="y", tar_var="x", E=Eyx, tau=1, tp=-1)
 ```
@@ -68,7 +68,6 @@ Cross mapping shows that x can be accurately predicted from y (right panel) whil
 
 ### Compute UIC for different time-lag
 ```r
-# No.3: Compute UIC
 uic_xy <- uic(block, lib_var="x", tar_var="y", E=Exy, tau=1, tp=-4:4)
 uic_yx <- uic(block, lib_var="y", tar_var="x", E=Eyx, tau=1, tp=-4:4)
 ```
@@ -85,7 +84,6 @@ The result suggests that x causally drives y and the optimal time-lag is 1, bein
 Two wrapper functions are implemented to compute UIC without manually exploring embedding dimensions. `rUIC::uic.optimal` compute UIC by the optimal embedding dimension, which returns the same results as No.3. `rUIC::uic.marginal` compute UIC by model average technique (and marginalizing explored embedding dimensions).
 
 ```r
-# No.4: Wrapper functions for computing UIC
 ## compute UIC using optimal embedding dimension (the same results as No.3)
 uic_opt_xy <- uic.optimal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4)
 uic_opt_yx <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4)
@@ -160,15 +158,18 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
     - If TRUE, the result will be similar to Convergent Cross Mapping (CCM) in rEDM package.
 
 
-## Outputs in rUIC package
-- `E`   : Embedding dimension
-- `E0`  : Embedding dimension of reference model
-- `tau` : Time-lag for attractor reconstruction (NOT time-lag of causal influence)
-- `tp` : Time prediction horizon (interpreted as time-lag of causal influence)
-- `nn` : The number of nearest neighbors
-- `n_lib` : The number of time indices used for attractor reconstruction
-- `n_pred` : The number of time indices used for model predictions
-- `rmse` : Root mean squared error (RMSE)
-- `te` : Transfer entropy
-- `pval` : The p-value to test alternative hypothesis te > 0
-- `n_surr` : The number of surrogate data generated to compute p-value
+## Outputs from functions
+
+| Statistics |                                                              |
+| -----------| ------------------------------------------------------------ |
+| `E`        | Embedding dimension                                          |
+| `E0`       | Embedding dimension of reference model                       |
+| `tau`      | Time-lag for attractor reconstruction                        |
+| `tp`       | Time prediction horizon                                      |
+| `nn`       | The number of nearest neighbors                              |
+| `n_lib`    | The number of time indices used for attractor reconstruction |
+| `n_pred`   | The number of time indices used for model predictions        |
+| `rmse`     | Root mean squared error (RMSE)                               |
+| `te`       | Transfer entropy (i.e., information flow)                    |
+| `pval`     | The _p_ value to test alternative hypothesis, te > 0         |
+| `n_surr`   | The number of surrogate data generated to compute _p_ value  |
