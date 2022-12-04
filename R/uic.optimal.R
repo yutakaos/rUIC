@@ -54,7 +54,7 @@ uic.optimal = function (
             E=E-1, tau=x, tp=x, nn, num_surr, alpha, exclusion_radius, epsilon,
             is_naive, knn_method)
         # compute UICs
-        E <- with(simp, max(c(0, E[pval < alpha]))) + 1
+        E <- with(simp, max(0, E[pval < alpha])) + 1
         uic(
             block, lib, pred, group, lib_var, tar_var, cond_var, norm,
             E, tau=x, tp, nn, num_surr, exclusion_radius, epsilon,
