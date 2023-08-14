@@ -171,5 +171,6 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 | `n_pred`   | The number of time indices used for model predictions        |
 | `rmse`     | Root mean squared error (RMSE)                               |
 | `te`       | Transfer entropy (i.e., information flow)                    |
+| `ete`      | Effective transfer entropy (original TE - surrogate TE)      |
 | `pval`     | The _p_ value to test alternative hypothesis, te > 0         |
 | `n_surr`   | The number of surrogate data generated to compute _p_ value  |

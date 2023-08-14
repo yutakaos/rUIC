@@ -34,6 +34,7 @@
 #' \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 #' \code{rmse}   \tab \code{:} root mean squared error \cr
 #' \code{te}     \tab \code{:} transfer entropy \cr
+#' \code{ete}    \tab \code{:} effective transfer entropy \cr
 #' \code{pval}   \tab \code{:} p-value to test alternative hypothesis, te > 0 \cr
 #' \code{n_surr} \tab \code{:} number of surrogate data \cr
 #' }
@@ -66,6 +67,7 @@ simplex = function (
     exclusion_radius = NULL, epsilon = NULL,
     is_naive = FALSE, knn_method = c("KD","BF"))
 {
+    if (norm < 1) stop("norm must be >= 1.")
     lib  <- rbind(lib)
     pred <- rbind(pred)
     if (length(group) == 0) Group <- rep(1, nrow(block))
@@ -74,7 +76,7 @@ simplex = function (
     E   <- sort(unique(pmax(0, E)))
     tau <- unique(pmax(1, tau))
     tp  <- unique(tp)
-    p <- pmax(0, norm)
+    p   <- ifelse(is.finite(norm), norm, 0)
     num_surr <- pmax(0, num_surr)
     KNN <- switch(match.arg(knn_method), "KD"=0, "BF"=1)
     if (!is.numeric(nn) & tolower(nn) == "e+1") nn <- 0
@@ -83,10 +85,10 @@ simplex = function (
     if (is.null(exclusion_radius)) exclusion_radius <- 0
     if (is.null(epsilon)) epsilon <- -1
     
-    X <- as.matrix(block[, lib_var,drop=FALSE])
-    Z <- as.matrix(block[,cond_var,drop=FALSE])
+    X <- as.matrix(block[ lib_var])
+    Z <- as.matrix(block[cond_var])
     if (alpha >= 1 || num_surr == 0) {
-        out <- .Call(`_rUIC_simplex_map`,
+        out <- .Call(`_rUIC_npmodel_R`,
             X, X, Z, Group, lib, pred, E, E-1, tau, tp, nn, p, num_surr,
             exclusion_radius, epsilon, is_naive, 0, KNN)
     }
@@ -95,7 +97,7 @@ simplex = function (
         for (tpi in tp) for (taui in tau) {
             E0 <- 0
             for (Ei in E) {
-                outi <- .Call(`_rUIC_simplex_map`,
+                outi <- .Call(`_rUIC_npmodel_R`,
                     X, X, Z, Group, lib, pred, Ei, E0, taui, tpi, nn, p,
                     num_surr, exclusion_radius, epsilon, is_naive, 0, KNN)
                 if(outi$pval < alpha) E0 <- Ei

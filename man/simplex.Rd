@@ -43,7 +43,7 @@ used as explanatory variables.}
 \item{cond_var}{the names or column indeices of condition variables, which are used as
 library variables without time-delay embedding.}
 
-\item{norm}{the power of Lp distance. Maximum distance is used if \code{norm} <= 0.}
+\item{norm}{the power of Lp distance. Maximum distance is used if \code{norm} == Inf.}
 
 \item{E}{the embedding dimensions used for time-delay embedding.}
 
@@ -84,6 +84,7 @@ A data.frame where each row represents model statistics computed from a paramete
 \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 \code{rmse}   \tab \code{:} root mean squared error \cr
 \code{te}     \tab \code{:} transfer entropy \cr
+\code{ete}    \tab \code{:} effective transfer entropy \cr
 \code{pval}   \tab \code{:} p-value to test alternative hypothesis, te > 0 \cr
 \code{n_surr} \tab \code{:} number of surrogate data \cr
 }

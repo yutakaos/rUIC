@@ -22,7 +22,7 @@
 #' the names or column indeices of condition variables, which are used as
 #' library variables without time-delay embedding.
 #' @param norm
-#' the power of Lp distance. Maximum distance is used if \code{norm} <= 0.
+#' the power of Lp distance. Maximum distance is used if \code{norm} == Inf.
 #' @param E
 #' the embedding dimension used for time-delay embedding. Must be an integer.
 #' @param tau
@@ -82,23 +82,24 @@ xmap = function (
 {
     if (E  [1] < 0) stop("E must be non-negative.")
     if (tau[1] < 0) stop("tau must be non-negative.")
+    if (norm   < 1) stop("norm must be >= 1.")
     lib  <- rbind(lib)
     pred <- rbind(pred)
     if (length(group) == 0) Group <- rep(1, nrow(block))
     if (length(group) != 0) Group <- as.numeric(as.factor(block[,group[1]]))
     
     tp <- tp[1]
-    p  <- pmax(0, norm)
+    p  <- ifelse(is.finite(norm), norm, 0)
     KNN <- switch(match.arg(knn_method), "KD"=0, "BF"=1)
     if (!is.numeric(nn) & tolower(nn) == "e+1") nn <- 0
     if (nn < 0) nn <- -1
     if (is.null(exclusion_radius)) exclusion_radius <- 0
     if (is.null(epsilon)) epsilon <- -1
     
-    X <- as.matrix(block[, lib_var,drop=FALSE])
-    Y <- as.matrix(block[, tar_var,drop=FALSE])
-    Z <- as.matrix(block[,cond_var,drop=FALSE])
-    out <- .Call(`_rUIC_predict_simplex`,
+    X <- as.matrix(block[ lib_var])
+    Y <- as.matrix(block[ tar_var])
+    Z <- as.matrix(block[cond_var])
+    out <- .Call(`_rUIC_predict_R`,
         X, Y, Z, Group, lib, pred, E, tau, tp, nn, p,
         exclusion_radius, epsilon, is_naive, KNN)
     for (k in 1:ncol(Y)) out[[k]]$data <- Y[,k]

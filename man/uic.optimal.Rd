@@ -45,7 +45,7 @@ groups of time series data.}
 \item{cond_var}{the names or column indeices of condition variables, which are used as
 library variables without time-delay embedding.}
 
-\item{norm}{the power of Lp distance. Maximum distance is used if \code{norm} <= 0.}
+\item{norm}{the power of Lp distance. Maximum distance is used if \code{norm} == Inf.}
 
 \item{E}{the embedding dimensions used for time-delay embedding.}
 

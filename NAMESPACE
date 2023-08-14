@@ -8,4 +8,4 @@ export(uic.optimal)
 export(uic.marginal)
 
 importFrom(Rcpp, evalCpp)
-import(RcppArmadillo)
+
