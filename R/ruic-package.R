@@ -1,5 +1,4 @@
 #' @name rUIC
-#' @docType package
 #' @title Unified Information-theoretic Causality for R.
 #' @author
 #'     \strong{Maintainer}  : Yutaka Osada
@@ -19,7 +18,6 @@
 #'         \item \code{\link{simplex}} - simplex projection
 #'         \item \code{\link{uic}}     - unified information-theoretic causality (UIC)
 #'         \item \code{\link{uic.optimal}}  - UIC using the optimal embedding dimension
-#'         \item \code{\link{uic.marginal}} - UIC marginalizing embedding dimensions
 #'     }
 #' @keywords package
-NULL
+"_PACKAGE"

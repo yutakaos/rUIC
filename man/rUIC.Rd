@@ -2,6 +2,7 @@
 % Please edit documentation in R/ruic-package.R
 \docType{package}
 \name{rUIC}
+\alias{rUIC-package}
 \alias{rUIC}
 \title{Unified Information-theoretic Causality for R.}
 \description{
@@ -20,8 +21,15 @@ This package has three basic functions (\code{xmap}, \code{simplex} and \code{ui
         \item \code{\link{simplex}} - simplex projection
         \item \code{\link{uic}}     - unified information-theoretic causality (UIC)
         \item \code{\link{uic.optimal}}  - UIC using the optimal embedding dimension
-        \item \code{\link{uic.marginal}} - UIC marginalizing embedding dimensions
     }
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/yutakaos/rUIC}
+  \item Report bugs at \url{https://github.com/yutakaos/rUIC/issues}
+}
+
 }
 \author{
 \strong{Maintainer}  : Yutaka Osada

@@ -63,7 +63,7 @@
 simplex = function (
     block, lib = c(1, NROW(block)), pred = lib, group = NULL,
     lib_var = 1, cond_var = NULL,
-    norm = 2, E = 1, tau = 1, tp = 0, nn = "e+1", num_surr = 1000, alpha = NULL,
+    norm = 2, E = 1, tau = 1, tp = 1, nn = "e+1", num_surr = 1000, alpha = NULL,
     exclusion_radius = NULL, epsilon = NULL,
     is_naive = FALSE, knn_method = c("KD","BF"))
 {

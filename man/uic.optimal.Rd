@@ -106,5 +106,5 @@ with(out1, plot(tp, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
 
 }
 \seealso{
-\link{simplex}, \link{uic}, \link{uic.marginal}
+\link{simplex}, \link{uic}
 }

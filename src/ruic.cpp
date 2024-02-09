@@ -27,7 +27,9 @@
 #define _uic_R_cpp_
 
 // [[Rcpp::plugins("cpp11")]]
+// [[Rcpp::depends(RcppEigen)]]
 #include <Rcpp.h>
+#include <RcppEigen.h>
 #include <random> // std::mt19937
 #include <vector> // std::vector
 

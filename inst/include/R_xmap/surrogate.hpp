@@ -11,7 +11,7 @@
 #include <Rcpp.h>
 #include <random> // std::mt19937
 #include <vector> // std::vector
-#include <ext/Eigen/Dense>
+//#include <Eigen/Dense>
 
 #include "model/knnregr.hpp"
 #include "random/mvnormal.hpp"

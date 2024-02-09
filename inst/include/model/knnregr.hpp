@@ -10,7 +10,7 @@
 
 #include <vector>     // std::vector
 #include <functional> // std::function
-#include <ext/Eigen/Cholesky>
+//#include <Eigen/Cholesky>
 
 #include "nns/find_neighbors.hpp"
 

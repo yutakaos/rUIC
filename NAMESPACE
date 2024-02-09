@@ -5,7 +5,5 @@ export(xmap)
 export(simplex)
 export(uic)
 export(uic.optimal)
-export(uic.marginal)
 
 importFrom(Rcpp, evalCpp)
-

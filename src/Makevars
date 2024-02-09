@@ -1,2 +1,2 @@
 
-PKG_CXXFLAGS = -I../inst/include
+PKG_CXXFLAGS = -I../inst/include -Wno-ignored-attributes

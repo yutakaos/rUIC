@@ -14,7 +14,7 @@ simplex(
   norm = 2,
   E = 1,
   tau = 1,
-  tp = 0,
+  tp = 1,
   nn = "e+1",
   num_surr = 1000,
   alpha = NULL,

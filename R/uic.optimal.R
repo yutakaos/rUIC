@@ -17,7 +17,7 @@
 #' A data.frame where each row represents model statistics computed from a parameter set.
 #' See the details in Value section of \code{uic}.
 #' 
-#' @seealso \link{simplex}, \link{uic}, \link{uic.marginal}
+#' @seealso \link{simplex}, \link{uic}
 #' 
 #' @examples
 #' # simulate logistic map

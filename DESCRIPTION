@@ -1,7 +1,7 @@
 Package: rUIC
 Type: Package
 Title: rUIC: Unified Information-theoretic Causality for R
-Version: 0.9.1
+Version: 0.9.11
 License: file LICENSE
 Description: R implementation of unified information-theoretic causality.
 Authors@R:
@@ -18,5 +18,5 @@ BugReports: https://github.com/yutakaos/rUIC/issues
 NeedsCompilation: yes
 Imports: Rcpp
 Suggests: ggplot2, cowplot
-LinkingTo: Rcpp
-RoxygenNote: 7.2.3
+LinkingTo: Rcpp, RcppEigen
+RoxygenNote: 7.3.1

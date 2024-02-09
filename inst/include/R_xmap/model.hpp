@@ -75,6 +75,19 @@ public:
         size_t dim_comp = dim_X - df;
         size_t dim_full = dim_X;
         
+        /* result */
+        (*result).E  = dim_full;
+        (*result).E0 = dim_comp;
+        (*result).nn = nn;
+        (*result).n_lib = DataX.trn_data.size();
+        (*result).n_prd = DataX.val_data.size();
+        (*result).rmse = qnan;
+        (*result).te   = qnan;
+        (*result).ete  = qnan;
+        (*result).pval = qnan;
+        (*result).n_surr = n_surr;
+        if (DataX.val_data.size()==0) return;
+        
         /* set knn-regresions */
         model::knnregr<num_t> regr_comp(
             dim_comp, DataX, nn, p, exclusion_radius, epsilon,
@@ -87,18 +100,8 @@ public:
         num_t lp_comp = calc_lp(regr_comp, DataY.trn_data, DataY.val_data);
         num_t lp_full = calc_lp(regr_full, DataY.trn_data, DataY.val_data);
         num_t TE = lp_comp - lp_full;
-        
-        /* result */
-        (*result).E  = dim_full;
-        (*result).E0 = dim_comp;
-        (*result).nn = nn;
-        (*result).n_lib = DataX.trn_data.size();
-        (*result).n_prd = DataX.val_data.size();
         (*result).rmse = std::exp(lp_full);
         (*result).te   = TE;
-        (*result).ete  = qnan;
-        (*result).pval = qnan;
-        (*result).n_surr = n_surr;
         if (n_surr == 0) return;
         
         /* compute ETE and p-value using surrogate data */
