@@ -11,7 +11,7 @@ remotes::install_github("yutakaos/rUIC")
 
 ### Load library and generate model time-series
 ```r
-library(rUIC); packageVersion("rUIC") # v0.9.0
+library(rUIC); packageVersion("rUIC") # v0.9.11
 
 # simulate logistic map
 tl <- 400  # time length
@@ -81,21 +81,17 @@ The result suggests that x causally drives y and the optimal time-lag is 1, bein
 
 ### Wrapper functions for computing UIC
 
-Two wrapper functions are implemented to compute UIC without manually exploring embedding dimensions. `rUIC::uic.optimal` compute UIC by the optimal embedding dimension, which returns the same results as No.3. `rUIC::uic.marginal` compute UIC by model average technique (and marginalizing explored embedding dimensions).
+In rUIC package, a wrapper functions is implemented to compute UIC without manually exploring embedding dimensions. `rUIC::uic.optimal` compute UIC by the optimal embedding dimension, which returns the same results as No.3.
 
 ```r
 ## compute UIC using optimal embedding dimension (the same results as No.3)
 uic_opt_xy <- uic.optimal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4)
 uic_opt_yx <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4)
-
-## compute UIC marginalizing embedding dimension
-uic_mar_xy <- uic.marginal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4)
-uic_mar_yx <- uic.marginal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4)
 ```
 
 <figure>
 <img src="inst/demo/figures/uic_wrapper.png" width="70%" align="middle">
-<figcaption><i>Figure 5 | UIC results at different time-lags (tp) using rUIC::uic.optimal (top) and rUIC::uic.marginal (bottom). Red points indicate that UIC values are significant. Gray region in the right panels indicate the largest UIC value among the tested time-lags. </i></figcaption>
+<figcaption><i>Figure 5 | UIC results at different time-lags (tp) using rUIC::uic.optimal (top). Red points indicate that UIC values are significant. Gray region in the right panels indicate the largest UIC value among the tested time-lags. </i></figcaption>
 </figure>
 
 
@@ -125,12 +121,6 @@ uic_mar_yx <- uic.marginal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:
 - `uic.optimal`: Wrapper function for computing UIC, which return statistics only.
     - `E`, `tau` and `tp` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
     - UIC is computed using the optimal embedding dimension.
-    - Potential causal variables should be specified by `tar_var`.
-    - Specify `cond_var` for the multivariate UIC.
-
-- `uic.marginal`: Wrapper function for computing UIC, which return statistics only.
-    - `E`, `tau` and `tp` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
-    - UIC is computed using a model average technique (i.e., marginalizing `E`).
     - Potential causal variables should be specified by `tar_var`.
     - Specify `cond_var` for the multivariate UIC.
 
