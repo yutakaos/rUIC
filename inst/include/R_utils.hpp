@@ -93,14 +93,15 @@ inline void make_delay_block (
             for (auto range : range_grp)
             {
                 int dtt = dt * tau;
+                int rng = range[1] - range[0];
                 int L = range[0] - (dtt < 0 ? dtt : 0);
                 int R = range[1] - (dtt > 0 ? dtt : 0);
                 /* forward NAs */
-                for (int t = 0; t < dtt ; ++t) B.push_back(qnan);
+                for (int t = 0; t < dtt && t <= rng; ++t) B.push_back(qnan);
                 /* input data */
                 for (int t = L; t <= R  ; ++t) B.push_back(block(t,dim));
                 /* backward NAs */
-                for (int i = 0; i < -dtt; ++i) B.push_back(qnan);
+                for (int t = 0; t < -dtt && t <= rng; ++t) B.push_back(qnan);
             }
         }
     }
