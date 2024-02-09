@@ -70,25 +70,25 @@ ts <- ggplot(block[100:200,]) +
 g1_1 <- ggplot(simp_x, aes(x = E, y = rmse)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
-    ylab("RMSE") + theme(legend.position = "none") +
-    ggtitle(expression("{"~x[t]~","~x[t-1]~", ...,"~x[t-(E-1)]~"}"))
+    ggtitle(expression("{"~x[t]~","~x[t-1]~", ...,"~x[t-(E-1)]~"}")) +
+    labs(y ="RMSE") + theme_cowplot() + theme(legend.position = "none")
 g1_2 <- ggplot(simp_y, aes(x = E, y = rmse)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
-    ylab("RMSE") + theme(legend.position = "none") +
-    ggtitle(expression("{"~y[t]~","~y[t-1]~", ...,"~y[t-(E-1)]~"}"))
+    ggtitle(expression("{"~y[t]~","~y[t-1]~", ...,"~y[t-(E-1)]~"}")) +
+    labs(y ="RMSE") + theme_cowplot() + theme(legend.position = "none")
 g1_3 <- ggplot(simp_xy, aes(x = E, y = rmse)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
-    ylab("RMSE") + theme(legend.position = "none") +
-    ggtitle(expression("{"~x[t]~","~x[t-1]~", ..."~x[t-(E-1)]~","~y[t]~"}"))
+    ggtitle(expression("{"~x[t]~","~x[t-1]~", ..."~x[t-(E-1)]~","~y[t]~"}")) +
+    labs(y ="RMSE") + theme_cowplot() + theme(legend.position = "none")
 g1_4 <- ggplot(simp_yx, aes(x = E, y = rmse)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
-    ylab("RMSE") + theme(legend.position = "none") +
-    ggtitle(expression("{"~y[t]~","~y[t-1]~", ..."~y[t-(E-1)]~","~x[t]~"}"))
+    ggtitle(expression("{"~y[t]~","~y[t-1]~", ..."~y[t-(E-1)]~","~x[t]~"}")) +
+    labs(y ="RMSE") + theme_cowplot() + theme(legend.position = "none")
 
-g1 = plot_grid(g1_1, g1_2, g1_3, g1_4, nrow = 2, align = "hv")
+g1 = plot_grid(g1_1, g1_2, g1_3, g1_4, nrow = 2, align = "hv"); g1
 
 # Visualize cross-map
 g2_1 <- ggplot(xmap_xy, aes(x = data, y = pred)) +
