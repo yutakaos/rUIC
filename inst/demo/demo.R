@@ -64,7 +64,7 @@ uic_opt_yx <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4
 ts <- ggplot(block[100:200,]) +
     geom_line(aes(x=t, y=x), col="red3") +
     geom_line(aes(x=t, y=y), col="royalblue") +
-    xlab("Time") + ylab("Value")
+    labs(x = "Time", y = "Value") + theme_cowplot()
 
 # Visualize Simplex
 g1_1 <- ggplot(simp_x, aes(x = E, y = rmse)) +
@@ -92,51 +92,57 @@ g1 = plot_grid(g1_1, g1_2, g1_3, g1_4, nrow = 2, align = "hv"); g1
 
 # Visualize cross-map
 g2_1 <- ggplot(xmap_xy, aes(x = data, y = pred)) +
-    geom_abline(intercept = 0, slope = 1, linetype = 2, color = "red3") +
     xlim(0.2, 0.9) + ylim(0.2, 0.9) +
-    geom_point(alpha = 0.7) + xlab("Observed") + ylab("Predicted") +
-    ggtitle(expression("x cross-map y (y cause x?)"))
-g2_2 <- ggplot(xmap_yx, aes(x = data, y = pred)) +
     geom_abline(intercept = 0, slope = 1, linetype = 2, color = "red3") +
+    geom_point(alpha = 0.7) +
+    ggtitle(expression("x cross-map y (y cause x?)")) +
+    labs(x = "Observed", y = "Predicted") + theme_cowplot()
+g2_2 <- ggplot(xmap_yx, aes(x = data, y = pred)) +
     xlim(0.18, 1) + ylim(0.18, 1) + 
-    geom_point(alpha = 0.7) + xlab("Observed") + ylab("Predicted") +
-    ggtitle(expression("y cross-map x (x cause y?)"))
+    geom_abline(intercept = 0, slope = 1, linetype = 2, color = "red3") +
+    geom_point(alpha = 0.7) +
+    ggtitle(expression("y cross-map x (x cause y?)")) +
+    labs(x = "Observed", y = "Predicted") + theme_cowplot()
 
-g2 = plot_grid(g2_1, g2_2, nrow = 1, align = "hv")
+g2 = plot_grid(g2_1, g2_2, nrow = 1, align = "hv"); g2
 
 # Visualize UIC
-g3_1 <- ggplot(uic_xy, aes(x = tp, y = te)) +
+g3_1 <- ggplot(uic_xy, aes(x = tp, y = ete)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
     scale_x_continuous(breaks = -4:5) + ylim(-0.021, 1.50) +
-    xlab("tp") + ylab("UIC") + ggtitle(expression("UIC (y cause x?)")) +
-    theme(legend.position = "none")
-g3_2 <- ggplot(uic_yx, aes(x = tp, y = te)) +
+    ggtitle(expression("UIC (y cause x?)")) +
+    labs(x = "tp", y = "Effective TE") +
+    theme_cowplot() + theme(legend.position = "none")
+g3_2 <- ggplot(uic_yx, aes(x = tp, y = ete)) +
     geom_vline(xintercept = -1, size = 3, alpha = 0.2) +
     geom_line() + geom_point(aes(color = pval >= 0.05), size = 2) +
     scale_color_manual(values = c("red3", "black")) +
     scale_x_continuous(breaks = -4:5) + ylim(-0.021, 1.50) +
-    xlab("tp") + ylab("UIC") + ggtitle(expression("UIC (x cause y?)")) +
-    theme(legend.position = "none")
+    ggtitle(expression("UIC (x cause y?)")) +
+    labs(x = "tp", y = "Effective TE") +
+    theme_cowplot() + theme(legend.position = "none")
 
-g3 = plot_grid(g3_1, g3_2, nrow = 1, align = "hv")
+g3 = plot_grid(g3_1, g3_2, nrow = 1, align = "hv"); g3
 
 # Visualize UIC computed by wrapper functions
-g4_1 <- ggplot(uic_opt_xy, aes(x = tp, y = te)) +
+g4_1 <- ggplot(uic_opt_xy, aes(x = tp, y = ete)) +
     geom_line() + geom_point(aes(color = pval < 0.05), size = 2) +
     scale_color_manual(values = c("black", "red3")) +
     scale_x_continuous(breaks = -4:5) + ylim(-0.021, 1.50) +
-    xlab("tp") + ylab("UIC") + ggtitle(expression("optimal UIC (y cause x?)")) +
-    theme(legend.position = "none")
-g4_2 <- ggplot(uic_opt_yx, aes(x = tp, y = te)) +
+    ggtitle(expression("optimal UIC (y cause x?)")) +
+    labs(x = "tp", y = "Effective TE") +
+    theme_cowplot() + theme(legend.position = "none")
+g4_2 <- ggplot(uic_opt_yx, aes(x = tp, y = ete)) +
     geom_vline(xintercept = -1, size = 3, alpha = 0.2) +
     geom_line() + geom_point(aes(color = pval >= 0.05), size = 2) +
     scale_color_manual(values = c("red3", "black")) +
     scale_x_continuous(breaks = -4:5) + ylim(-0.021, 1.50) +
-    xlab("tp") + ylab("UIC") + ggtitle(expression("optimal UIC (x cause y?)")) +
-    theme(legend.position = "none")
+    ggtitle(expression("optimal UIC (x cause y?)")) +
+    labs(x = "tp", y = "Effective TE") +
+    theme_cowplot() + theme(legend.position = "none")
 
-g4 = plot_grid(g4_1, g4_2, nrow = 1, align = "hv")
+g4 = plot_grid(g4_1, g4_2, nrow = 1, align = "hv"); g4
 
 # Save figures
 ggsave("demo_figures/time_series.png" , plot = ts, width = 8, height = 3)
