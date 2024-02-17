@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Brute-force Nearest Neighbor Search
  * 
- * Copyright 2022-2023  Yutaka Osada. All rights reserved.
+ * Copyright 2022-2024  Yutaka Osada. All rights reserved.
  * 
  *****************************************************************************/
 

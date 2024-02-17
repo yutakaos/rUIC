@@ -99,7 +99,7 @@ xmap = function (
     X <- as.matrix(block[ lib_var])
     Y <- as.matrix(block[ tar_var])
     Z <- as.matrix(block[cond_var])
-    out <- .Call(`_rUIC_predict_R`,
+    out <- .Call(`_rUIC_xmap_predict_R`,
         X, Y, Z, Group, lib, pred, E, tau, tp, nn, p,
         exclusion_radius, epsilon, is_naive, KNN)
     for (k in 1:ncol(Y)) out[[k]]$data <- Y[,k]

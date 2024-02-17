@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Utility Functions
  * 
- * Copyright 2022-2023  Yutaka Osada. All rights reserved.
+ * Copyright 2022-2024  Yutaka Osada. All rights reserved.
  * 
  *****************************************************************************/
 
@@ -36,98 +36,43 @@ inline void reformat_range (
     }
 }
 
-
 /*---------------------------------------------------------------------------*
- | make time-delayed indicies
+ | convert data format from R to cpp
  *---------------------------------------------------------------------------*/
-inline std::vector<int> make_delay_time (
-    const int E,
-    const bool reverse = false)
+template <typename num_t>
+inline void as_cpp (
+    std::vector<std::vector<num_t>> *matC,
+    const Rcpp::NumericMatrix &matR)
 {
-    std::vector<int> dt;
-    if (reverse)
-        for (int i = E; i > 0; --i) dt.push_back(i - 1);
-    else
-        for (int i = 0; i < E; ++i) dt.push_back(i);
-    return dt;
-}
-
-
-/*---------------------------------------------------------------------------*
- | make time-delayed block
- *---------------------------------------------------------------------------*/
-inline void make_delay_block (
-    Rcpp::NumericMatrix &block_to_add_dc,
-    const Rcpp::NumericMatrix &block,
-    const Rcpp::IntegerVector &group,
-    const std::vector<int> &delay_time,
-    const size_t tau)
-{
-    const double qnan = std::numeric_limits<double>::quiet_NaN();
-    const int nt = block.rows();
-    const int nd = block.cols();
+    std::vector<std::vector<num_t>>().swap(*matC);
+    size_t nrow = matR.rows();
+    size_t ncol = matR.cols();
     
-    /* make group range */
-    std::vector<std::vector<int>> range_grp;
-    range_grp.push_back({0,0});
-    for (int t = 0, k = 0, g = group(0); t < nt; ++t)
+    (*matC).resize(nrow);
+    for (size_t i = 0; i < nrow; ++i)
     {
-        if (group(t) != /*NA*/-2147483648) //INT32_MIN
+        (*matC)[i].resize(ncol);
+        for (size_t j = 0; j < ncol; ++j)
         {
-            if (g != group(t))
-            {
-                range_grp[k][1] = t - 1;
-                range_grp.push_back({t, 0});
-                g = group(t); ++k;
-            }
+            (*matC)[i][j] = num_t(matR(i,j));
         }
     }
-    range_grp.back()[1] = nt - 1;
-    
-    /* add time-delayed block to original block */
-    Rcpp::NumericMatrix &B = block_to_add_dc;
-    for (int dim = 0; dim < nd; ++dim)
-    {
-        for (int dt : delay_time)
-        {
-            for (auto range : range_grp)
-            {
-                int dtt = dt * tau;
-                int rng = range[1] - range[0];
-                int L = range[0] - (dtt < 0 ? dtt : 0);
-                int R = range[1] - (dtt > 0 ? dtt : 0);
-                /* forward NAs */
-                for (int t = 0; t < dtt && t <= rng; ++t) B.push_back(qnan);
-                /* input data */
-                for (int t = L; t <= R  ; ++t) B.push_back(block(t,dim));
-                /* backward NAs */
-                for (int t = 0; t < -dtt && t <= rng; ++t) B.push_back(qnan);
-            }
-        }
-    }
-    B.attr("dim") = Rcpp::Dimension(nt, B.size()/nt);
-    B = Rcpp::clone(B);
 }
 
-/*---------------------------------------------------------------------------*
- | check whether data hve NAs, reflecting 'group' vector
- *---------------------------------------------------------------------------*/
-inline void check_NAs_group (
-    Rcpp::IntegerVector &group,
-    const Rcpp::NumericMatrix &Data_x,
-    const Rcpp::NumericMatrix &Data_y)
+template <typename num_t=int>
+inline void as_cpp (
+    std::vector<num_t> *vecC,
+    const Rcpp::IntegerVector &vecR)
 {
-    size_t nt = Data_x.rows();
-    size_t nx = Data_x.cols();
-    size_t ny = Data_y.cols();
-    for (size_t t = 0; t < nt; ++t)
+    std::vector<num_t>().swap(*vecC);
+    size_t size = vecR.size();
+    
+    num_t qnan = std::numeric_limits<num_t>::quiet_NaN();
+    (*vecC).resize(size);
+    for (size_t i = 0; i < size; ++i)
     {
-        bool complete = true;
-        for (size_t k = 0; k < nx && complete; ++k)
-            if (std::isnan(Data_x(t,k))) complete = false;
-        for (size_t k = 0; k < ny && complete; ++k)
-            if (std::isnan(Data_y(t,k))) complete = false;
-        if (!complete) group(t) = /*NA*/-2147483648; //INT32_MIN
+        (*vecC)[i] = (vecR[i] == -2147483648) ? qnan : num_t(vecR(i));
+        // NA is -2147483648 (INT32_MIN) for R::Integer
     }
 }
 

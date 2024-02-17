@@ -88,7 +88,7 @@ simplex = function (
     X <- as.matrix(block[ lib_var])
     Z <- as.matrix(block[cond_var])
     if (alpha >= 1 || num_surr == 0) {
-        out <- .Call(`_rUIC_npmodel_R`,
+        out <- .Call(`_rUIC_xmap_fit_R`,
             X, X, Z, Group, lib, pred, E, E-1, tau, tp, nn, p, num_surr,
             exclusion_radius, epsilon, is_naive, 0, KNN)
     }
@@ -97,7 +97,7 @@ simplex = function (
         for (tpi in tp) for (taui in tau) {
             E0 <- 0
             for (Ei in E) {
-                outi <- .Call(`_rUIC_npmodel_R`,
+                outi <- .Call(`_rUIC_xmap_fit_R`,
                     X, X, Z, Group, lib, pred, Ei, E0, taui, tpi, nn, p,
                     num_surr, exclusion_radius, epsilon, is_naive, 0, KNN)
                 if(outi$pval < alpha) E0 <- Ei

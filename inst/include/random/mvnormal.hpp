@@ -1,7 +1,7 @@
 /*****************************************************************************
  * Multivariate normal distribution (Eigen)
  * 
- * Copyright 2023  Yutaka Osada. All rights reserved.
+ * Copyright 2023-2024  Yutaka Osada. All rights reserved.
  * 
  *****************************************************************************/
 

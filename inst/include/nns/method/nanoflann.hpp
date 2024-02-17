@@ -1,7 +1,7 @@
 /***********************************************************************
  * Software License Agreement (BSD License)
  * 
- * Copyright 2022-2023  Yutaka Osada (ytosada@gmail.com). All rights reserved.
+ * Copyright 2022-2024  Yutaka Osada (ytosada@gmail.com). All rights reserved.
  *     - Modification for UIC.
  * 
  * based on nanoflann (version:0x142)
@@ -177,8 +177,10 @@ public:
     std::function<num_t(num_t)> root;
     std::function<num_t(num_t, num_t, num_t)> update_min;
     
-    NormAdaptor () : p(2.0)
-    {}
+    NormAdaptor (num_t p = 2.0) : p(p)
+    {
+        set_norm(p);
+    }
     
     inline void set_norm (num_t p = 2)
     {
@@ -232,73 +234,73 @@ private:
 /*---------------------------------------------------------------------------*
  | Data class (point cloud)
  *---------------------------------------------------------------------------*/
-template <typename num_t>
-struct DataSet
-{
-    using data_t = std::vector<num_t>;
-    using time_t = std::pair<int,int>;
-    
-    NormAdaptor<num_t> norm;
-    std::vector<data_t> data;
-    std::vector<time_t> time;
-    int exclusion_radius;
-    
-    inline void set_data (
-        const std::vector<data_t> &data,
-        const std::vector<time_t> &time,
-        int exclusion_radius = -1)
-    {
-        std::vector<data_t>().swap(this->data);
-        std::vector<time_t>().swap(this->time);
-        this->data = data;
-        this->time = time;
-        this->exclusion_radius = exclusion_radius;
-    }
-    
-    inline void set_norm (num_t p) { norm.set_norm(p); }
-    
-    /* for KD-TREE */
-    inline bool time_exclusion (const size_t idx, const time_t &qtime) const
-    {
-        /* check whether library and query have the same group? */
-        if (time[idx].second != qtime.second) return false;
-        /* check whether library and query are near timestamp? */
-        int radius = std::abs(time[idx].first - qtime.first);
-        if (radius > exclusion_radius) return false;
-        return true;
-    }
-    
-    inline num_t eval_norm (
-        const data_t &query, size_t idx, size_t size,
-        num_t worst_dist = -1) const
-    {
-        num_t d = num_t();
-        size_t dim = 0;
-        while (dim + 3 < size)
-        {
-            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
-            ++dim;
-            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
-            ++dim;
-            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
-            ++dim;
-            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
-            ++dim;
-            if (worst_dist > 0 && d > worst_dist) return d;
-        }
-        while (dim < size)
-        {
-            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
-            ++dim;
-        }
-        return d;
-    }
-    
-    inline size_t get_size () const { return data.size(); }
-    inline size_t get_dim  () const { return data[0].size(); }
-    inline num_t  get_pt (const size_t idx, const size_t dim) const
-        { return data[idx][dim]; }
-};
+//template <typename num_t>
+//struct DataSet
+//{
+//    using data_t = std::vector<num_t>;
+//    using time_t = std::pair<int,int>;
+//    
+//    NormAdaptor<num_t> norm;
+//    std::vector<data_t> data;
+//    std::vector<time_t> time;
+//    int exclusion_radius;
+//    
+//    inline void set_data (
+//        const std::vector<data_t> &data,
+//        const std::vector<time_t> &time,
+//        int exclusion_radius = -1)
+//    {
+//        std::vector<data_t>().swap(this->data);
+//        std::vector<time_t>().swap(this->time);
+//        this->data = data;
+//        this->time = time;
+//        this->exclusion_radius = exclusion_radius;
+//    }
+//    
+//    inline void set_norm (num_t p) { norm.set_norm(p); }
+//    
+//    /* for KD-TREE */
+//    inline bool time_exclusion (const size_t idx, const time_t &qtime) const
+//    {
+//        /* check whether library and query have the same group? */
+//        if (time[idx].second != qtime.second) return false;
+//        /* check whether library and query are near timestamp? */
+//        int radius = std::abs(time[idx].first - qtime.first);
+//        if (radius > exclusion_radius) return false;
+//        return true;
+//    }
+//    
+//    inline num_t eval_norm (
+//        const data_t &query, size_t idx, size_t size,
+//        num_t worst_dist = -1) const
+//    {
+//        num_t d = num_t();
+//        size_t dim = 0;
+//        while (dim + 3 < size)
+//        {
+//            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
+//            ++dim;
+//            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
+//            ++dim;
+//            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
+//            ++dim;
+//            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
+//            ++dim;
+//            if (worst_dist > 0 && d > worst_dist) return d;
+//        }
+//        while (dim < size)
+//        {
+//            d = norm.sum(d, norm.pow(query[dim], data[idx][dim]));
+//            ++dim;
+//        }
+//        return d;
+//    }
+//    
+//    inline size_t get_size () const { return data.size(); }
+//    inline size_t get_dim  () const { return data[0].size(); }
+//    inline num_t  get_pt (const size_t idx, const size_t dim) const
+//        { return data[idx][dim]; }
+//};
 
 
 /*---------------------------------------------------------------------------*
@@ -596,31 +598,28 @@ private:
 /*---------------------------------------------------------------------------*
  | KD-TREE interface class (based on KDTreeSingleIndexAdaptor)
  *---------------------------------------------------------------------------*/
-template <typename num_t>
-class KDTreeInterface : public KDTreeBase<KDTreeInterface<num_t>, num_t>
+template <typename num_t, typename DataSet_t>
+class KDTreeInterface : public KDTreeBase<KDTreeInterface<num_t, DataSet_t>, num_t>
 {
     using data_t = std::vector<num_t>;
-    using time_t = std::pair<int,int>;
+    using time_t = int;
     
     num_t epsError;
-    num_t exclusion_dist;
     
-    using Derived = nanoflann::KDTreeInterface<num_t>;
+    using Derived = nanoflann::KDTreeInterface<num_t, DataSet_t>;
     using Base = typename nanoflann::KDTreeBase<Derived, num_t>;
     using Node = typename Base::Node;
     using BoundingBox = typename Base::BoundingBox;
     
 public:
-    const nanoflann::DataSet<num_t> &data;
+    const DataSet_t &data;
     
-    explicit KDTreeInterface(const KDTreeInterface<num_t>&) = delete;
+    explicit KDTreeInterface(const KDTreeInterface<num_t, DataSet_t>&) = delete;
     explicit KDTreeInterface(
-        const int n_dim, const DataSet<num_t> &inputData,
-        const num_t epsilon = -1, const num_t eps = 0.0)
+        const int n_dim, const DataSet_t &inputData, const num_t eps = 0.0)
         : data(inputData)
     {
         Base::pool.free_all();
-        exclusion_dist = epsilon < 0 ? -1 : data.norm.pow(epsilon, 0);
         
         /* search parameters */
         Base::m_leaf_max_size = 10; // default
@@ -709,7 +708,7 @@ private:
                 const size_t index = Base::vAcc[i];
                 if (data.time_exclusion(index, qtime)) continue;
                 num_t dist = data.eval_norm(query, index, Base::dim);
-                if (dist <= exclusion_dist) continue;
+                if (data.dist_exclusion(dist)) continue;
                 if (dist <= worst_dist)
                 {
                     if (!result.add_point(dist, index)) return false;

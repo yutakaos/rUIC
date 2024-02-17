@@ -88,7 +88,7 @@ uic = function (
     X <- as.matrix(block[ lib_var])
     Y <- as.matrix(block[ tar_var])
     Z <- as.matrix(block[cond_var])
-    out <- .Call(`_rUIC_npmodel_R`,
+    out <- .Call(`_rUIC_xmap_fit_R`,
         X, Y, Z, Group, lib, pred, E, E-1, tau, tp, nn, p, num_surr,
         exclusion_radius, epsilon, is_naive, 1, KNN)
     return(out)

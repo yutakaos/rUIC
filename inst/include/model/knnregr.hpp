@@ -1,7 +1,7 @@
 /*****************************************************************************
  * KNN Regresion
  * 
- * Copyright 2022-2023  Yutaka Osada. All rights reserved.
+ * Copyright 2022-2024  Yutaka Osada. All rights reserved.
  * 
  *****************************************************************************/
 
@@ -18,141 +18,173 @@
 namespace UIC {
 namespace model {
 
+/*---------------------------------------------------------------------------*
+ | KNN regression
+ *---------------------------------------------------------------------------*/
 template <typename num_t>
 class knnregr
 {
     using EigenMatrix = Eigen::Matrix<num_t,Eigen::Dynamic,Eigen::Dynamic>;
+    using data_t = std::vector<num_t>;
     
-    size_t num_val;
-    size_t dim;
+    int num_val, dim_y;
+    std::function<num_t(size_t)> calc_cc;
     std::vector<std::vector<size_t>> idxs;
     std::vector<std::vector<num_t >> weis;
-    std::function<num_t(size_t)> calc_cc;
     
 public:
     
-    /*-----------------------------------------------------------------------*
-     | DataX : dataset, which has the following member variables:
-     |    - DataX.trn_data : training data
-     |    - DataX.val_data : validation data
-     |    - DataX.trn_time : time indices of training data
-     |    - DataX.val_time : time indices of validation data
-     *-----------------------------------------------------------------------*/
-    template <typename DataSet_t>
     inline knnregr (
-        const size_t dim,
-        const DataSet_t &DataX,
-        const size_t nn = 0,
-        const num_t p = 2,
-        const int exclusion_radius = -1,
-        const num_t epsilon = -1,
-        const UIC::KNN_TYPE knn_type = UIC::KNN_TYPE::KD,
+        const int dim,
+        const DataSet<num_t>   &Data,
+        const std::vector<int> &idx_val,
         const bool is_naive = false)
     {
-        num_val = DataX.val_data.size();
+        num_val = idx_val.size();
+        dim_y   = Data.dim_y;
         
         /* define function for corrections */
+        set_calc_cc(is_naive);
+        
+        /* find neighbors */
+        UIC::find_neighbors(dim, idxs, weis, Data, idx_val);
+        
+        /* convert distances to weights for simplex projection */
+        for (auto &ds : weis)
+        {
+            if (ds[0] == 0.0)
+                for (auto &d : ds) d = (d == 0.0 ? 1.0 : 0.0); 
+            else {
+                num_t mind = ds[0];
+                for (auto &d : ds) d = std::exp(-d / mind);
+            }
+            num_t sumw = 0;
+            for (auto  w : ds) sumw += w;
+            for (auto &w : ds) w /= sumw;
+        }
+    }
+    
+    /* predictions */
+    template <typename vec_t>  // vec_t = std::vector<num_t> or Eigen::VectorXd
+    inline void predict (
+        std::vector<vec_t> &pred,
+        const std::vector<data_t> &trn_data)
+    {
+        std::vector<vec_t>().swap(pred);
+        pred.resize(num_val);
+        for (int t = 0; t < num_val; ++t) pred[t] = mean<vec_t>(t, trn_data);
+    }
+    
+    /* calculate log-predictives */
+    inline num_t calc_lp (
+        const std::vector<data_t> &trn_data,
+        const std::vector<data_t> &val_data)
+    {
+        std::vector<data_t> pred;
+        predict(pred, trn_data);
+        return LP(pred, val_data);
+    }
+    
+    /* calculate effective number of neighbors */
+    inline void calc_enn (std::vector<num_t> &enn)
+    {
+        std::vector<num_t>().swap(enn);
+        enn.resize(num_val);
+        for (int t = 0; t < num_val; ++t)
+        {
+            num_t w2 = 0;
+            for (auto w : weis[t]) w2 += w * w;
+            enn[t] = 1.0 / w2;
+        }
+    }
+    
+    /* calculate covariance matrix */
+    template <typename vec_t>
+    inline void calc_S2 (
+        std::vector<EigenMatrix>  &S2,
+        const std::vector<vec_t>  &pred,
+        const std::vector<data_t> &val_data)
+    {
+        std::vector<data_t> e2d(num_val);
+        std::vector<num_t>  enn(num_val);
+        for (int t = 0; t < num_val; ++t)
+        {
+            num_t w = calc_cc(t);
+            e2d[t] = calc_e2d(pred[t], val_data[t], w);
+            enn[t] = w / (1.0 - w);
+        }
+        std::vector<data_t> s2d(num_val);
+        for (int t = 0; t < num_val; ++t) s2d[t] = mean<data_t>(t, e2d);
+        
+        std::vector<EigenMatrix>().swap(S2);
+        S2.resize(num_val);
+        for (int t = 0; t < num_val; ++t)
+        {
+            S2[t] = calc_S2t(e2d[t], s2d[t], enn[t]);
+        }
+    }
+    
+private:
+    
+    /* set function for corrections */
+    inline void set_calc_cc (const bool is_naive)
+    {
         if (is_naive)
             calc_cc = [](size_t) { return 1.0; };
-        else {
+        else
             calc_cc = [this](size_t t)
             {
                 num_t w2 = 0;
                 for (auto w : weis[t]) w2 += w * w;
                 return 1.0 / (1.0 + w2);
             };
-        }
-        
-        /* find neighbors */
-        UIC::find_neighbors(
-            dim, idxs, weis, DataX, nn, p, exclusion_radius, epsilon,
-            true, knn_type);
     }
     
-    // vec_t = std::vector<num_t> or Eigen::VectorXd
+    /* weighted mean */
     template <typename vec_t>
-    inline void predict (
-        std::vector<vec_t> &yhat,
-        const std::vector<std::vector<num_t>> &ytrn)
+    inline vec_t mean (int t, const std::vector<data_t> &data)
     {
-        size_t dim = ytrn[0].size();
-        std::vector<vec_t>().swap(yhat);
-        yhat.resize(num_val);
-        for (size_t t = 0; t < num_val; ++t)
+        int nn  = idxs[t].size();
+        int dim = data[0].size();
+        vec_t pred(dim);
+        for (int i = 0; i < dim; ++i)
         {
-            yhat[t].resize(dim);
-            size_t nn = idxs[t].size();
-            for (size_t i = 0; i < dim; ++i)
-            {
-                yhat[t][i] = 0;
-                for (size_t k = 0; k < nn; ++k)
-                {
-                    yhat[t][i] += weis[t][k] * ytrn[idxs[t][k]][i];
-                }
-            }
+            pred[i] = 0;
+            for (int k = 0; k < nn; ++k)
+                pred[i] += weis[t][k] * data[idxs[t][k]][i];
         }
+        return pred;
     }
     
-    /* calculate squared errors
-    template <typename vec_t>
-    inline void calc_E2 (
-        std::vector<EigenMatrix> &Sm,
-        const std::vector<vec_t> &yhat,
-        const std::vector<std::vector<num_t>> &yval)
+    /* calculate log-predictive (temporally homogeneous) */
+    inline num_t LP (
+        const std::vector<data_t> &yhat,
+        const std::vector<data_t> &yval)
     {
-        dim = yval[0].size();
-        std::vector<EigenMatrix>().swap(Sm);
-        Sm.resize(num_val);
-        for (size_t t = 0; t < num_val; ++t)
+        EigenMatrix Sm = EigenMatrix::Zero(dim_y,dim_y);
+        for (int t = 0; t < num_val; ++t)
         {
-            num_t w = calc_cc(t);
-            Sm[t] = calc_e2(yval[t], yhat[t], w);
+            Sm += calc_e2(yhat[t], yval[t], calc_cc(t));
         }
-    } //*/
+        Sm /= num_t(num_val);
+        return 0.5 * logdet(Sm);
+    }
     
-    template <typename vec_t>
-    inline void calc_S2 (
-        std::vector<EigenMatrix> &S2,
-        const std::vector<vec_t> &yhat,
-        const std::vector<std::vector<num_t>> &yval)
+    /* calculate log-predictive (temporally heterogeneous)
+    inline num_t LP2 (
+        const std::vector<data_t> &yhat,
+        const std::vector<data_t> &yval)
     {
-        dim = yval[0].size();
-        std::vector<std::vector<num_t>> e2d(num_val);
-        std::vector<std::vector<num_t>> s2d;
-        std::vector<num_t> enn(num_val);
+        std::vector<data_t> e2d(num_val);
+        std::vector<num_t>  enn(num_val);
         for (size_t t = 0; t < num_val; ++t)
         {
             num_t w = calc_cc(t);
             e2d[t] = calc_e2d(yval[t], yhat[t], w);
             enn[t] = w / (1.0 - w);
         }
-        predict(s2d, e2d);
-        
-        std::vector<EigenMatrix>().swap(S2);
-        S2.resize(num_val);
-        for (size_t t = 0; t < num_val; ++t)
-        {
-            S2[t] = calc_S2t(e2d[t], s2d[t], enn[t]);
-        }
-    }
-    
-    /* calculate log-predictive each time
-    template <typename vec_t>
-    inline num_t calc_lp (
-        const std::vector<vec_t> &yhat,
-        const std::vector<std::vector<num_t>> &yval)
-    {
-        dim = yval[0].size();
-        std::vector<std::vector<num_t>> e2d(num_val);
-        std::vector<std::vector<num_t>> s2d;
-        std::vector<num_t> enn(num_val);
-        for (size_t t = 0; t < num_val; ++t)
-        {
-            num_t w = calc_cc(t);
-            e2d[t] = calc_e2d(yval[t], yhat[t], w);
-            enn[t] = w / (1.0 - w);
-        }
-        predict(s2d, e2d);
+        std::vector<data_t> s2d(num_val);
+        for (int t = 0; t < num_val; ++t) s2d[t] = mean<data_t>(t, e2d);
         
         num_t lp = 0.0;
         for (size_t t = 0; t < num_val; ++t)
@@ -163,48 +195,24 @@ public:
         return 0.5 * lp / num_t(num_val);
     } //*/
     
-    //* calculate log-predictives (temporally homogeneous)
-    template <typename vec_t>
-    inline num_t calc_lp (
-        const std::vector<vec_t> &yhat,
-        const std::vector<std::vector<num_t>> &yval)  // validation
+    inline num_t logdet (const EigenMatrix &Mat)
     {
-        dim = yval[0].size();
-        EigenMatrix Sm = EigenMatrix::Zero(dim,dim);
-        for (size_t t = 0; t < num_val; ++t)
-        {
-            num_t w = calc_cc(t);
-            Sm += calc_e2(yval[t], yhat[t], w);
-        }
-        Sm /= num_t(num_val);
-        return 0.5 * logdet(Sm);
-    } //*/
-    
-    inline void calc_enn (std::vector<num_t> &enn)
-    {
-        std::vector<num_t>().swap(enn);
-        enn.resize(num_val);
-        for (size_t t = 0; t < num_val; ++t)
-        {
-            num_t w2 = 0;
-            for (auto w : weis[t]) w2 += w * w;
-            enn[t] = 1.0 / w2;
-        }
+        num_t L_logdet = 
+            Eigen::LLT<EigenMatrix>(Mat).matrixL().toDenseMatrix()
+            .diagonal().array().log().sum();
+        return 2.0 * L_logdet;
     }
-    
-private:
     
     template <typename vec_t>
     inline EigenMatrix calc_e2 (
-        const std::vector<num_t> &yval, const vec_t &yhat,
-        const num_t w)
+        const vec_t &yhat, const data_t &yval, const num_t w)
     {
-        EigenMatrix e2(dim,dim);
-        for (size_t i = 0; i < dim; ++i)
+        EigenMatrix e2(dim_y,dim_y);
+        for (int i = 0; i < dim_y; ++i)
         {
             num_t ei = yval[i] - yhat[i];
             e2(i,i) = w * ei * ei;
-            for (size_t j = i + 1; j < dim; ++j)
+            for (int j = i + 1; j < dim_y; ++j)
             {
                 num_t ej = yval[j] - yhat[j];
                 e2(i,j) = w * ei * ej;
@@ -216,16 +224,15 @@ private:
     
     template <typename vec_t>
     inline std::vector<num_t> calc_e2d (
-        const std::vector<num_t> &yval, const vec_t &yhat,
-        const num_t w)
+        const vec_t &yhat, const data_t &yval, const num_t w)
     {
-        size_t K = dim * (dim + 1) / 2;
+        size_t K = dim_y * (dim_y + 1) / 2;
         std::vector<num_t> e2d(K);
-        for (size_t i = 0, k = 0; i < dim; ++i)
+        for (int i = 0, k = 0; i < dim_y; ++i)
         {
             num_t ei = yval[i] - yhat[i];
             e2d[k++] = w * ei * ei;
-            for (size_t j = i + 1; j < dim; ++j)
+            for (int j = i + 1; j < dim_y; ++j)
             {
                 num_t ej = yval[j] - yhat[j];
                 e2d[k++] = w * ei * ej;
@@ -235,30 +242,20 @@ private:
     }
     
     inline EigenMatrix calc_S2t (
-        const std::vector<num_t> &e2d,
-        const std::vector<num_t> &s2d,
-        const num_t enn)
+        const data_t &e2d, const data_t &s2d, const num_t enn)
     {
-        EigenMatrix S2(dim,dim);
-        for (size_t i = 0, k = 0; i < dim; ++i)
+        EigenMatrix S2(dim_y, dim_y);
+        for (int i = 0, k = 0; i < dim_y; ++i)
         {
             S2(i,i) = (enn*s2d[k] + e2d[k]) / (enn + 1.0);
             ++k;
-            for (size_t j = i + 1; j < dim; ++j, ++k)
+            for (int j = i + 1; j < dim_y; ++j, ++k)
             {
                 S2(i,j) = (enn*s2d[k] + e2d[k]) / (enn + 1.0);
                 S2(j,i) = S2(i,j);
             }
         }
         return S2;
-    }
-    
-    inline num_t logdet (const EigenMatrix &Mat)
-    {
-        num_t L_logdet = 
-            Eigen::LLT<EigenMatrix>(Mat).matrixL().toDenseMatrix()
-            .diagonal().array().log().sum();
-        return 2.0 * L_logdet;
     }
 };
 
