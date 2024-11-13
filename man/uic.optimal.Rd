@@ -54,8 +54,8 @@ library variables without time-delay embedding.}
 \item{tp}{the time indices to predict.}
 
 \item{nn}{the number of nearest neighbors. Must be an integer or "e+1".
-If \code{nn = "e+1"} or \code{nn = 0}, \code{nn} is set to \code{E} + 1.
-If \code{nn < 0}, \code{nn} is set to the number of all data.}
+If \code{nn = "e+1"} or \code{nn = -1}, \code{nn} is set to \code{E} + 1.
+If \code{nn = 0}, \code{nn} is set to the number of all data.}
 
 \item{num_surr}{the number of surrogate data generated to compute p-value.}
 

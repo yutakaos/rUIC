@@ -11,8 +11,8 @@
 #include <vector> // std::vector
 
 #include "./dataset.hpp"
-#include "./method/bfnn.hpp"
-#include "./method/nanoflann.hpp"
+#include "./nnsearch/bfnn.hpp"
+#include "./nnsearch/nanoflann.hpp"
 
 
 namespace UIC {
@@ -95,12 +95,14 @@ public:
  | Find neighbors 
  |---------------------------------------------------------------------------*
  |    dim   : data dimension to compute distances (<= data.cols)
+ |    nn    : number of neighbors
  |    index : k-NN indices
  |    dist  : k-NN distances
  *---------------------------------------------------------------------------*/
 template <typename num_t>
 inline void find_neighbors (
     const size_t dim,
+    const int    nn,
     std::vector<std::vector<size_t>> &index,    
     std::vector<std::vector<num_t >> &dist,
     const DataSet<num_t>   &Data,
@@ -112,7 +114,6 @@ inline void find_neighbors (
     index.resize(n_query);
     dist .resize(n_query);
     
-    int nn = (Data.nn == 0) ? dim + 1 : Data.nn;
     if (Data.knn_type == KNN_TYPE::KD) // KD-tree nearest neighbor search
     {
         DataCloud<num_t> cloud(Data);

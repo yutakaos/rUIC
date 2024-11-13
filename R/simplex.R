@@ -30,6 +30,7 @@
 #' \code{tau}    \tab \code{:} time-lag \cr
 #' \code{tp}     \tab \code{:} time prediction horizon \cr
 #' \code{nn}     \tab \code{:} number of nearest neighbors \cr
+#' \code{nn0}    \tab \code{:} number of nearest neighbors of reference model \cr
 #' \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 #' \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 #' \code{rmse}   \tab \code{:} root mean squared error \cr
@@ -68,6 +69,7 @@ simplex = function (
     is_naive = FALSE, knn_method = c("KD","BF"))
 {
     if (norm < 1) stop("norm must be >= 1.")
+    if (!is.numeric(nn) & tolower(nn) != "e+1") stop('nn must be an integer or "e+1".')
     lib  <- rbind(lib)
     pred <- rbind(pred)
     if (length(group) == 0) Group <- rep(1, nrow(block))
@@ -79,8 +81,7 @@ simplex = function (
     p   <- ifelse(is.finite(norm), norm, 0)
     num_surr <- pmax(0, num_surr)
     KNN <- switch(match.arg(knn_method), "KD"=0, "BF"=1)
-    if (!is.numeric(nn) & tolower(nn) == "e+1") nn <- 0
-    if (nn < 0) nn <- -1
+    if (tolower(nn) == "e+1") nn <- -1
     if (is.null(alpha)) alpha <- 1
     if (is.null(exclusion_radius)) exclusion_radius <- 0
     if (is.null(epsilon)) epsilon <- -1

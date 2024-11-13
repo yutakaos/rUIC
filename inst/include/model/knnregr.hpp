@@ -12,7 +12,7 @@
 #include <functional> // std::function
 //#include <Eigen/Cholesky>
 
-#include "nns/find_neighbors.hpp"
+#include "./find_neighbors.hpp"
 
 
 namespace UIC {
@@ -27,7 +27,7 @@ class knnregr
     using EigenMatrix = Eigen::Matrix<num_t,Eigen::Dynamic,Eigen::Dynamic>;
     using data_t = std::vector<num_t>;
     
-    int num_val, dim_y;
+    const int num_val, dim_y;
     std::function<num_t(size_t)> calc_cc;
     std::vector<std::vector<size_t>> idxs;
     std::vector<std::vector<num_t >> weis;
@@ -36,18 +36,17 @@ public:
     
     inline knnregr (
         const int dim,
+        const int nn,
         const DataSet<num_t>   &Data,
         const std::vector<int> &idx_val,
         const bool is_naive = false)
+        : num_val(idx_val.size()), dim_y(Data.dim_y)
     {
-        num_val = idx_val.size();
-        dim_y   = Data.dim_y;
-        
         /* define function for corrections */
         set_calc_cc(is_naive);
         
         /* find neighbors */
-        UIC::find_neighbors(dim, idxs, weis, Data, idx_val);
+        UIC::find_neighbors(dim, nn, idxs, weis, Data, idx_val);
         
         /* convert distances to weights for simplex projection */
         for (auto &ds : weis)
@@ -100,8 +99,8 @@ public:
     
     /* calculate covariance matrix */
     template <typename vec_t>
-    inline void calc_S2 (
-        std::vector<EigenMatrix>  &S2,
+    inline void calc_SL (
+        std::vector<EigenMatrix>  &SL,
         const std::vector<vec_t>  &pred,
         const std::vector<data_t> &val_data)
     {
@@ -116,11 +115,11 @@ public:
         std::vector<data_t> s2d(num_val);
         for (int t = 0; t < num_val; ++t) s2d[t] = mean<data_t>(t, e2d);
         
-        std::vector<EigenMatrix>().swap(S2);
-        S2.resize(num_val);
+        std::vector<EigenMatrix>().swap(SL);
+        SL.resize(num_val);
         for (int t = 0; t < num_val; ++t)
         {
-            S2[t] = calc_S2t(e2d[t], s2d[t], enn[t]);
+            SL[t] = calc_S2t(e2d[t], s2d[t], enn[t]).llt().matrixL();
         }
     }
     

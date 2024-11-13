@@ -52,8 +52,8 @@ library variables without time-delay embedding.}
 \item{tp}{the time indices to predict.}
 
 \item{nn}{the number of nearest neighbors. Must be an integer or "e+1".
-If \code{nn = "e+1"} or \code{nn = 0}, \code{nn} is set to \code{E} + 1.
-If \code{nn < 0}, \code{nn} is set to the number of all data.}
+If \code{nn = "e+1"} or \code{nn = -1}, \code{nn} is set to \code{E} + 1.
+If \code{nn = 0}, \code{nn} is set to the number of all data.}
 
 \item{num_surr}{the number of surrogate data generated to compute p-value.}
 
@@ -80,6 +80,7 @@ A data.frame where each row represents model statistics computed from a paramete
 \code{tau}    \tab \code{:} time-lag \cr
 \code{tp}     \tab \code{:} time prediction horizon \cr
 \code{nn}     \tab \code{:} number of nearest neighbors \cr
+\code{nn0}    \tab \code{:} number of nearest neighbors of reference model \cr
 \code{n_lib}  \tab \code{:} number of time indices used for attractor reconstruction \cr
 \code{n_pred} \tab \code{:} number of time indices used for model predictions \cr
 \code{rmse}   \tab \code{:} root mean squared error \cr

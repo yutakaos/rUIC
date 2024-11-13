@@ -157,6 +157,7 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 | `tau`      | Time-lag for attractor reconstruction                        |
 | `tp`       | Time prediction horizon                                      |
 | `nn`       | The number of nearest neighbors                              |
+| `nn0`      | The number of nearest neighbors of reference model           |
 | `n_lib`    | The number of time indices used for attractor reconstruction |
 | `n_pred`   | The number of time indices used for model predictions        |
 | `rmse`     | Root mean squared error (RMSE)                               |

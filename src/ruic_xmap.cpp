@@ -9,12 +9,12 @@
  * Note
  * ------------------------------------------------------------------------
  * p  : power of norm 
- *    p <= 0 | Max norm 
- *    p >  0 | Lp  norm (but p < 1 is invalid as distance)
+ *    p <= 0   | Max norm
+ *    p >= 1   | Lp  norm
  * nn : number of neighbors
- *    nn <  0 | all data
- *    nn == 0 | E + 1
- *    nn >  0 | nn
+ *    nn < 0   | E - nn
+ *    nn = 0   | all data
+ *    nn > 0   | nn
  * uic_type : simplex or xmap
  *    false(0) | simplex
  *    true     | xmap
@@ -23,17 +23,15 @@
  *    true     | brute-force
  * ------------------------------------------------------------------------
  */
-#ifndef _xmap_R_cpp_
-#define _xmap_R_cpp_
+#ifndef _ruic_xmap_cpp_
+#define _ruic_xmap_cpp_
 
-// [[Rcpp::plugins("cpp11")]]
 // [[Rcpp::depends(RcppEigen)]]
 #include <Rcpp.h>
 #include <RcppEigen.h>
-#include <random> // std::mt19937
 #include <vector> // std::vector
 
-#include "xmap.hpp"
+#include "R_xmap.hpp"
 #include "R_utils.hpp"
 
 typedef double num_t;
@@ -63,13 +61,10 @@ Rcpp::List xmap_fit_R (
     int dim = E.size();
     int nt  = groupR.size();
     if (E0.size() != dim) Rcpp::stop("length(E0) must be length(E).");
-    if (xR.rows() != nt) Rcpp::stop("length(group) must be nrow(block_x).");
-    if (yR.rows() != nt) Rcpp::stop("length(group) must be nrow(block_y).");
-    if (zR.rows() != nt) Rcpp::stop("length(group) must be nrow(block_z).");
-    
-    /* set RNG engine (seed is generated from R) */
-    std::mt19937 engine;
-    engine.seed(int(Rcpp::runif(1,1,INT32_MAX)(0)));
+    if (xR.rows() != nt)  Rcpp::stop("length(group) must be nrow(block_x).");
+    if (yR.rows() != nt)  Rcpp::stop("length(group) must be nrow(block_y).");
+    if (zR.rows() != nt)  Rcpp::stop("length(group) must be nrow(block_z).");
+    if (0 < p && p < 1 )  Rcpp::stop("p must be >= 1 (Lp norm) or == 0 (Max norm).");
     
     /* convert data format from R to cpp */
     std::vector<std::vector<num_t>> x, y, z;
@@ -86,7 +81,7 @@ Rcpp::List xmap_fit_R (
     
     /* main */
     struct Output {
-        Rcpp::IntegerVector E, E0, tau, tp, nn, nl, np, ns;
+        Rcpp::IntegerVector E, E0, tau, tp, nn, nn0, nl, np, ns;
         Rcpp::NumericVector rmse, te, ete, pval;
     } out;
     
@@ -103,7 +98,7 @@ Rcpp::List xmap_fit_R (
             /* KNN regresion */
             int df = E0[i] > 0 ? E[i]-E0[i] : E[i];
             UIC::xmap::ResultSet<num_t> result;
-            UIC::xmap::Model<num_t> xmap(engine, Data, is_naive);
+            UIC::xmap::Model<num_t> xmap(Data, is_naive);
             xmap.compute(&result, df, n_surr);
             
             /* output */
@@ -112,6 +107,7 @@ Rcpp::List xmap_fit_R (
             out.tau .push_back(taui);
             out.tp  .push_back(tpi);
             out.nn  .push_back(result.nn);
+            out.nn0 .push_back(result.nn0);
             out.nl  .push_back(result.n_lib);
             out.np  .push_back(result.n_prd);
             out.rmse.push_back(result.rmse);
@@ -127,6 +123,7 @@ Rcpp::List xmap_fit_R (
         Rcpp::Named("tau"   ) = out.tau,
         Rcpp::Named("tp"    ) = out.tp,
         Rcpp::Named("nn"    ) = out.nn,
+        Rcpp::Named("nn0"   ) = out.nn0,
         Rcpp::Named("n_lib" ) = out.nl,
         Rcpp::Named("n_pred") = out.np,
         Rcpp::Named("rmse"  ) = out.rmse,
@@ -160,6 +157,7 @@ Rcpp::List xmap_predict_R (
     if (xR.rows() != nt) Rcpp::stop("length(group) must be nrow(block_x).");
     if (yR.rows() != nt) Rcpp::stop("length(group) must be nrow(block_y).");
     if (zR.rows() != nt) Rcpp::stop("length(group) must be nrow(block_z).");
+    if (0 < p && p < 1 ) Rcpp::stop("p must be >= 1 (Lp norm) or == 0 (Max norm).");
     
     /* convert data format from R to cpp */
     std::vector<std::vector<num_t>> x, y, z;
@@ -180,8 +178,7 @@ Rcpp::List xmap_predict_R (
         epsilon, UIC::KNN_TYPE(knn_type));
     
     /* KNN regresion */
-    std::mt19937 engine;
-    UIC::xmap::Model<num_t> xmap(engine, Data, is_naive);
+    UIC::xmap::Model<num_t> xmap(Data, is_naive);
     
     /* output */
     Rcpp::List out;
@@ -189,6 +186,7 @@ Rcpp::List xmap_predict_R (
     {
         out.push_back(
         Rcpp::DataFrame::create(
+            Rcpp::Named("group") = groupR,
             Rcpp::Named("data") = x.data,
             Rcpp::Named("pred") = x.pred,
             Rcpp::Named("enn" ) = x.enn,

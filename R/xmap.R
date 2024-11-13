@@ -31,8 +31,8 @@
 #' the time index to predict. Must be an integer.
 #' @param nn
 #' the number of nearest neighbors. Must be an integer or "e+1".
-#' If \code{nn = "e+1"} or \code{nn = 0}, \code{nn} is set to \code{E} + 1.
-#' If \code{nn < 0}, \code{nn} is set to the number of all data.
+#' If \code{nn = "e+1"} or \code{nn = -1}, \code{nn} is set to \code{E} + 1.
+#' If \code{nn = 0}, \code{nn} is set to the number of all data.
 #' @param exclusion_radius
 #' the filtering to exclude nearest neighbors if their time index is within
 #' exclusion radius.
@@ -83,6 +83,7 @@ xmap = function (
     if (E  [1] < 0) stop("E must be non-negative.")
     if (tau[1] < 0) stop("tau must be non-negative.")
     if (norm   < 1) stop("norm must be >= 1.")
+    if (!is.numeric(nn) & tolower(nn) != "e+1") stop('nn must be an integer or "e+1".')
     lib  <- rbind(lib)
     pred <- rbind(pred)
     if (length(group) == 0) Group <- rep(1, nrow(block))
@@ -91,8 +92,7 @@ xmap = function (
     tp <- tp[1]
     p  <- ifelse(is.finite(norm), norm, 0)
     KNN <- switch(match.arg(knn_method), "KD"=0, "BF"=1)
-    if (!is.numeric(nn) & tolower(nn) == "e+1") nn <- 0
-    if (nn < 0) nn <- -1
+    if (tolower(nn) == "e+1") nn <- -1
     if (is.null(exclusion_radius)) exclusion_radius <- 0
     if (is.null(epsilon)) epsilon <- -1
     

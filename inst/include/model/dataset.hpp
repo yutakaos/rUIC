@@ -73,6 +73,7 @@ public:
         //if (int(x.size()) != num_data) std::cerr << "length(group) must be nrow(x)." << std::endl;
         //if (int(y.size()) != num_data) std::cerr << "length(group) must be nrow(y)." << std::endl;
         //if (int(z.size()) != num_data) std::cerr << "length(group) must be nrow(z)." << std::endl;
+        //if (0 < p && p < 1) std::cerr << "p must be >= 1 (Lp norm) or == 0 (Max norm)." << std::endl;
         nx = x[0].size();
         ny = y[0].size();
         nz = z[0].size();
@@ -108,8 +109,8 @@ public:
             if (!complete_case(X(t))) continue;
             if (!complete_case(Y(t))) continue;
             
-            if (trn[t]) idx_trn.push_back(t);
-            if (val[t]) idx_val.push_back(t);
+            if (trn[t ]) idx_trn.push_back(t);
+            if (val[ty]) idx_val.push_back(t);
             if (trn[t] || val[t]) idx_all.push_back(t);
         }
         num_trn = idx_trn.size();
@@ -138,6 +139,14 @@ public:
     inline std::vector<num_t> Y (int t) const
     {
         return y[t+tp];
+    }
+    
+    inline int get_nn (const size_t dim) const
+    {
+        int nn_out = nn;
+        if (nn < 0) nn_out = dim - nn;
+        if (nn == 0 || num_trn <= nn_out) nn_out = num_trn - 1;
+        return nn_out;
     }
     
 private:

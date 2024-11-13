@@ -51,8 +51,8 @@ library variables without time-delay embedding.}
 \item{tp}{the time index to predict. Must be an integer.}
 
 \item{nn}{the number of nearest neighbors. Must be an integer or "e+1".
-If \code{nn = "e+1"} or \code{nn = 0}, \code{nn} is set to \code{E} + 1.
-If \code{nn < 0}, \code{nn} is set to the number of all data.}
+If \code{nn = "e+1"} or \code{nn = -1}, \code{nn} is set to \code{E} + 1.
+If \code{nn = 0}, \code{nn} is set to the number of all data.}
 
 \item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within
 exclusion radius.}
