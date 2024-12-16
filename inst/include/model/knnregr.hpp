@@ -26,6 +26,7 @@ class knnregr
 {
     using EigenMatrix = Eigen::Matrix<num_t,Eigen::Dynamic,Eigen::Dynamic>;
     using data_t = std::vector<num_t>;
+    const num_t LOG_EPS = std::log(std::numeric_limits<num_t>::epsilon());
     
     const int num_val, dim_y;
     std::function<num_t(size_t)> calc_cc;
@@ -166,7 +167,8 @@ private:
             Sm += calc_e2(yhat[t], yval[t], calc_cc(t));
         }
         Sm /= num_t(num_val);
-        return 0.5 * logdet(Sm);
+        num_t lp = 0.5 * logdet(Sm);
+        return (lp < LOG_EPS) ? LOG_EPS : lp;
     }
     
     /* calculate log-predictive (temporally heterogeneous)

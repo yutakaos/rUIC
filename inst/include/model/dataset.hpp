@@ -109,8 +109,8 @@ public:
             if (!complete_case(X(t))) continue;
             if (!complete_case(Y(t))) continue;
             
-            if (trn[t ]) idx_trn.push_back(t);
-            if (val[ty]) idx_val.push_back(t);
+            if (trn[t]) idx_trn.push_back(t);
+            if (val[t]) idx_val.push_back(t);
             if (trn[t] || val[t]) idx_all.push_back(t);
         }
         num_trn = idx_trn.size();
