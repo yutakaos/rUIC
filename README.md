@@ -11,7 +11,7 @@ remotes::install_github("yutakaos/rUIC")
 
 ### Load library and generate model time-series
 ```r
-library(rUIC); packageVersion("rUIC") # v0.9.11
+library(rUIC); packageVersion("rUIC") # v0.9.14
 
 # simulate logistic map
 tl <- 400  # time length
@@ -85,8 +85,8 @@ In rUIC package, a wrapper functions is implemented to compute UIC without manua
 
 ```r
 ## compute UIC using optimal embedding dimension (the same results as No.3)
-uic_opt_xy <- uic.optimal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4)
-uic_opt_yx <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4)
+uic_opt_xy <- uic.optimal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4, sequential_test=TRUE)
+uic_opt_yx <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4, sequential_test=TRUE)
 ```
 
 <figure>
@@ -119,7 +119,7 @@ uic_opt_yx <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4
     - `pval` in the output indicates _p_ value to test alternative hypothesis _te_ > 0, which means **y causes x in the sense of transfer entropy**.
 
 - `uic.optimal`: Wrapper function for computing UIC, which return statistics only.
-    - `E`, `tau` and `tp` accept vectors. All possible combinations of  `E`, `tau`, and `tp` are used.
+    - `E` and `tp` accept vectors. All possible combinations of  `E` and `tp` are used. `tau` accept a scalar value only.
     - UIC is computed using the optimal embedding dimension.
     - Potential causal variables should be specified by `tar_var`.
     - Specify `cond_var` for the multivariate UIC.
@@ -141,6 +141,8 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 - `nn` : the number of neighbors used for prediction
     - **num_neighbors** argument in rEDM package.
     - "e+1" can be used if nn = E + 1.
+
+- `sequential_test` : explores the optimal `tp` based on sequential conditional tests.
 
 - `is_naive` : whether rEDM-style estimator is used
     - Whether to return naive estimator.
@@ -165,3 +167,4 @@ Several arguments in rUIC package is identical with those used in rEDM package. 
 | `ete`      | Effective transfer entropy (original TE - surrogate TE)      |
 | `pval`     | The _p_ value to test alternative hypothesis, te > 0         |
 | `n_surr`   | The number of surrogate data generated to compute _p_ value  |
+| `seq_test` | The results of sequential tests                              |

@@ -20,6 +20,7 @@ uic.optimal(
   nn = "e+1",
   num_surr = 1000,
   alpha = 0.05,
+  sequential_test = FALSE,
   exclusion_radius = NULL,
   epsilon = NULL,
   is_naive = FALSE,
@@ -49,7 +50,7 @@ library variables without time-delay embedding.}
 
 \item{E}{the embedding dimensions used for time-delay embedding.}
 
-\item{tau}{the time-lags used for time-delay embedding.}
+\item{tau}{the time-lag used for time-delay embedding. Must be an integer.}
 
 \item{tp}{the time indices to predict.}
 
@@ -63,6 +64,9 @@ If \code{nn = 0}, \code{nn} is set to the number of all data.}
 (i.e., E0). If \code{alpha = NULL}, E0 is set to E - 1. If \code{0 < alpha < 1} 
 E0 depends on the model results with lower embedding dimensions. Default is
 0.05.}
+
+\item{sequential_test}{if \code{sequential_test = TRUE}, the function explores the optimal \code{tp} based
+on sequential conditional test.}
 
 \item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within
 exclusion radius.}
@@ -78,12 +82,16 @@ The KD-tree ("KD") or brute-force ("BF") search can be used.}
 \value{
 A data.frame where each row represents model statistics computed from a parameter set.
 See the details in Value section of \code{uic}.
+If \code{sequential_test = TRUE}, the data.frame includes an additional column
+\code{seq_test}. The \code{tp} with \code{seq_test} = i > 0 were selected as optimal
+by the i-th sequential test. The causal effect of \code{tp} with \code{seq_test} = -i
+< 0 is blocked by \code{tp} with \code{seq_test} = i.
 }
 \description{
 \code{uic.optimal} returns model statistics computed from given multiple time
 series using simplex projection and cross mapping. This function computes UICs
-after exploring the optimal \code{E} based on simplex projection. The users
-do not have to determine the optimal \code{E} by themselves.
+after exploring the optimal \code{E} based on simplex projection. The users do
+not have to determine the optimal \code{E} by themselves.
 }
 \examples{
 # simulate logistic map
@@ -97,12 +105,13 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
 }
 block <- data.frame(t=1:tl, x=x, y=y)
 
-# UIC
-out0 <- uic.optimal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:0)
-out1 <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:0)
-par(mfrow=c(2, 1))
-with(out0, plot(tp, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
-with(out1, plot(tp, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
+out0 <- uic.optimal(block, lib_var="x", tar_var="y", E=0:8, tau=1, tp=-4:4, sequential_test=TRUE)
+out1 <- uic.optimal(block, lib_var="y", tar_var="x", E=0:8, tau=1, tp=-4:4, sequential_test=TRUE)
+par(mfrow=c(2,2))
+with(out0, plot(tp, ete, type="b", pch=c(1,16)[1+(pval<0.05)]))
+with(out1, plot(tp, ete, type="b", pch=c(1,16)[1+(pval<0.05)]))
+with(out0, plot(tp, ete, type="b", pch=c(1,16)[1+(seq_test>0)]))
+with(out1, plot(tp, ete, type="b", pch=c(1,16)[1+(seq_test>0)]))
 
 }
 \seealso{

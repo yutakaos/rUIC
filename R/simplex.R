@@ -58,8 +58,8 @@
 #' out0 <- simplex(block, lib_var="x", cond_var="y", E=0:8, tau=1, tp=1)
 #' out1 <- simplex(block, lib_var="y", cond_var="x", E=0:8, tau=1, tp=1)
 #' par(mfrow=c(2, 1))
-#' with(out0, plot(E, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
-#' with(out1, plot(E, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
+#' with(out0, plot(E, ete, type="b", pch=c(1,16)[1+(pval<0.05)]))
+#' with(out1, plot(E, ete, type="b", pch=c(1,16)[1+(pval<0.05)]))
 #' 
 simplex = function (
     block, lib = c(1, NROW(block)), pred = lib, group = NULL,

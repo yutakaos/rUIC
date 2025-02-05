@@ -59,8 +59,8 @@
 #' out0 <- uic(block, lib_var="x", tar_var="y", E=2, tau=1, tp=-4:0)
 #' out1 <- uic(block, lib_var="y", tar_var="x", E=2, tau=1, tp=-4:0)
 #' par(mfrow=c(2, 1))
-#' with(out0, plot(tp, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
-#' with(out1, plot(tp, te, type="b", pch=c(1,16)[1+(pval<0.05)]))
+#' with(out0, plot(tp, ete, type="b", pch=c(1,16)[1+(pval<0.05)]))
+#' with(out1, plot(tp, ete, type="b", pch=c(1,16)[1+(pval<0.05)]))
 #' 
 uic = function (
     block, lib = c(1, NROW(block)), pred = lib, group = NULL,
