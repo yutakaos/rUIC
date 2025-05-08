@@ -11,7 +11,7 @@
 #' used as explanatory variables.
 #' @param alpha
 #' the significant level to determine the embedding dimension of reference model
-#' (i.e., E0). If \code{alpha = NULL}, E0 is set to E - 1. If \code{0 < alpha < 1} 
+#' (i.e., E0). If \code{alpha = NULL}, E0 is set to E - 1. If \code{0 <= alpha <= 1}, 
 #' E0 depends on the model results with lower embedding dimensions.
 #' 
 #' @details
@@ -82,13 +82,12 @@ simplex = function (
     num_surr <- pmax(0, num_surr)
     KNN <- switch(match.arg(knn_method), "KD"=0, "BF"=1)
     if (tolower(nn) == "e+1") nn <- -1
-    if (is.null(alpha)) alpha <- 1
     if (is.null(exclusion_radius)) exclusion_radius <- 0
     if (is.null(epsilon)) epsilon <- -1
     
     X <- as.matrix(block[ lib_var])
     Z <- as.matrix(block[cond_var])
-    if (alpha >= 1 || num_surr == 0) {
+    if (is.null(alpha) || num_surr == 0) {
         out <- .Call(`_rUIC_xmap_fit_R`,
             X, X, Z, Group, lib, pred, E, E-1, tau, tp, nn, p, num_surr,
             exclusion_radius, epsilon, is_naive, 0, KNN)

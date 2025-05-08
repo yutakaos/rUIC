@@ -73,7 +73,7 @@ uic.optimal = function (
     }
     
     # Sequential test
-    if (is.null(alpha)) stop("Must be 0 < alpha < 1 if sequential_test = TRUE.")
+    if (is.null(alpha)) stop("Must be 0 <= alpha <= 1 if sequential_test = TRUE.")
     out <- Recall(
         block, lib, pred, group, lib_var, tar_var, cond_var,
         norm, E, tau, tp, nn, num_surr, alpha, FALSE,
@@ -86,7 +86,7 @@ uic.optimal = function (
         idx <- which(out$pval<alpha & seq_test==0)
         if (length(idx) == 0) break
         lag.tp <- out$tp[which.max(seq_test)]
-        lag <- cbind(lag, make_block(block[tar_var], lib, -lag.tp, group))
+        lag <- cbind(lag, make_block(block, tar_var, -lag.tp, group))
         out.cond <- Recall(
             cbind(block,lag), lib, pred, group,
             lib_var, tar_var, c(cond_var,colnames(lag)),

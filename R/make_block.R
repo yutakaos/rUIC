@@ -2,11 +2,10 @@
 #' 
 #' \code{make_block} makes time-lagged block.
 #' 
-#' @param X
+#' @param block
 #' a data.frame or matrix where each column is a time series.
-#' @param lib
-#' a two-column matrix (or two-element vector) where each row specifies the
-#' first and last indices of time series to use for attractor reconstruction.
+#' @param lib_var
+#' the names or column indices of library variables.
 #' @param lag
 #' the time-lag. Must be an integer.
 #' @param group
@@ -28,36 +27,38 @@
 #' }
 #' block <- data.frame(t=1:tl, x=x, y=y)
 #' 
-#' head(make_block(block[-1], lag= 0))
-#' head(make_block(block[-1], lag= 1))
-#' head(make_block(block[-1], lag=-1))
+#' head(make_block(block, lib_var=c("x","y"), lag= 0))
+#' head(make_block(block, lib_var=c("x","y"), lag= 1))
+#' head(make_block(block, lib_var=c("x","y"), lag=-1))
 #' 
-make_block = function (X, lib = c(1,NROW(X)), lag = 0, group=NULL)
+make_block = function (block, lib_var = 1, lag = 0, group = NULL)
 {
-    lib <- rbind(lib)
-    if (is.null(group)) {
-        X <- as.matrix(X)
-        naF <- matrix(NA, nrow=pmax(0, lag), ncol=ncol(X))
-        naB <- matrix(NA, nrow=pmax(0,-lag), ncol=ncol(X))
-        nNA <- nrow(naB)
-        out <- lapply(1:nrow(lib), function(i) {
-            L1 <- lib[i,1]
-            L2 <- lib[i,2]
-            dc <- rbind(naF, X[L1:L2,,drop=FALSE], naB)
-            dc [nNA+1:(L2-L1+1),,drop=FALSE]
-        })
-        out <- data.frame(do.call(rbind, out))
-        suffix <- paste0("_lag.", ifelse(lag>0,"B","F"), abs(lag))
-        if (lag==0) suffix <- ""
-        colnames(out) <- paste0(colnames(X), suffix)
-        return(out)
-    }
-    lib <- lapply(1:nrow(lib), function(i) {
-        L <- lapply(unique(group), function(g) range((lib[i,1]:lib[i,2])[group==g]))
-        L <- do.call(rbind, L)
+    if (length(group) == 0) Group <- rep(1, nrow(block))
+    if (length(group) != 0) Group <- as.numeric(as.factor(block[,group[1]]))
+    Group[is.na(Group)] <- 0
+    
+    not_same_group <- Group[-1] != Group[-nrow(block)]
+    lib <- data.frame(
+        first = c(1, which(not_same_group)+1),
+        last  = c(which(not_same_group), nrow(block)) )
+    lib$group <- Group[lib$first]
+    
+    X <- as.matrix(block[lib_var])
+    naF <- matrix(NA, nrow=pmax(0, lag), ncol=ncol(X))
+    naB <- matrix(NA, nrow=pmax(0,-lag), ncol=ncol(X))
+    nNA <- nrow(naB)
+    out <- lapply(1:nrow(lib), function(i) {
+        L1 <- lib[i,1]
+        L2 <- lib[i,2]
+        if (lib[i,3]==0) return(matrix(NA, L2-L1+1, ncol(X)))
+        dc <- rbind(naF, X[L1:L2,,drop=FALSE], naB)
+        dc [nNA+1:(L2-L1+1),,drop=FALSE]
     })
-    lib <- do.call(rbind, lib)
-    Recall(X, lib, lag)
+    out <- data.frame(do.call(rbind, out))
+    suffix <- paste0("_lag.", ifelse(lag>0,"B","F"), abs(lag))
+    if (lag==0) suffix <- ""
+    colnames(out) <- paste0(colnames(X), suffix)
+    return(out)
 }
 
 # End

@@ -4,13 +4,12 @@
 \alias{make_block}
 \title{Making time-lagged block}
 \usage{
-make_block(X, lib = c(1, NROW(X)), lag = 0, group = NULL)
+make_block(block, lib_var = 1, lag = 0, group = NULL)
 }
 \arguments{
-\item{X}{a data.frame or matrix where each column is a time series.}
+\item{block}{a data.frame or matrix where each column is a time series.}
 
-\item{lib}{a two-column matrix (or two-element vector) where each row specifies the
-first and last indices of time series to use for attractor reconstruction.}
+\item{lib_var}{the names or column indices of library variables.}
 
 \item{lag}{the time-lag. Must be an integer.}
 
@@ -35,8 +34,8 @@ for (t in 1:(tl - 1)) {  # causality : x -> y
 }
 block <- data.frame(t=1:tl, x=x, y=y)
 
-head(make_block(block[-1], lag= 0))
-head(make_block(block[-1], lag= 1))
-head(make_block(block[-1], lag=-1))
+head(make_block(block, lib_var=c("x","y"), lag= 0))
+head(make_block(block, lib_var=c("x","y"), lag= 1))
+head(make_block(block, lib_var=c("x","y"), lag=-1))
 
 }

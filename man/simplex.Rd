@@ -58,7 +58,7 @@ If \code{nn = 0}, \code{nn} is set to the number of all data.}
 \item{num_surr}{the number of surrogate data generated to compute p-value.}
 
 \item{alpha}{the significant level to determine the embedding dimension of reference model
-(i.e., E0). If \code{alpha = NULL}, E0 is set to E - 1. If \code{0 < alpha < 1} 
+(i.e., E0). If \code{alpha = NULL}, E0 is set to E - 1. If \code{0 <= alpha <= 1}, 
 E0 depends on the model results with lower embedding dimensions.}
 
 \item{exclusion_radius}{the filtering to exclude nearest neighbors if their time index is within
